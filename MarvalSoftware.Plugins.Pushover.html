@@ -1,0 +1,1212 @@
+
+<script type="text/javascript" src="template.js"></script>
+<template>
+    <style>
+        #groupsDropdown{
+            font-weight:normal;
+        }
+        .content {
+            border-radius: 10px;
+            font-family: 'Inter', 'Open Sans', sans-serif;
+            font-weight:bold;
+            /*            height:500px !important;*/
+        }
+        .messageButton {
+            background-color: #8c9097;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .LinkedProjectsHeader {
+            /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
+            color: #00314a !important;
+            font-size: 12px !important;
+            font-family: 'Inter', 'Open Sans', sans-serif;
+        }
+        
+            .LinkedProjectsHeader h1 {
+                /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
+                color: #00314a !important;
+                font-size: 12px !important;
+                font-family: 'Inter', 'Open Sans', sans-serif;
+            }
+        .headerColourChange {
+            background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
+            color: #00314a !important;
+            font-size: 18px !important;
+            font-family: 'Inter', 'Open Sans', sans-serif;
+            border-radius:10px;
+        }
+        #message {
+            vertical-align: top;
+/*            height: 100px;*/
+            width: 600px;
+        }
+
+        marvalsoftware-plugins-pushover {
+/*            display: block;*/
+            height: 200px;
+        }
+
+            marvalsoftware-plugins-pushover > .config-area {
+                height:100px;
+                padding: 0px 10px 10px 10px;
+                box-shadow: 0 1px 0 0 #ebe8e4;
+            }
+
+                marvalsoftware-plugins-pushover > .config-area > div {
+                    padding: 10px 0 0 0;
+                }
+
+            marvalsoftware-plugins-pushover > .message-area {
+/*                display: block;*/
+                height: 100px;
+                padding: 10px;
+                box-shadow: 0 1px 0 0 #ebe8e4;
+            }
+
+                marvalsoftware-plugins-pushover > .message-area > .cards {
+                    height: ;
+                    overflow-y: auto;
+                    padding: 10px;
+                    box-shadow: 0 1px 0 0 #ebe8e4;
+                }
+
+                    marvalsoftware-plugins-pushover > .message-area > .cards .card {
+                        background-color: #fff;
+                        padding: 1.5rem;
+                        margin-bottom: 0.5rem;
+                        border: 1px solid #ebe8e4;
+                        border-radius: 4px;
+                        box-shadow: 0 1px 1px 0 #ebe8e4;
+                    }
+
+                        marvalsoftware-plugins-pushover > .message-area > .cards .card .timestamp {
+                            font-size: 0.75rem;
+                            font-weight: 500;
+                            color: #666;
+                            width: 10%;
+                        }
+
+                        marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip {
+                            position: relative;
+/*                            display: inline-block;*/
+                        }
+
+                            marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip .tooltiptext {
+                                visibility: hidden;
+                                width: 120px;
+                                background-color: #555;
+                                color: #fff;
+                                text-align: center;
+                                border-radius: 6px;
+                                padding: 5px 0;
+                                position: absolute;
+                                z-index: 1;
+                                bottom: 125%;
+                                left: 50%;
+                                margin-left: -60px;
+                                opacity: 0;
+                                transition: opacity 0.3s;
+                            }
+
+                                marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip .tooltiptext::after {
+                                    content: "";
+                                    position: absolute;
+                                    top: 100%;
+                                    left: 50%;
+                                    margin-left: -5px;
+                                    border-width: 5px;
+                                    border-style: solid;
+                                    border-color: #555 transparent transparent transparent;
+                                }
+
+                            marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip:hover .tooltiptext {
+                                visibility: visible;
+                                opacity: 1;
+                            }
+
+                        marvalsoftware-plugins-pushover > .message-area > .cards .card .status {
+                            margin-top: 0.75rem;
+                            font-size: 1rem;
+                            font-weight: 600;
+                        }
+
+                        marvalsoftware-plugins-pushover > .message-area > .cards .card .message {
+                            line-height: 22px;
+                            margin-right: 6rem;
+                            color: #666;
+                            font-size: 0.875rem;
+                            white-space: pre-line;
+                        }
+
+            marvalsoftware-plugins-pushover > .update-area {
+                height: 20%;
+                padding: 10px 10px 0 10px;
+            }
+
+                marvalsoftware-plugins-pushover > .update-area textarea {
+                    width: 100%;
+                    height: 75%;
+                    box-sizing: border-box;
+                    -moz-box-sizing: border-box;
+                    -webkit-box-sizing: border-box;
+                    resize: none;
+                }
+
+                marvalsoftware-plugins-pushover > .update-area .action-buttons {
+                    float: right;
+                    padding-top: 10px;
+                }
+
+                    marvalsoftware-plugins-pushover > .update-area .action-buttons button {
+                        box-sizing: border-box;
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        background-color: #6697EA; /*changing colour from green to blue*/
+                        cursor: pointer; /*changing to pointer when cursor is over it*/
+                    }
+
+                marvalsoftware-plugins-pushover > .update-area label,
+                marvalsoftware-plugins-pushover > .message-area label,
+                marvalsoftware-plugins-pushover > .config-area > div label {
+                    font-size: 1rem;
+                    font-weight: 600;
+/*                    display: inline-block;*/
+                    width: 50px;
+                    padding-bottom: 5px;
+                }
+        .headerColourChange {
+            background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
+            color: #00314a !important;
+            font-size: 18px !important;
+            font-family: 'Inter', 'Open Sans', sans-serif;
+        }
+
+            marvalsoftware-plugins-pushover > .message-area label {
+                width: 100px !important;
+            }
+
+            marvalsoftware-plugins-pushover > .message-area > .header {
+                align-items: center
+            }
+
+                marvalsoftware-plugins-pushover > .message-area > .header a img {
+                    position: relative;
+                    top: 4px;
+                }
+    </style>
+    <div class="config-area">
+        <div>
+            <!--<label>Pages:</label>-->
+            <!--<select id="pages">
+                <option value="0"></option>
+            </select>-->
+            Message to send:
+            <br />
+            <input id="message"/>
+            <br />
+            <br />
+            Do you want to include incident details?: <input type="checkbox" id="CheckBox" />
+            <br />
+            <br />
+            <select id="groupsDropdown"><option>Loading…</option> </select>
+            <br />
+            <br />
+            <button id="sendMessage" class="messageButton">Send</button>
+
+
+        </div>
+        
+    </div>
+    
+
+</template>
+<template class="cardTemplate">
+    <div class="card">
+        <div class="timestamp tooltip">
+            <span class="tooltiptext"></span>
+        </div>
+        <div class="status"></div>
+        <div class="message"></div>
+    </div>
+</template>
+<template class="errorTemplate">
+    <style>
+        .marvalsoftware-pushover-errors h3,
+        .marvalsoftware-pushover-errors h4 {
+            padding: 8px 0 8px 0;
+        }
+
+        .pushoverConfig > li {
+            display: none;
+        }
+    </style>
+    <div class="marvalsoftware-pushover-errors">
+        <div class="title">
+            <h3>Ensure all configuration settings are correct.</h3>
+        </div>
+        <div>
+            <ul class="pushoverConfig">
+                <li id="userAPIKey"> Organisation API Key </li>
+            </ul>
+            <h4></h4>
+        </div>
+    </div>
+</template>
+<template class="miscellaneousErrorsTemplate">
+    <style>
+        .marvalsoftware-pushover-errors h3,
+        .marvalsoftware-pushover-errors h4 {
+            padding: 8px 0 8px 0;
+        }
+    </style>
+    <div class="marvalsoftware-pushover-errors">
+        <div class="title">
+            <h3>Error loading Pushover.</h3>
+        </div>
+        <div>
+            <label></label>
+        </div>
+    </div>
+</template>
+<script>
+    (function () {
+
+        var MarvalSoftware = window.top.MarvalSoftware;
+        var $ = window.top.$;
+
+        MarvalSoftware.Plugins.define("marvalsoftware-plugins-pushover",
+            {
+                _element: null,
+                _body: null,
+                _refreshLink: null,
+                _refreshElement: null,
+                _cards: null,
+                _card: null,
+                _status: null,
+                _message: null,
+                _pages: null,
+                _incidents: null,
+                _createElement: null,
+                _requestNumber: null,
+                _requestID: null,
+                _requestDescription: null,
+                _contactEmail: null,
+                _fullPluginPathHandler: null,
+                _requestActionMessageID: null,
+
+
+
+
+                init: function () {
+                    Pushover = this;
+
+                    this._sendInProgress = false; //we will use later to keep track of if we are sending a request
+                    var HeaderText = $('#ctl00_ctl00_cph_entityHeaderText').text();
+                    var currentUrl = window.top.location.href;
+                    var currentHost = window.top.location.host;
+                    _fullPluginPathHandler = "https://" + currentHost + Pushover._getPluginPath() + "handler/APIHandler.ashx";
+                    //checkRequestActionMessageExists();
+                 
+                    
+                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Pushover') {
+                        checkRequestActionMessageExists();
+
+                        function OpenInstallRequestRuleDialog() {
+                            event.preventDefault();
+                            $('#setupActionRuleModal').fadeIn(200);
+                           
+
+                            var getWorkflowStatuses = fetch(_fullPluginPathHandler, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    action: "getWorkflowStatuses"
+                                })
+                            });
+                            getWorkflowStatuses.then(async workflowStatuses => {
+                                var jsonWorkflowStatusData = await workflowStatuses.json();
+                                // console.log("Have workflows statuses as ", jsonWorkflowStatusData);
+                                var $select = $('#workflowStatusDropdown');
+                                $select.empty();
+                                $select.append('<option value="">-- Select a Workflow Status --</option>');
+                                jsonWorkflowStatusData.forEach(element => {
+                                    $select.append($('<option>').val(element.Identifier).text(element.Name));
+                                })
+                            })
+                            var getWorkflows = fetch(_fullPluginPathHandler, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    action: "getWorkflows"
+                                })
+                            });
+                            getWorkflows.then(async workflows => {
+                                var jsonworkflowData = await workflows.json();
+                                //    console.log("Have workflow data as ", jsonworkflowData);
+                                var $select = $('#workflowDropdown');
+                                $select.empty();
+                                $select.append('<option value="">-- Select a Workflow --</option>');
+                                jsonworkflowData.forEach(element => {
+                                    $select.append($('<option>').val(element.Identifier).text(element.Name));
+                                    //     console.log("Have element ", element);
+                                })
+                            })
+                        }
+
+                        $('head').append(`
+                        <style>
+                        /* ✅ Steps */
+.modal-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+  color: #073f5c;
+}
+.modal-steps li {
+  margin-bottom: .9rem;
+}
+.modal-steps a {
+  color: #1696B7;
+  text-decoration: underline;
+}
+.modal-steps a:hover {
+  text-decoration: none;
+}
+
+
+.close {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #1696B7;
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+.close:hover { background: #073f5c; }
+
+/* 📈 Subtle pop-in */
+@keyframes pop {
+  0%   { transform: scale(.85); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;    /* horizontally center all direct children */
+  text-align: center;      /* center text inside headings, list items, etc. */
+  padding: 1.5rem;         /* optional, for a bit of breathing room */
+}
+
+.modal-content .modal-steps {
+  padding: 0;
+  list-style-position: inside; /* keep the bullets but centered */
+  margin: 1rem 0;
+}
+
+.modal-content input,
+.modal-content .hrefButton,
+.modal-content .close {
+  /* make sure buttons/inputs shrink to their contents */
+  display: inline-block;
+  margin: 0.5rem 0;
+}
+                        .headerColourChange {
+    background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
+    color: #00314a !important;
+    font-size: 18px !important;
+    font-family: 'Inter', 'Open Sans', sans-serif;
+}
+                        .modalBox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;                 /* toggle with JS */
+  place-items: center;
+  background: rgba(7, 63, 92, .60);   /* #073f5c with 60 % opacity */
+  backdrop-filter: blur(2px);
+}
+
+/* 🗂️  Content card -------------------------------------------------------- */
+.modal-content {
+  width: min(600px, 90%);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  padding: 2.5rem 2.25rem;
+  animation: pop .35s ease;
+  position: relative;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+/* 🎀 Header */
+.modal-content h2 {
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: #073f5c;
+}
+.modal-content h2 span {
+  border-bottom: 3px solid #1696B7;
+  padding-bottom: .25rem;
+}
+                            .hrefButton {
+  display: inline-block;
+  background-color: #1696B7;
+  color: #ffffff;
+  padding: 2px 12px;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+.hrefButton:hover {
+  background-color: #0056b3;
+   color: #ffffff;
+}</style>`);
+                        $('#ctl00_ctl00_cph_maintenance_pluginDetailsFieldSet').before(`<button class="hrefButton" id="requestActionMessageInstall">
+  Install Request Action Message
+</button>
+<div id="requestActionMessageResponse"> </div>
+<br>
+<br>
+<button class="hrefButton" id="actionRuleInstall">
+  Open Request Action Rule Dialogue
+</button>
+<br>
+<br>
+<div id="setupActionRuleModal" class="modalBox">
+  <div class="modal-content">
+    <button class="close" title="Close">&times;</button>
+<br>
+    <h2><span>Install the Request Action Rule</span></h2>
+    <br>
+  <p>This section rule is used to determine the criteria for running the request action rule to create a new Pushover User.</p>
+  <p>You can modify this later directly in the request action rule.</p>
+  <br>
+ <div class="form-group">
+      <label for="workflowDropdown">Choose a workflow for your request action rule:</label><br>
+      <select id="workflowDropdown">
+        <option>Loading…</option>
+      </select>
+    </div>
+<br>
+    <div class="form-group">
+      <label for="workflowStatusDropdown">Choose a workflow status for your request action rule:</label><br>
+      <select id="workflowStatusDropdown" >
+        <option>Loading…</option>
+      </select>
+    </div>
+<br>
+<br>
+     <button class="hrefButton" id="InstallRequestActionRule">
+        Install Request Action Rule
+      </button>
+       <div class="loadingSpinner" id="InstallRequestActionRuleSpinner" role="status" style="display:none" aria-label="Loading…"></div>
+      <br><span id="InstalledRequestionActionRuleResponse"></span>
+      <br>
+      <ul class="modal-steps">
+       <li>
+      </li>
+    </ul>
+  </div>
+</div>
+`);
+                        $('#ct100_overlay_id1').hide();
+                        $('#ctl00_ctl00_cph_maintenance_worksWithMsm').removeClass('unsigned');
+                        $('#ctl00_ctl00_cph_maintenance_worksWithMsm').addClass('signed');
+                        console.log("button should be working");
+                        window.top.document.getElementById("requestActionMessageInstall").onclick = downloadRequestActionMessage;
+                        window.top.document.getElementById("actionRuleInstall").addEventListener("click", OpenInstallRequestRuleDialog);
+                        window.top.document.getElementById("InstallRequestActionRule").onclick = InstallRequestActionRule;
+                        async function InstallRequestActionRule() {
+                            event.preventDefault();
+                            $('#InstallRequestActionRule').attr('disabled', true);
+                            $('#InstallRequestActionRuleSpinner').show();
+                            $('#InstalledRequestionActionRuleResponse').empty();
+                            $('#InstalledRequestionActionRuleResponse').css('color', 'green');
+                            var Workflow = $("#workflowDropdown  option:selected").text();
+                            var WorkflowStatus = $("#workflowStatusDropdown  option:selected").text();
+                            if (Workflow === '-- Select a Workflow --' || WorkflowStatus === '-- Select a Workflow Status --') {
+                                $('#InstalledRequestionActionRuleResponse').empty();
+                                $('#InstallRequestActionRule').attr('disabled', false);
+                                $('#InstalledRequestionActionRuleResponse').append('You must specify an attribute for each item');
+                                $('#InstalledRequestionActionRuleResponse').css('color', 'red');
+                                $('#InstallRequestActionRuleSpinner').hide();
+                                return;
+                            } else {
+
+                                console.log("Selected is ", $("#workflowStatusDropdown option:selected"));
+                                var WorkflowStatusId = $("#workflowStatusDropdown option:selected").val();
+                                var WorkflowId = $("#workflowDropdown option:selected").val();
+                                const encodedFullUrl = encodeURI(_fullPluginPathHandler);
+                                //console.log("we ")
+
+                                var createActionRule = await (await fetch(_fullPluginPathHandler, {
+                                    "method": "POST",
+                                    body: JSON.stringify({ actionMessageId: Pushover._requestActionMessageID, actionMessageURL: encodedFullUrl, WorkflowStatusId: WorkflowStatusId, WorkflowId: WorkflowId, action: "createActionRule" }),
+                                    "headers": [["content-type", "application/json"]]
+                                })).json();
+
+                                $('#InstallRequestActionRuleSpinner').hide();
+                                $('#InstallRequestActionRule').attr('disabled', false);
+                                $('#InstalledRequestionActionRuleResponse').append(createActionRule.response);
+
+
+                            }
+
+                        }
+
+                        function checkRequestActionMessageExists() {
+                            var requestActionMessageName = "Pushover Integration Message - Automated";
+                            var foundItem = false;
+                            $.get('/MSM/RFP/Forms/RequestActionMessage.aspx', function (html) {
+                                $(html).find('#ctl00_ctl00_ctl00_cph_existingEntitiesContentPlaceHolder_ExistingEntitiesList_loadMoreList_items a.item')
+
+                                    .each(function () {
+
+                                        if ($(this).attr('title') == requestActionMessageName) {
+
+                                            foundItem = true;
+                                            Pushover._requestActionMessageID = $(this).attr('href').match(/id=(\d+)$/)[1];
+                                        }
+                                        // console.log($(this).attr('search'));
+
+                                    });
+                                if (foundItem == true) {
+
+                                    //  $('#isRequestActionMessageInstalled').append('You have a request action message in your list of request action messages <a href="/MSM/RFP/Forms/RequestActionMessage.aspx" >here</a>, you do not need to install it.');
+                                    $('#pluginStatus').append('<br><span style="color:green">You have a request action message in your list of request action messages <a href="/MSM/RFP/Forms/RequestActionMessage.aspx" >here</a>, you do not need to install it.</span>');
+                                    //   $('#isRequestActionMessageInstalled').css('color', 'green');
+                                    //   $('#isRequestActionMessageInstalled').attr('')
+                                } else {
+                                    $('#pluginStatus').append('<span style="color:red"><br>You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Pushover Integration Message - Automated</span>"');
+                                    // $('#isRequestActionMessageInstalled').append('You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Pushover Integration Message - Automated"');
+                                    //  $('#isRequestActionMessageInstalled').css('color', 'red');
+                                }
+                            })
+                                .fail(function () {
+                                    // //  $select.empty()
+                                    //     .append('<option disabled>Error loading list</option>');
+                                });
+
+                        }
+
+
+                        async function getLatestPluginVersion() {
+
+                            var url = "https://raw.githubusercontent.com/Marval-Global/PushoverPlugin/refs/heads/main/manifest.json";
+                            var githubPluginVersion = await (await fetch(url)).json();
+                            var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
+
+                            if (pagePluginVersion == githubPluginVersion.Version) {
+                                $('#ctl00_ctl00_cph_maintenance_version').css("color", "green");
+                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+
+                                $('#uptodatemessage').fadeIn(250);
+                                setTimeout(() => {
+                                    $('#uptodatemessage').fadeOut(1000);
+                                }, 2000);
+                            } else {
+                                $('#ctl00_ctl00_cph_maintenance_version').css("color", "red");
+                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+                                $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/PushoverPlugin/releases/latest/download/MarvalSoftware.Plugins.Pushover.zip">here</a> for the new version.');
+                            }
+                        }
+
+                        $(document).ready(function () {
+
+                            getLatestPluginVersion();
+                        });
+                    }
+                    else if (!currentUrl.includes("Plugin.aspx")) {
+
+
+                        this._setUpQuickMenu();
+                        this._requestNumber = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getRequestNumber();
+                        this._requestID = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                        console.log(MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage());
+                        this._requestDescription = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestDescription;
+                        this._contactEmail = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getContactPreferredEmail();
+                        //displayGroups();
+                        
+
+                    }
+                    async function downloadRequestActionMessage() { //should be an async function
+                        event.preventDefault();
+                        console.log("we are calling download request action message");
+                        var actionMessageText = `
+
+@{
+    var lastNote = (Model.Notes != null && Model.Notes.Count > 0)
+        ? Model.Notes[Model.Notes.Count - 1]
+        : null;
+
+var requestDescription = @Model.Description;
+var fullMessage = "";
+}
+
+@if (lastNote != null)
+{
+fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Note:</b><br> " + @lastNote.Content + "<br><b>Last Note Created On:</b><br> "+@lastNote.Created + "<br> <b>Last Note Author</b><br> " + @lastNote.Author + " <br> <b>Service Name:</b><br>"+@Model.Service.Name + "<br>";
+
+}
+
+
+{
+                           "Identifier": @Model.Identifier,
+
+                           "ContactName": "@Model.LastUpdatedBy.Name.GivenName @Model.LastUpdatedBy.Name.FamilyName ",
+                           "Email": "@Model.PreferredNotification.Address",
+                        "message": "@fullMessage",
+"serviceName": "@Model.Service.Name",
+"action": "SendPushoverMessage"
+
+
+                        }
+
+                            `;
+                        var currentUrl = window.top.location.host;
+                        var pluginPathHandler = "https://" + currentUrl + Pushover._getPluginPath() + "handler/ApiHandler.ashx";
+                        //$('#InstallRequestActionMessage').attr('disabled', true);
+
+                        console.log("actionmsgtext: ", actionMessageText);
+                        var snippetFile = await (await fetch(pluginPathHandler, {
+                            "method": "POST",
+                            body: JSON.stringify({ action: "createActionMessage", actionMessageText: actionMessageText }),
+                            "headers": [["content-type", "application/json"]]
+                        })).json();
+                        console.log("response is: ", snippetFile);
+                        $('#InstallRequestActionMessageSpinner').hide();
+                        $('#InstallRequestActionMessage').attr('disabled', false);
+                        $('#requestActionMessageResponse').append(snippetFile.response);
+                        $('#requestActionMessageResponse').css('color', 'green');
+                        //  console.log("Have snippet as ", snippetFile);
+                    }
+
+
+
+
+                },
+                _showGroups: async function () {
+                    //let _fullPluginPathHandler = "https://" + currentHost + Pushover._getPluginPath() + "handler/ApiHandler.ashx";
+                        try {
+                            const response = await fetch(_fullPluginPathHandler, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ action: "getGroups" })
+                            });
+
+                            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+
+                            const json = await response.json();
+                            console.log("groups data is: ", json);
+
+                            if (!json || !Array.isArray(json.groups)) {
+                                console.error("Invalid or missing groups in response", json);
+                                return;
+                            }
+
+                            let $selectGroup = $('#groupsDropdown');
+                            if ($selectGroup.length === 0) {
+                                console.error("Dropdown element not found");
+                                return;
+                            }
+
+                            $selectGroup.empty().append('<option value="">-- Select a Group --</option>');
+                            json.groups.forEach(element => {
+                                $selectGroup.append($('<option>').val(element.group).text(element.name));
+                            });
+
+                        } catch (error) {
+                            console.error("Failed to load groups:", error);
+                        }
+                    
+                },
+
+
+                _getPluginPath: function () {
+                    return this.attributes["data-pluginpath"].value;
+                },
+
+                _getPluginId: function () {
+                    return this.attributes["data-pluginid"].value;
+                },
+
+                _getPluginCulture: function () {
+                    return this.attributes["data-pluginculture"].value;
+                },
+
+                _getString: function (key, formatObject) {
+                    if (MarvalSoftware.Plugins.PluginResourceManager) {
+                        return MarvalSoftware.Plugins.PluginResourceManager.getInstance()
+                            .getString(this._getPluginId(), key, this._getPluginCulture(), formatObject);
+                    } else {
+                        return key;
+                    }
+                },
+                _updateButtonVisual() {
+                    if (window.top.document.getElementById("message").value != "" && window.top.document.getElementById("groupsDropdown").value != "") {
+                        window.top.document.getElementById("sendMessage").style.backgroundColor = "green";
+                        window.top.document.getElementById("sendMessage").disabled = false;
+                    } else {
+                        window.top.document.getElementById("sendMessage").style.backgroundColor = "gray";
+                        window.top.document.getElementById("sendMessage").disabled = true;
+                    }
+    }, 
+
+                _renderElement: function () {
+                    var template = document.querySelector("template").content;
+                    this._element = window.top.document.importNode(template, true);
+
+
+                    // this._body = this._element.querySelector("textarea");
+                    this._cards = this._element.querySelector(".cards");
+                    //this._trimWhiteSpaces(this._body);
+                    var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
+                    this._sendMessageButton = this._element.querySelector("#sendMessage");
+                    eventManager.addHandler(this._sendMessageButton, "click", this._postMessage, this);
+                    this._createElement = this._element.querySelector(".action-buttons > button");
+                    this._refreshLink = this._element.querySelector("a");
+
+                    this.messageInput = this._element.querySelector("#message");
+                    eventManager.addHandler(this.messageInput, "input", this._updateButtonVisual, this);
+
+                    this.groupSelected = this._element.querySelector("#groupsDropdown");
+                    eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
+
+                    
+                    //window.top.document.getElementById("message").onchange = updateButtonVisual();
+                    //this._refreshLink.firstChild.setAttribute("src", this._getPluginPath() + "img/refresh_spinner_16.png");
+                    // this._refreshElement = this._element.querySelector(".message-area > div");
+                    //this._pages = this._element.querySelector("#pages");
+                    //this._incidents = this._element.querySelector("#incidents");
+                    // eventManager.addHandler(this._body, "input", this._enableOrDisableSubmit, this);
+                    //eventManager.addHandler(this._createElement, "click", this._createElement_click, this);
+                    //eventManager.addHandler(this._refreshLink, "click", this._refreshCards, this);
+                    //eventManager.addHandler(this._pages, "change", this._getAllPageIncindents, this);
+                    //eventManager.addHandler(this._incidents, "change", this._getAllIncindentUpdates, this);
+                    this.appendChild(this._element);
+                },
+
+                _trimWhiteSpaces: function (element) {
+                    var value = element.value;
+                    value = value.replace(/(^\s*)|(\s*$)/gi, "");
+                    value = value.replace(/[ ]{2,}/gi, " ");
+                    value = value.replace(/\n /, "\n");
+                    element.value = value;
+                },
+
+                _popup: function () {
+                    if (!this._pluginWindow) {
+                        this._pluginWindow = new MarvalSoftware.UI.Window({
+                            appendToElement: window.top.document.getElementById("aspnetForm"),
+                            title: "Pushover",
+                            height: 200,
+                            width: 800,
+                            minHeight: 700,
+                            minWidth: 432,
+                            isResizable: true,
+                            isMaximizable: true,
+                            bodyElement: this
+                        });
+                        this._renderElement();
+                        this._showGroups();
+                        
+                        //this._getAllPages();
+                    }
+                    //this._resetPopUpValues();
+                    if (!this._pluginWindow.isVisible()) {
+                        this._pluginWindow.centerToViewport();
+                    }
+                    this._pluginWindow.show();
+                    $('.window .content .header').eq(0).addClass('headerColourChange');
+                    $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
+                },
+
+                _errorPopup: function (result) {
+                    var errorTemplate = document.querySelector('.errorTemplate').content;
+                    var errorMessages = window.top.document.importNode(errorTemplate, true);
+                    if (result) {
+                        for (var item in result) {
+                            var id = "#" + item;
+                            errorMessages.querySelector(id).style.display = "block";
+                        }
+                        errorMessages.querySelector('div > h3').textContent = this._getString("@@PushoverErrorConfigurationTitle");
+                        errorMessages.querySelector('div > h4').textContent = this._getString("@@PushoverErrorConfigurationFooter");
+                    }
+                    MarvalSoftware.UI.MessageBox.show(
+                        this._getString("@@PushoverErrorPopupTitle"),
+                        errorMessages,
+                        MarvalSoftware.UI.MessageBox.Types.ERROR,
+                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
+                        MarvalSoftware.UI.MessageBox.Buttons.OK,
+                        450
+                    );
+                },
+
+                _miscellaneousErrorPopup: function (result) {
+                    var miscellaneousErrorsTemplate = document.querySelector('.miscellaneousErrorsTemplate').content;
+                    var errorMessages = window.top.document.importNode(miscellaneousErrorsTemplate, true);
+                    if (result) {
+                        console.log("We have an error ", result);
+                        errorMessages.querySelector('div > label').textContent = result.responseText;
+                    }
+                    MarvalSoftware.UI.MessageBox.show(
+                        this._getString("@@PushoverErrorPopupTitle"),
+                        errorMessages,
+                        MarvalSoftware.UI.MessageBox.Types.ERROR,
+                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
+                        MarvalSoftware.UI.MessageBox.Buttons.OK,
+                        450
+                    );
+                },
+
+                _addCard: function (results) {
+                    this._clearCards();
+                    if (!results.incident_updates || results.incident_updates.length == 0) {
+                        var label = document.createElement("h3")
+                        label.textContent = this._getString("@@PushoverNoItems");
+                        label.align = "center";
+                        label.style.position = "relative";
+                        label.style.top = "150px";
+                        label.style.color = "#808080";
+                        this._cards.appendChild(label);
+                        return;
+                    }
+
+                    for (var i = 0; i < results.incident_updates.length; i++) {
+                        this._resetCard()
+                        var status = results.incident_updates[i].status;
+                        var createdOn = results.incident_updates[i].display_at;
+                        this.timestamp.firstElementChild.innerHTML = new Date(createdOn).toDateString() + " " + this._formattedTime(createdOn);
+                        this.timestamp.innerHTML += this._formattedDate(createdOn).toUpperCase();
+                        this.status.innerText = status.charAt(0).toUpperCase() + status.slice(1);
+                        this.message.innerText = results.incident_updates[i].body;
+                        this._cards.appendChild(this.card);
+                    }
+
+                    this._cards.scrollTop = 0
+                },
+
+                _clearCards: function () {
+                    while (this._cards.firstChild) {
+                        this._cards.removeChild(this._cards.firstChild);
+                    }
+                },
+
+                _resetCard: function () {
+                    var cardTemplate = document.querySelector(".cardTemplate").content;
+                    var element = window.top.document.importNode(cardTemplate, true);
+                    this.card = element.querySelector(".card");
+                    this.timestamp = element.querySelector(".card > .timestamp");
+                    this.status = element.querySelector(".card > .status");
+                    this.message = element.querySelector(".card > .message");
+                },
+
+                _refreshCards: function () {
+                    this._getAllIncindentUpdates();
+                    this._enableOrDisableIncidentsOption();
+                },
+
+                _resetPopUpValues: function () {
+                    this._pages.selectedIndex = "0";
+                    this._body.value = "";
+                    this._clearIncidents();
+                },
+
+                _clearIncidents: function () {
+                    for (var i = this._incidents.options.length - 1; i >= 0; i--) {
+                        this._incidents.remove(i);
+                    }
+
+                    var incident = document.createElement("option")
+                    incident.id = 0;
+                    incident.value = "";
+                    this._incidents.add(incident)
+                    this._refreshCards();
+                },
+
+                _formattedDate: function (updatedBy) {
+                    var minute = 60 * 1000;
+                    var hour = minute * 60;
+                    var day = hour * 24;
+                    var month = day * 30;
+                    var year = day * 365;
+                    var elapsed = new Date().getTime() - new Date(updatedBy).getTime();
+                    if (elapsed < minute) {
+                        return "< 1 min ago";
+                    }
+                    else if (elapsed < hour) {
+                        var calculatedHours = Math.round(elapsed / minute);
+                        return calculatedHours > 1 ? calculatedHours + " minutes ago" : calculatedHours + " min ago";
+                    }
+                    else if (elapsed < day) {
+                        var calculatedDays = Math.round(elapsed / hour);
+                        return calculatedDays > 1 ? calculatedDays + " hours ago" : calculatedDays + " hour ago";
+                    }
+                    else if (elapsed < month) {
+                        var calculatedMonths = Math.round(elapsed / day);
+                        return calculatedMonths > 1 ? calculatedMonths + " days ago" : calculatedMonths + " day ago";
+                    }
+                    else if (elapsed < year) {
+                        var calculatedMonths = Math.round(elapsed / month);
+                        return calculatedMonths > 1 ? calculatedMonths + " months ago" : calculatedMonths + " month ago";
+                    }
+                    else {
+                        var calculatedYears = Math.round(elapsed / year);
+                        return calculatedYears > 1 ? calculatedYears + " years ago" : calculatedYears + " year ago";
+                    }
+                },
+
+                _addZero: function (i) {
+                    if (i < 10) {
+                        i = "0" + i;
+                    }
+                    return i;
+                },
+
+                _formattedTime: function (value) {
+                    var date = new Date(value);
+                    return this._addZero(date.getHours()) + ":" + this._addZero(date.getMinutes());
+                },
+
+                _setUpQuickMenu: function () {
+                    var styleElement = window.top.document.createElement("style");
+                    window.top.document.body.appendChild(styleElement);
+                    styleElement.sheet.insertRule(".marvalSoftware-pushover-quick-menu-item { background-image: url(" + this._getPluginPath() + "img/pushover_32.png); }", 0);
+
+                    var quickMenuId = window.top.document.querySelector(".quickMenu").id;
+                    var quickMenu = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getControl(quickMenuId);
+                    quickMenu.addMenuItem({
+                        Identifier: "marvalSoftware-pushover",
+                        Label: this._getString("@@PluginDisplayname"),
+                        HRef: "javascript:void(0);",
+                        CssClass: "marvalSoftware-pushover-quick-menu-item"
+                    });
+                    quickMenu.onMenuItemClicked.subscribe(function (sender, e) {
+                        if (e.menuItem.getIdentifier() === "marvalSoftware-pushover") {
+                            //window.open("", "_blank", "width=800,height=600")
+                            this._popup();
+                        }
+                    },
+                        this);
+                },
+
+                _preRequisiteCheck: function (sender, e) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=PreRequisiteCheck",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (result) {
+                            if (Object.keys(result).length > 0) {
+                                this._errorPopup(result);
+                            }
+                            else {
+                                this._popup();
+                            }
+                        }.bind(this)
+                    });
+                }, _postMessage: function (sender, e) {
+                    e.preventDefault();
+                    var messageText = $('#message').val();
+                    let email = this._contactEmail ? this._contactEmail : " No email defined";
+                    let description = window.top.document.getElementById("ctl00_cph_description").value;
+                    var payload = {};
+                    if (window.top.document.getElementById("CheckBox").checked) {
+                        var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
+                        payload = {
+                            message: formulatedMessage,
+                            action: "SendPushoverMessage"
+                        }
+                    } else {//not checked
+                        payload = {
+                            message: messageText,
+                            action: "SendPushoverMessage"
+                        }
+                    }
+                    console.log("We are here");
+
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=SendPushoverMessage",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(payload),
+                        success: function (result) {
+                            if (Object.keys(result).length > 0) {
+                                this._errorPopup(result);
+                            }
+                            else {
+                                this._popup();
+                            }
+                        }.bind(this)
+                    });
+                },
+
+                _showSpinner: function () {
+                    this._refreshLink.firstChild.removeAttribute("src");
+                    this._refreshLink.firstChild.setAttribute("src", this._getPluginPath() + "/img/spinner.gif");
+                },
+
+                _hideSpinner: function () {
+                    this._refreshLink.firstChild.removeAttribute("src");
+                    this._refreshLink.firstChild.setAttribute("src", this._getPluginPath() + "img/refresh_spinner_16.png");
+                },
+
+                _getAllPageIncindents: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=GetAllPageIncidents&pageId=" + this._pages.options[this._pages.selectedIndex].value,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (results) {
+                            if (results) {
+                                this._clearIncidents();
+                                for (var i = 0; i < results.length; i++) {
+                                    var incident = document.createElement("option");
+                                    incident.value = results[i].id;
+                                    incident.text = results[i].name;
+                                    this._incidents.add(incident);
+                                }
+                            }
+                        }.bind(this),
+                        error: function (results) {
+                            this._clearIncidents();
+                        }.bind(this)
+                    });
+                },
+
+                _getAllIncindentUpdates: function () {
+                    var pageId = this._pages.options[this._pages.selectedIndex].value;
+                    var incidentNumber = this._incidents.options[this._incidents.selectedIndex].value;
+                    this._showSpinner();
+                    if (incidentNumber) {
+                        $.ajax({
+                            type: "POST",
+                            url: this._getPluginPath() + "handler/ApiHandler.ashx?action=GetAllIncidentUpdates&pageId=" + pageId + "&incidentNumber=" + incidentNumber,
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (results) {
+                                if (results) {
+                                    this._addCard(results);
+                                }
+                            }.bind(this),
+                            error: function (result) {
+                                if (result) {
+                                    this._addCard(result);
+                                }
+                            }.bind(this)
+                        });
+                    }
+                    this._enableOrDisableMessageTextArea();
+                    this._hideSpinner();
+
+                },
+
+                _getAllPages: function (sender, e) {
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=GetAllPages",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (results) {
+                            if (results) {
+                                for (var i = 0; i < results.length; i++) {
+                                    var page = document.createElement("option");
+                                    page.value = results[i].id;
+                                    page.text = results[i].name;
+                                    this._pages.add(page);
+                                }
+                            }
+                        }.bind(this)
+                    });
+                },
+
+                _update: function (value) {
+                    this._sendInProgress = true;
+                    this._enableOrDisableSubmit();//as send is in progress, we need to disable the button
+
+                    var data = { incident: { body: value } };
+                    var pageId = this._pages.options[this._pages.selectedIndex].value;
+                    var incidentNumber = this._incidents.options[this._incidents.selectedIndex].value;
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=UpdatePushoverIncident&pageId=" + pageId + "&incidentNumber=" + incidentNumber,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(data),
+                        success: function (result, textStatus, xhr) {
+
+
+                            if (result.error) {
+                                this._miscellaneousErrorPopup({ "responseText": xhr.status + " " + result.error.join(", ") });
+                            } else {
+                                this._getAllIncindentUpdates();
+                                this._body.value = "";
+                            }
+                            this._sendInProgress = false;
+                            this._enableOrDisableSubmit();
+                            sendBtn.disabled = false;
+
+                        }.bind(this),
+                        error: function (xhr) {
+
+                            let statusCode = xhr.status;
+                            let message = xhr.responseText;
+
+                            try {
+                                var parsed = JSON.parse(message);
+                                if (parsed.error && Array.isArray(parsed.error)) {
+                                    message = parsed.error.join(", ")
+                                }
+                            } catch (e) {
+
+                            }
+                            this._miscellaneousErrorPopup({
+                                "responseText": statusCode + " " + message
+                            })
+                            this._sendInProgress = false;
+                            this._enableOrDisableSubmit();
+                            sendBtn.disabled = false;
+
+                        }.bind(this)
+                    });
+                },
+
+
+                _enableOrDisableIncidentsOption: function (sender, e) {
+                    if (this._pages.selectedIndex > 0) {
+                        this._incidents.removeAttribute('disabled');
+                    } else {
+                        this._incidents.setAttribute('disabled', '');
+                    }
+                },
+
+
+                _enableOrDisableMessageTextArea: function (sender, e) {
+                    if (this._pages.selectedIndex > 0 && this._incidents.selectedIndex > 0) {
+                        this._body.removeAttribute('disabled');
+                    } else {
+                        this._body.setAttribute('disabled', '');
+                    }
+                }
+            });
+    })();
+</script>

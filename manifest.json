@@ -1,0 +1,21 @@
+﻿{
+  "Name": "MarvalSoftware.Plugins.Pushover",
+  "Organisation": "MarvalSoftware",
+  "DisplayName": "@@PluginDisplayname",
+  "Icon": "img/Pushover_16.png",
+  "Version": "1.0.9",
+  "SupportedVersions": [
+    "15.11.0",
+    "0.0.0"
+  ],
+  "Pages": [
+    "request.aspx",
+    "plugin.aspx"
+  ],
+  "GlobalSettings": [
+    "@@UserAPIKey",
+    "@@APPToken"
+  ],
+  "HtmlImportFile": "MarvalSoftware.Plugins.Pushover.html",
+  "TagName": "marvalsoftware-plugins-pushover"
+}
