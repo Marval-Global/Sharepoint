@@ -2,76 +2,81 @@
 <script type="text/javascript" src="template.js"></script>
 <template>
     <style>
-        #groupsDropdown{
-            font-weight:normal;
+        #groupsDropdown {
+            font-weight: normal;
         }
+
         .content {
             border-radius: 10px;
             font-family: 'Inter', 'Open Sans', sans-serif;
-            font-weight:bold;
+            font-weight: bold;
             /*            height:500px !important;*/
         }
+
         .messageButton {
             background-color: #8c9097;
             font-weight: normal;
             cursor: pointer;
         }
+
         .LinkedProjectsHeader {
             /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
             color: #00314a !important;
             font-size: 12px !important;
             font-family: 'Inter', 'Open Sans', sans-serif;
         }
-        
+
             .LinkedProjectsHeader h1 {
                 /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
                 color: #00314a !important;
                 font-size: 12px !important;
                 font-family: 'Inter', 'Open Sans', sans-serif;
             }
+
         .headerColourChange {
             background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
             color: #00314a !important;
             font-size: 18px !important;
             font-family: 'Inter', 'Open Sans', sans-serif;
-            border-radius:10px;
+            border-radius: 10px;
         }
+
         #message {
             vertical-align: top;
-/*            height: 100px;*/
+            /*            height: 100px;*/
             width: 600px;
         }
 
-        marvalsoftware-plugins-pushover {
-/*            display: block;*/
+        marvalsoftware-plugins-sharepoint {
+            /*            display: block;*/
             height: 200px;
         }
 
-            marvalsoftware-plugins-pushover > .config-area {
-                height:100px;
+            marvalsoftware-plugins-sharepoint > .config-area {
+                height: 100px;
                 padding: 0px 10px 10px 10px;
                 box-shadow: 0 1px 0 0 #ebe8e4;
             }
 
-                marvalsoftware-plugins-pushover > .config-area > div {
+                marvalsoftware-plugins-sharepoint > .config-area > div {
                     padding: 10px 0 0 0;
                 }
 
-            marvalsoftware-plugins-pushover > .message-area {
-/*                display: block;*/
+            marvalsoftware-plugins-sharepoint > .message-area {
+                /*                display: block;*/
                 height: 100px;
                 padding: 10px;
                 box-shadow: 0 1px 0 0 #ebe8e4;
             }
 
-                marvalsoftware-plugins-pushover > .message-area > .cards {
-                    height: ;
+                marvalsoftware-plugins-sharepoint > .message-area > .cards {
+                    height:;
                     overflow-y: auto;
                     padding: 10px;
                     box-shadow: 0 1px 0 0 #ebe8e4;
                 }
 
-                    marvalsoftware-plugins-pushover > .message-area > .cards .card {
+                    marvalsoftware-plugins-sharepoint > .message-area > .cards .card {
                         background-color: #fff;
                         padding: 1.5rem;
                         margin-bottom: 0.5rem;
@@ -80,19 +85,19 @@
                         box-shadow: 0 1px 1px 0 #ebe8e4;
                     }
 
-                        marvalsoftware-plugins-pushover > .message-area > .cards .card .timestamp {
+                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .timestamp {
                             font-size: 0.75rem;
                             font-weight: 500;
                             color: #666;
                             width: 10%;
                         }
 
-                        marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip {
+                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip {
                             position: relative;
-/*                            display: inline-block;*/
+                            /*                            display: inline-block;*/
                         }
 
-                            marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip .tooltiptext {
+                            marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip .tooltiptext {
                                 visibility: hidden;
                                 width: 120px;
                                 background-color: #555;
@@ -109,7 +114,7 @@
                                 transition: opacity 0.3s;
                             }
 
-                                marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip .tooltiptext::after {
+                                marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip .tooltiptext::after {
                                     content: "";
                                     position: absolute;
                                     top: 100%;
@@ -120,18 +125,18 @@
                                     border-color: #555 transparent transparent transparent;
                                 }
 
-                            marvalsoftware-plugins-pushover > .message-area > .cards .card .tooltip:hover .tooltiptext {
+                            marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip:hover .tooltiptext {
                                 visibility: visible;
                                 opacity: 1;
                             }
 
-                        marvalsoftware-plugins-pushover > .message-area > .cards .card .status {
+                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .status {
                             margin-top: 0.75rem;
                             font-size: 1rem;
                             font-weight: 600;
                         }
 
-                        marvalsoftware-plugins-pushover > .message-area > .cards .card .message {
+                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .message {
                             line-height: 22px;
                             margin-right: 6rem;
                             color: #666;
@@ -139,12 +144,12 @@
                             white-space: pre-line;
                         }
 
-            marvalsoftware-plugins-pushover > .update-area {
+            marvalsoftware-plugins-sharepoint > .update-area {
                 height: 20%;
                 padding: 10px 10px 0 10px;
             }
 
-                marvalsoftware-plugins-pushover > .update-area textarea {
+                marvalsoftware-plugins-sharepoint > .update-area textarea {
                     width: 100%;
                     height: 75%;
                     box-sizing: border-box;
@@ -153,12 +158,12 @@
                     resize: none;
                 }
 
-                marvalsoftware-plugins-pushover > .update-area .action-buttons {
+                marvalsoftware-plugins-sharepoint > .update-area .action-buttons {
                     float: right;
                     padding-top: 10px;
                 }
 
-                    marvalsoftware-plugins-pushover > .update-area .action-buttons button {
+                    marvalsoftware-plugins-sharepoint > .update-area .action-buttons button {
                         box-sizing: border-box;
                         border: 1px solid #ccc;
                         border-radius: 2px;
@@ -166,15 +171,16 @@
                         cursor: pointer; /*changing to pointer when cursor is over it*/
                     }
 
-                marvalsoftware-plugins-pushover > .update-area label,
-                marvalsoftware-plugins-pushover > .message-area label,
-                marvalsoftware-plugins-pushover > .config-area > div label {
+                marvalsoftware-plugins-sharepoint > .update-area label,
+                marvalsoftware-plugins-sharepoint > .message-area label,
+                marvalsoftware-plugins-sharepoint > .config-area > div label {
                     font-size: 1rem;
                     font-weight: 600;
-/*                    display: inline-block;*/
+                    /*                    display: inline-block;*/
                     width: 50px;
                     padding-bottom: 5px;
                 }
+
         .headerColourChange {
             background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
             color: #00314a !important;
@@ -182,18 +188,18 @@
             font-family: 'Inter', 'Open Sans', sans-serif;
         }
 
-            marvalsoftware-plugins-pushover > .message-area label {
-                width: 100px !important;
-            }
+        marvalsoftware-plugins-sharepoint > .message-area label {
+            width: 100px !important;
+        }
 
-            marvalsoftware-plugins-pushover > .message-area > .header {
-                align-items: center
-            }
+        marvalsoftware-plugins-sharepoint > .message-area > .header {
+            align-items: center
+        }
 
-                marvalsoftware-plugins-pushover > .message-area > .header a img {
-                    position: relative;
-                    top: 4px;
-                }
+            marvalsoftware-plugins-sharepoint > .message-area > .header a img {
+                position: relative;
+                top: 4px;
+            }
     </style>
     <div class="config-area">
         <div>
@@ -203,7 +209,7 @@
             </select>-->
             Message to send:
             <br />
-            <input id="message"/>
+            <input id="message" />
             <br />
             <br />
             Do you want to include incident details?: <input type="checkbox" id="CheckBox" />
@@ -216,9 +222,10 @@
 
 
         </div>
-        
+
     </div>
-    
+    <select id="sitesDropdown"><option>Loading!</option></select>
+
 
 </template>
 <template class="cardTemplate">
@@ -232,21 +239,21 @@
 </template>
 <template class="errorTemplate">
     <style>
-        .marvalsoftware-pushover-errors h3,
-        .marvalsoftware-pushover-errors h4 {
+        .marvalsoftware-sharepoint-errors h3,
+        .marvalsoftware-sharepoint-errors h4 {
             padding: 8px 0 8px 0;
         }
 
-        .pushoverConfig > li {
+        .sharepointConfig > li {
             display: none;
         }
     </style>
-    <div class="marvalsoftware-pushover-errors">
+    <div class="marvalsoftware-sharepoint-errors">
         <div class="title">
             <h3>Ensure all configuration settings are correct.</h3>
         </div>
         <div>
-            <ul class="pushoverConfig">
+            <ul class="sharepointConfig">
                 <li id="userAPIKey"> Organisation API Key </li>
             </ul>
             <h4></h4>
@@ -255,27 +262,29 @@
 </template>
 <template class="miscellaneousErrorsTemplate">
     <style>
-        .marvalsoftware-pushover-errors h3,
-        .marvalsoftware-pushover-errors h4 {
+        .marvalsoftware-sharepoint-errors h3,
+        .marvalsoftware-sharepoint-errors h4 {
             padding: 8px 0 8px 0;
         }
     </style>
-    <div class="marvalsoftware-pushover-errors">
+    <div class="marvalsoftware-sharepoint-errors">
         <div class="title">
-            <h3>Error loading Pushover.</h3>
+            <h3>Error loading Sharepoint.</h3>
         </div>
         <div>
             <label></label>
         </div>
     </div>
 </template>
+
+<script type="text/javascript" src="msal-browser.min.js"></script>
 <script>
     (function () {
 
         var MarvalSoftware = window.top.MarvalSoftware;
         var $ = window.top.$;
 
-        MarvalSoftware.Plugins.define("marvalsoftware-plugins-pushover",
+        MarvalSoftware.Plugins.define("marvalsoftware-plugins-sharepoint",
             {
                 _element: null,
                 _body: null,
@@ -299,23 +308,25 @@
 
 
                 init: function () {
-                    Pushover = this;
+                    Sharepoint = this;
 
                     this._sendInProgress = false; //we will use later to keep track of if we are sending a request
                     var HeaderText = $('#ctl00_ctl00_cph_entityHeaderText').text();
                     var currentUrl = window.top.location.href;
                     var currentHost = window.top.location.host;
-                    _fullPluginPathHandler = "https://" + currentHost + Pushover._getPluginPath() + "handler/APIHandler.ashx";
-                    //checkRequestActionMessageExists();
-                 
-                    
-                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Pushover') {
+                    _fullPluginPathHandler = "https://" + currentHost + Sharepoint._getPluginPath() + "handler/APIHandler.ashx";
+                    //checkRequestActionMessageExists(); //should be /handler/APIHandler/ashx
+                    //let hostString = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=ChatbotHostOverride")).text()
+                    //let tenantId = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=TenantID")).text()
+                    //let secret = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=SecretKey")).text()
+
+                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Sharepoint') {
                         checkRequestActionMessageExists();
 
                         function OpenInstallRequestRuleDialog() {
                             event.preventDefault();
                             $('#setupActionRuleModal').fadeIn(200);
-                           
+
 
                             var getWorkflowStatuses = fetch(_fullPluginPathHandler, {
                                 method: "POST",
@@ -491,7 +502,7 @@
 <br>
     <h2><span>Install the Request Action Rule</span></h2>
     <br>
-  <p>This section rule is used to determine the criteria for running the request action rule to create a new Pushover User.</p>
+  <p>This section rule is used to determine the criteria for running the request action rule to create a new Sharepoint User.</p>
   <p>You can modify this later directly in the request action rule.</p>
   <br>
  <div class="form-group">
@@ -554,7 +565,7 @@
 
                                 var createActionRule = await (await fetch(_fullPluginPathHandler, {
                                     "method": "POST",
-                                    body: JSON.stringify({ actionMessageId: Pushover._requestActionMessageID, actionMessageURL: encodedFullUrl, WorkflowStatusId: WorkflowStatusId, WorkflowId: WorkflowId, action: "createActionRule" }),
+                                    body: JSON.stringify({ actionMessageId: Sharepoint._requestActionMessageID, actionMessageURL: encodedFullUrl, WorkflowStatusId: WorkflowStatusId, WorkflowId: WorkflowId, action: "createActionRule" }),
                                     "headers": [["content-type", "application/json"]]
                                 })).json();
 
@@ -568,7 +579,7 @@
                         }
 
                         function checkRequestActionMessageExists() {
-                            var requestActionMessageName = "Pushover Integration Message - Automated";
+                            var requestActionMessageName = "Sharepoint Integration Message - Automated";
                             var foundItem = false;
                             $.get('/MSM/RFP/Forms/RequestActionMessage.aspx', function (html) {
                                 $(html).find('#ctl00_ctl00_ctl00_cph_existingEntitiesContentPlaceHolder_ExistingEntitiesList_loadMoreList_items a.item')
@@ -578,7 +589,7 @@
                                         if ($(this).attr('title') == requestActionMessageName) {
 
                                             foundItem = true;
-                                            Pushover._requestActionMessageID = $(this).attr('href').match(/id=(\d+)$/)[1];
+                                            Sharepoint._requestActionMessageID = $(this).attr('href').match(/id=(\d+)$/)[1];
                                         }
                                         // console.log($(this).attr('search'));
 
@@ -590,8 +601,8 @@
                                     //   $('#isRequestActionMessageInstalled').css('color', 'green');
                                     //   $('#isRequestActionMessageInstalled').attr('')
                                 } else {
-                                    $('#pluginStatus').append('<span style="color:red"><br>You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Pushover Integration Message - Automated</span>"');
-                                    // $('#isRequestActionMessageInstalled').append('You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Pushover Integration Message - Automated"');
+                                    $('#pluginStatus').append('<span style="color:red"><br>You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Sharepoint Integration Message - Automated</span>"');
+                                    // $('#isRequestActionMessageInstalled').append('You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Sharepoint Integration Message - Automated"');
                                     //  $('#isRequestActionMessageInstalled').css('color', 'red');
                                 }
                             })
@@ -605,13 +616,13 @@
 
                         async function getLatestPluginVersion() {
 
-                            var url = "https://raw.githubusercontent.com/Marval-Global/PushoverPlugin/refs/heads/main/manifest.json";
+                            var url = "https://raw.githubusercontent.com/Marval-Global/SharepointPlugin/refs/heads/main/manifest.json";
                             var githubPluginVersion = await (await fetch(url)).json();
                             var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
 
                             if (pagePluginVersion == githubPluginVersion.Version) {
                                 $('#ctl00_ctl00_cph_maintenance_version').css("color", "green");
-                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
+                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold"); _popup
 
                                 $('#uptodatemessage').fadeIn(250);
                                 setTimeout(() => {
@@ -620,7 +631,7 @@
                             } else {
                                 $('#ctl00_ctl00_cph_maintenance_version').css("color", "red");
                                 $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
-                                $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/PushoverPlugin/releases/latest/download/MarvalSoftware.Plugins.Pushover.zip">here</a> for the new version.');
+                                $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/SharepointPlugin/releases/latest/download/MarvalSoftware.Plugins.Sharepoint.zip">here</a> for the new version.');
                             }
                         }
 
@@ -630,18 +641,112 @@
                         });
                     }
                     else if (!currentUrl.includes("Plugin.aspx")) {
+                        
 
-
+                        fetchSharePointSites();
+                        this._getAuth();
                         this._setUpQuickMenu();
                         this._requestNumber = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getRequestNumber();
                         this._requestID = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log(MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage());
                         this._requestDescription = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestDescription;
                         this._contactEmail = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getContactPreferredEmail();
+                        addIconColumnFirst(this._getPluginPath() + "img/sharepoint_16.png", function ($row, index) {
+                            Sharepoint._popup();
+                            alert(`Clicked row ${index + 1}`);
+                        });
+
                         //displayGroups();
-                        
+
 
                     }
+
+                    async function fetchSharePointSites() {
+                        try {
+                            const response = await fetch(_fullPluginPathHandler + '?endpoint=getSites', {
+                                method: 'GET'
+                            });
+                            if (!response.ok) { //throw error if not ok
+                                throw new Error(`HTTP! error! status: ${response.status}`);
+                            }
+                            const sitesJson = await response.json(); //in theory should have all our sites if response is correct
+                            console.log("Sharepoint sites are: ", sitesJson);
+
+                            const $dropdown = $('sitesDropdown');
+                            $dropdown.empty();
+                            $dropdown.append('<option value = "">-- Select a Site --</option>');
+
+                            sitesJson.value.forEach(site => {
+                                $dropdown.append($('<option').val(site.id).text(site.name || site.webUrl));
+                            });
+                        } catch (error) {
+                            console.log("Error fetching sites: ", error);
+                        }
+                    }
+
+                    async function getMicrosoftAccessToken() {
+                        try {
+                            // Get the Client ID from your SharePoint handler or hardcode it here
+                            const clientIdUrl = "/_layouts/15/handler/APIHandler.ashx?endpoint=ClientID"; // adjust as needed
+                            const clientId = await (await fetch(clientIdUrl)).text();
+
+                            const msalInstance = await msal.createStandardPublicClientApplication({
+                                auth: {
+                                    clientId: clientId,
+                                    authority: "https://login.microsoftonline.com/common"
+                                }
+                            });
+
+                            const loginRequest = {
+                                scopes: ["https://graph.microsoft.com/.default"]
+                            };
+
+                            const response = await msalInstance.loginPopup(loginRequest);
+
+                            console.log("Logged in successfully, access token:", response.accessToken);
+                            return response.accessToken;
+
+                        } catch (err) {
+                            console.error("MSAL login failed:", err);
+                            throw err;
+                        }
+                    }
+
+
+
+                    function addIconColumnFirst(imageSrc, onClickCallback) {
+                        const $table = $('.attachments table.related');
+                        const $theadRow = $table.find('thead tr');
+                        const $tbodyRows = $table.find('tbody tr').not('.noAttachmentsMessage');
+
+                        // 1. Add an empty <th> at the start
+                        $theadRow.prepend(`<th class="icon-column"></th>`);
+
+                        // 2. Add an icon <td> at the start of each row
+                        $tbodyRows.each(function (index) {
+                            const $row = $(this);
+                            const $icon = $(`
+            <td class="icon-column">
+                <a href="#" class="icon-link" title="Open SharePoint">
+                    <img src="${imageSrc}" alt="icon" style="width:16px; height:16px; cursor:pointer;" />
+                </a>
+            </td>
+        `);
+
+                            // Optional: attach click handler if needed now
+                            if (typeof onClickCallback === 'function') {
+                                $icon.find('a.icon-link').on('click', function (e) {
+                                    e.preventDefault();
+                                    onClickCallback($row, index);
+                                });
+                            }
+
+                            $row.prepend($icon);
+                        });
+                    }
+
+
+
                     async function downloadRequestActionMessage() { //should be an async function
                         event.preventDefault();
                         console.log("we are calling download request action message");
@@ -670,14 +775,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                            "Email": "@Model.PreferredNotification.Address",
                         "message": "@fullMessage",
 "serviceName": "@Model.Service.Name",
-"action": "SendPushoverMessage"
+"action": "SendSharepointMessage"
 
 
                         }
 
                             `;
                         var currentUrl = window.top.location.host;
-                        var pluginPathHandler = "https://" + currentUrl + Pushover._getPluginPath() + "handler/ApiHandler.ashx";
+                        var pluginPathHandler = "https://" + currentUrl + Sharepoint._getPluginPath() + "handler/ApiHandler.ashx";
                         //$('#InstallRequestActionMessage').attr('disabled', true);
 
                         console.log("actionmsgtext: ", actionMessageText);
@@ -698,42 +803,66 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                 },
-                _showGroups: async function () {
-                    //let _fullPluginPathHandler = "https://" + currentHost + Pushover._getPluginPath() + "handler/ApiHandler.ashx";
+                _getAuth: async function () {
+
+                    let hostString = await (await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=ChatbotHostOverride")).text()
+                    let tenantId = await (await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=TenantID")).text()
+                    let secret = await (await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=SecretKey")).text()
+
+
+                    
+
+                        var url = Sharepoint._getPluginPath() + "Handler.ashx?endpoint=ClientID"
+
+                        //var id = await (await fetch(url)).text()
+
+                        const msalInstance = await msal.createStandardPublicClientApplication({
+                            auth: {
+                                clientId: "b6a84976-d3bc-4f7d-ae42-a50472a64116",
+                                authority: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+                            },
+                        });
+
+                        var loginRequest = {
+                            scopes: ["https://graph.microsoft.com/.default"]
+                        };
+
                         try {
-                            const response = await fetch(_fullPluginPathHandler, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ action: "getGroups" })
-                            });
+                            var response = await msalInstance.loginPopup(loginRequest);
 
-                            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                            try {
+                                const result = await (await fetch("https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '" + Sharepoint._contactEmail + "'", {
 
-                            const json = await response.json();
-                            console.log("groups data is: ", json);
+                                    method: "GET",
+                                    headers: new Headers({
+                                        "Authorization": "Bearer " + response.accessToken,
+                                    })
+                                })).json()
 
-                            if (!json || !Array.isArray(json.groups)) {
-                                console.error("Invalid or missing groups in response", json);
-                                return;
+                                console.log(response.accessToken);
+
+                                if (result.value.length < 1) {
+                                    throw Error("Search for contact returned no results.")
+                                } else {
+
+                                }
+
+                            } catch (err) {
+                                $("#SharepointError").remove();
+                                $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to find a Sharepoint contact for " + Sharepoint._contactEmail + "</p></div>")
+                                console.error("Sharepoint search error:\n", err)
+                                $("*").remove(".chatbot-container")
                             }
 
-                            let $selectGroup = $('#groupsDropdown');
-                            if ($selectGroup.length === 0) {
-                                console.error("Dropdown element not found");
-                                return;
-                            }
-
-                            $selectGroup.empty().append('<option value="">-- Select a Group --</option>');
-                            json.groups.forEach(element => {
-                                $selectGroup.append($('<option>').val(element.group).text(element.name));
-                            });
-
-                        } catch (error) {
-                            console.error("Failed to load groups:", error);
+                        } catch (err) {
+                            $("#SharepointError").remove();
+                            $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to authenticate with Microsoft</p></div>")
+                            $("*").remove(".chatbot-container")
+                            console.error("MS Auth error:\n", err)
                         }
+
                     
                 },
-
 
                 _getPluginPath: function () {
                     return this.attributes["data-pluginpath"].value;
@@ -763,7 +892,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         window.top.document.getElementById("sendMessage").style.backgroundColor = "gray";
                         window.top.document.getElementById("sendMessage").disabled = true;
                     }
-    }, 
+                },
 
                 _renderElement: function () {
                     var template = document.querySelector("template").content;
@@ -785,17 +914,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this.groupSelected = this._element.querySelector("#groupsDropdown");
                     eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
 
-                    
-                    //window.top.document.getElementById("message").onchange = updateButtonVisual();
-                    //this._refreshLink.firstChild.setAttribute("src", this._getPluginPath() + "img/refresh_spinner_16.png");
-                    // this._refreshElement = this._element.querySelector(".message-area > div");
-                    //this._pages = this._element.querySelector("#pages");
-                    //this._incidents = this._element.querySelector("#incidents");
-                    // eventManager.addHandler(this._body, "input", this._enableOrDisableSubmit, this);
-                    //eventManager.addHandler(this._createElement, "click", this._createElement_click, this);
-                    //eventManager.addHandler(this._refreshLink, "click", this._refreshCards, this);
-                    //eventManager.addHandler(this._pages, "change", this._getAllPageIncindents, this);
-                    //eventManager.addHandler(this._incidents, "change", this._getAllIncindentUpdates, this);
+
                     this.appendChild(this._element);
                 },
 
@@ -811,7 +930,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (!this._pluginWindow) {
                         this._pluginWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
-                            title: "Pushover",
+                            title: "Sharepoint",
                             height: 200,
                             width: 800,
                             minHeight: 700,
@@ -821,8 +940,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             bodyElement: this
                         });
                         this._renderElement();
-                        this._showGroups();
-                        
+                        //this._showGroups();
+
                         //this._getAllPages();
                     }
                     //this._resetPopUpValues();
@@ -842,11 +961,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             var id = "#" + item;
                             errorMessages.querySelector(id).style.display = "block";
                         }
-                        errorMessages.querySelector('div > h3').textContent = this._getString("@@PushoverErrorConfigurationTitle");
-                        errorMessages.querySelector('div > h4').textContent = this._getString("@@PushoverErrorConfigurationFooter");
+                        errorMessages.querySelector('div > h3').textContent = this._getString("@@SharepointErrorConfigurationTitle");
+                        errorMessages.querySelector('div > h4').textContent = this._getString("@@SharepointErrorConfigurationFooter");
                     }
                     MarvalSoftware.UI.MessageBox.show(
-                        this._getString("@@PushoverErrorPopupTitle"),
+                        this._getString("@@SharepointErrorPopupTitle"),
                         errorMessages,
                         MarvalSoftware.UI.MessageBox.Types.ERROR,
                         [MarvalSoftware.UI.MessageBox.Buttons.OK],
@@ -863,7 +982,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         errorMessages.querySelector('div > label').textContent = result.responseText;
                     }
                     MarvalSoftware.UI.MessageBox.show(
-                        this._getString("@@PushoverErrorPopupTitle"),
+                        this._getString("@@SharepointErrorPopupTitle"),
                         errorMessages,
                         MarvalSoftware.UI.MessageBox.Types.ERROR,
                         [MarvalSoftware.UI.MessageBox.Buttons.OK],
@@ -876,7 +995,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._clearCards();
                     if (!results.incident_updates || results.incident_updates.length == 0) {
                         var label = document.createElement("h3")
-                        label.textContent = this._getString("@@PushoverNoItems");
+                        label.textContent = this._getString("@@SharepointNoItems");
                         label.align = "center";
                         label.style.position = "relative";
                         label.style.top = "150px";
@@ -984,18 +1103,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 _setUpQuickMenu: function () {
                     var styleElement = window.top.document.createElement("style");
                     window.top.document.body.appendChild(styleElement);
-                    styleElement.sheet.insertRule(".marvalSoftware-pushover-quick-menu-item { background-image: url(" + this._getPluginPath() + "img/pushover_32.png); }", 0);
+                    styleElement.sheet.insertRule(".marvalSoftware-sharepoint-quick-menu-item { background-image: url(" + this._getPluginPath() + "img/sharepoint_32.png); }", 0);
 
                     var quickMenuId = window.top.document.querySelector(".quickMenu").id;
                     var quickMenu = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getControl(quickMenuId);
                     quickMenu.addMenuItem({
-                        Identifier: "marvalSoftware-pushover",
+                        Identifier: "marvalSoftware-sharepoint",
                         Label: this._getString("@@PluginDisplayname"),
                         HRef: "javascript:void(0);",
-                        CssClass: "marvalSoftware-pushover-quick-menu-item"
+                        CssClass: "marvalSoftware-sharepoint-quick-menu-item"
                     });
                     quickMenu.onMenuItemClicked.subscribe(function (sender, e) {
-                        if (e.menuItem.getIdentifier() === "marvalSoftware-pushover") {
+                        if (e.menuItem.getIdentifier() === "marvalSoftware-sharepoint") {
                             //window.open("", "_blank", "width=800,height=600")
                             this._popup();
                         }
@@ -1029,12 +1148,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
                         payload = {
                             message: formulatedMessage,
-                            action: "SendPushoverMessage"
+                            action: "SendSharepointMessage"
                         }
                     } else {//not checked
                         payload = {
                             message: messageText,
-                            action: "SendPushoverMessage"
+                            action: "SendSharepointMessage"
                         }
                     }
                     console.log("We are here");
@@ -1043,7 +1162,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     $.ajax({
                         type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=SendPushoverMessage",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=SendSharepointMessage",
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
                         data: JSON.stringify(payload),
@@ -1058,15 +1177,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     });
                 },
 
-                _showSpinner: function () {
-                    this._refreshLink.firstChild.removeAttribute("src");
-                    this._refreshLink.firstChild.setAttribute("src", this._getPluginPath() + "/img/spinner.gif");
-                },
-
-                _hideSpinner: function () {
-                    this._refreshLink.firstChild.removeAttribute("src");
-                    this._refreshLink.firstChild.setAttribute("src", this._getPluginPath() + "img/refresh_spinner_16.png");
-                },
 
                 _getAllPageIncindents: function () {
                     $.ajax({
@@ -1148,7 +1258,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     $.ajax({
                         type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=UpdatePushoverIncident&pageId=" + pageId + "&incidentNumber=" + incidentNumber,
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=UpdateSharepointIncident&pageId=" + pageId + "&incidentNumber=" + incidentNumber,
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
                         data: JSON.stringify(data),
