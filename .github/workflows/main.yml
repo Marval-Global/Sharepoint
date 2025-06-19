@@ -13,11 +13,11 @@ jobs:
         id: vars
         run: cd ${{ github.workspace }} && echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Zip files
-        run: cd ${{ github.workspace }} && zip -r MarvalSoftware.Plugins.Pushover.zip .
+        run: cd ${{ github.workspace }} && zip -r MarvalSoftware.Plugins.Sharepoint.zip .
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ steps.vars.outputs.sha_short }}
           prerelease: false
           title: Release ${{ steps.vars.outputs.sha_short }}
-          files: ${{ github.workspace }}/MarvalSoftware.Plugins.Pushover.zip
+          files: ${{ github.workspace }}/MarvalSoftware.Plugins.Sharepoint.zip
