@@ -40,24 +40,12 @@ public class Handler : PluginHandler
     private string DBName { get; set; }
     private string MarvalHost { get; set; }
     private string AssignmentGroups { get; set; }
-    private string CustomerGUID { get { return this.GlobalSettings["@@CustomerGUID"]; } }
-    private string ClientID { get { return this.GlobalSettings["@@APPToken"]; } }
-    private string TenantID { get { return this.GlobalSettings["@@TenantID"]; } }
-    private string CustomerName { get { return this.GlobalSettings["@@CustomerName"]; } }
-    private string AADObjectGUIDLocation { get { return this.GlobalSettings["@@AADObjectGUIDLocation"]; } }
 
-    private string SecretKey { get { return this.GlobalSettings["@@SecretKey"]; } }
+    private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
+    private string MarvalAPIKey { get { return this.GlobalSettings["@@MarvalAPIKey"]; } }
+ 
+   
 
-
-    private string Region { get { return this.GlobalSettings["@@Region"]; } }
-    private string ChatbotHostOverride
-    {
-        get
-        {
-            string host = Region == "asiapacific" ? "chatbot-au.marval.cloud" : "chatbot-uk.marval.cloud";
-            return this.GlobalSettings["@@ChatbotHostOverride"] == "" ? host : this.GlobalSettings["@@ChatbotHostOverride"];
-        }
-    }
 
     private int MsmRequestNo { get; set; }
 
@@ -214,7 +202,7 @@ public class Handler : PluginHandler
     {
         var param = context.Request.HttpMethod;
         var browserObject = context.Request.Browser;
-
+            
         //MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
         //lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
@@ -231,10 +219,10 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
                 // Trace.Write("paramval is" + getParamVal);
                 // Log.information
-                if (getParamVal == "createSharepoint")
+                if (getParamVal == "none")
                 {
 
-                    var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/", "");
+             
 
                     context.Response.Write("Hi");
                 }
@@ -244,7 +232,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 // }
                 else if (getParamVal == "ChatbotHostOverride")
                 {
-                    context.Response.Write(this.ChatbotHostOverride);
+         context.Response.Write("Hi");
                 }
                 else if (getParamVal == "ClientID")
                 {
@@ -258,16 +246,15 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 }
                 else if (getParamVal == "generatePassword")
                 {
-                    var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/generatePassword", "{  \"secretkey\":\"" + SecretKey + "\",  \"tenantId\":\"" + TenantID + "\"}");
-                    context.Response.Write(response);
+                    context.Response.Write("Hi");
                 }
                 else if (getParamVal == "TenantID")
                 {
-                    context.Response.Write(TenantID);
+                    context.Response.Write("Hi");
                 }
                 else if (getParamVal == "getprivatekey")
                 {
-                    var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/downloadFile", "{  \"secretKey\":\"" + SecretKey + "\", \"file\": \"getprivatekey\",  \"tenantId\":\"" + TenantID + "\", \"region\":\"" + Region + "\"}");
+                    var response = PostRequest("https","");
                     context.Response.Clear();
                     context.Response.ContentType = "application/octet-stream"; // or "text/plain" if it's text
                     context.Response.AddHeader("Content-Disposition", "attachment; filename=privatekey.txt");
@@ -278,7 +265,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 }
                 else if (getParamVal == "getpublickey")
                 {
-                    var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/downloadFile", "{  \"secretKey\":\"" + SecretKey + "\", \"file\": \"getpublickey\",  \"tenantId\":\"" + TenantID + "\", \"region\":\"" + Region + "\"}");
+                    var response = PostRequest("https:","");
                     context.Response.Clear();
                     context.Response.ContentType = "application/octet-stream"; // or "text/plain" if it's text
                     context.Response.AddHeader("Content-Disposition", "attachment; filename=publickey.txt");
@@ -288,7 +275,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 }
                 else if (getParamVal == "getchatbotsnippet")
                 {
-                    var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/downloadFile", "{  \"secretKey\":\"" + SecretKey + "\", \"file\": \"getchatbotsnippet\",  \"tenantId\":\"" + TenantID + "\", \"region\":\"" + Region + "\"}");
+                    var response = PostRequest("https:/i/server/downloadFile", "{");
                     context.Response.Clear();
                     context.Response.ContentType = "application/octet-stream"; // or "text/plain" if it's text
                     context.Response.AddHeader("Content-Disposition", "attachment; filename=chatbotsnippet.txt");
@@ -304,11 +291,11 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 }
                 else if (getParamVal == "AADObjectGUIDLocation")
                 {
-                    context.Response.Write(AADObjectGUIDLocation);
+                    context.Response.Write("Hi");
                 }
                 else if (getParamVal == "SecretKey")
                 {
-                    context.Response.Write(SecretKey);
+                    context.Response.Write("Hi");
                 }
                 else
                 {
@@ -316,14 +303,14 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 }
                 break;
             case "POST":
-                if (!context.Request.ContentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
-                {
-                    context.Response.StatusCode = 415;
-                    context.Response.End();
-                    return;
-                }
+                // if (!context.Request.ContentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+                // {
+                //     context.Response.StatusCode = 415;
+                //     context.Response.End();
+                //     return;
+                // }
                 string json;
-                Log.Information("context is: " + context.Request);
+    
                 using (var reader = new StreamReader(context.Request.InputStream))
                 {
                     json = reader.ReadToEnd();
@@ -332,7 +319,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 RequestData data;
                 try
                 {
-                    Log.Information("json: ", json);
+             
                     data = JsonConvert.DeserializeObject<RequestData>(json);
                 }
                 catch (JsonException)
@@ -348,9 +335,9 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
 
 
                 if (action == "getSites"){
-                    var appToken = context.Request.Params["apptoken"];
-                    Log.Information("apptoken is: " + appToken);
-                    string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
+                  
+                    Log.Information("apptoken is: " + apptoken);
+                    string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", apptoken);
                     context.Response.Write(ex);
                 }
                 else if (action == "")
