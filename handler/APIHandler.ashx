@@ -18,9 +18,18 @@ using System.Xml.Linq;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 public class Handler : PluginHandler
 {
+    public class RequestData
+    {
+        public string action { get; set; }
+
+        public string apptoken { get; set; }
+
+    }
+
 
     private string APIKey { get; set; }
 
@@ -32,7 +41,7 @@ public class Handler : PluginHandler
     private string MarvalHost { get; set; }
     private string AssignmentGroups { get; set; }
     private string CustomerGUID { get { return this.GlobalSettings["@@CustomerGUID"]; } }
-    private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
+    private string ClientID { get { return this.GlobalSettings["@@APPToken"]; } }
     private string TenantID { get { return this.GlobalSettings["@@TenantID"]; } }
     private string CustomerName { get { return this.GlobalSettings["@@CustomerName"]; } }
     private string AADObjectGUIDLocation { get { return this.GlobalSettings["@@AADObjectGUIDLocation"]; } }
@@ -74,6 +83,80 @@ public class Handler : PluginHandler
         }
 
         return request;
+    }
+    //     private HttpWebRequest BuildRequest(string uri = null, string body = null, string method = "GET", string token = null)
+    // {
+    //     ServicePointManager.Expect100Continue = true;
+    //     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
+
+    //     var request = WebRequest.Create(new UriBuilder(uri).Uri) as HttpWebRequest;
+    //     request.Method = method.ToUpperInvariant();
+    //     request.ContentType = "application/json";
+
+    //     if (!string.IsNullOrWhiteSpace(token))
+    //     {
+    //         request.Headers["Authorization"] = "Bearer " + token;
+    //     }
+
+    //     if (body != null)
+    //     {
+    //         using (var writer = new StreamWriter(request.GetRequestStream()))
+    //         {
+    //             writer.Write(body);
+    //         }
+    //     }
+
+    //     return request;
+    // }
+    private string GetRequest(string url, string token)
+    {
+        try
+        {
+            // Create a web request
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.ContentType = "application/json";
+            request.Headers["Authorization"] = "Bearer " + token;
+
+            // // Write data to request body
+            // using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+            // {
+            //     writer.Write(data);
+            // }
+
+            // Get response
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+        catch (WebException webEx)
+        {
+            // If we have a response, we can read the error message from the response body
+            if (webEx.Response != null)
+            {
+                using (var errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                    {
+                        string errorText = reader.ReadToEnd();
+                        // Return or log the error text
+                        return errorText;
+                    }
+                }
+            }
+
+            // If we have no response, return the exception message
+            return webEx.Message;
+        }
+        catch (Exception ex)
+        {
+            // Handle other exceptions
+            return ex.ToString();
+        }
     }
 
 
@@ -132,26 +215,33 @@ public class Handler : PluginHandler
         var param = context.Request.HttpMethod;
         var browserObject = context.Request.Browser;
 
-        MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
-        lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
+        //MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
+        //lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
-        this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
+        //this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
 
         switch (param)
         {
+
             case "GET":
+                    MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
+lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
+
+this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
+                // Trace.Write("paramval is" + getParamVal);
+                // Log.information
                 if (getParamVal == "createSharepoint")
                 {
 
                     var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/", "");
 
                     context.Response.Write("Hi");
-
-                }else if (getParamlVal == "getClientID"){
-                    var response = PostRequest("https://graph.microsoft.com/v1.0/sites/root");
-                     context.Response.Write(response);
                 }
+                // }else if (getParamVal == "getClientID"){
+                //     var response = PostRequest("https://graph.microsoft.com/v1.0/sites/root");
+                //      context.Response.Write(response);
+                // }
                 else if (getParamVal == "ChatbotHostOverride")
                 {
                     context.Response.Write(this.ChatbotHostOverride);
@@ -159,12 +249,15 @@ public class Handler : PluginHandler
                 else if (getParamVal == "ClientID")
                 {
                     context.Response.Write(ClientID);
-                }else if (getParamVal == "getSites")
-                {
-                    var response = BuildRequest("https://graph.microsoft.com/v1.0/sites/root");
-                    context.Response.Write(response);
+                    // }else if (getParamVal == "getSites"){
+                    //     var appToken = context.Request.Params["apptoken"];
+                    //     Log.Information("apptoken is: " + appToken);
+                    //     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
+                    //     context.Response.Write(ex);
+                    // }}
                 }
-                else if (getParamVal == "generatePassword") {
+                else if (getParamVal == "generatePassword")
+                {
                     var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/generatePassword", "{  \"secretkey\":\"" + SecretKey + "\",  \"tenantId\":\"" + TenantID + "\"}");
                     context.Response.Write(response);
                 }
@@ -205,9 +298,9 @@ public class Handler : PluginHandler
                 }
                 else if (getParamVal == "databaseValue")
                 {
-                    string json = this.GetCustomersJSON(context.Request.Params["CIId"]);
+                    string jsontwo = this.GetCustomersJSON(context.Request.Params["CIId"]);
 
-                    context.Response.Write(json);
+                    context.Response.Write(jsontwo);
                 }
                 else if (getParamVal == "AADObjectGUIDLocation")
                 {
@@ -223,29 +316,42 @@ public class Handler : PluginHandler
                 }
                 break;
             case "POST":
-                var hostSource = context.Request.Form["hostSource"];
-                var customerName = context.Request.Form["customerName"];
-                var tenantId = this.TenantID;
-                var action = context.Request.Form["action"];
-                if (action == "createSharepoint")
+                if (!context.Request.ContentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
                 {
-                    try
-                    {
-                        // Construct the request payload
+                    context.Response.StatusCode = 415;
+                    context.Response.End();
+                    return;
+                }
+                string json;
+                Log.Information("context is: " + context.Request);
+                using (var reader = new StreamReader(context.Request.InputStream))
+                {
+                    json = reader.ReadToEnd();
+                }
+
+                RequestData data;
+                try
+                {
+                    Log.Information("json: ", json);
+                    data = JsonConvert.DeserializeObject<RequestData>(json);
+                }
+                catch (JsonException)
+                {
+                    context.Response.StatusCode = 400; // Bad Request
+                    context.Response.Write("Invalid JSON");
+                    context.Response.End();
+                    return;
+                }
+                var action = data.action;
+                var apptoken = data.apptoken;
+                Log.Information("data is" + data);
 
 
-                        // Make the POST request
-                        var response = PostRequest("https://" + this.ChatbotHostOverride + "/api/server/createCustomer", "{ \"tenantId\": \"" + tenantId + "\", \"hostSource\": \"" + hostSource + "\", \"customerName\": \"" + customerName + "\"}");
-                        // Write the response back
-                        context.Response.Write(response);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Return an error response
-                        context.Response.StatusCode = 500; // Internal Server Error
-                        context.Response.ContentType = "application/json";
-                        context.Response.Write("{\"error\":\"An error occurred while processing your request.\"}");
-                    }
+                if (action == "getSites"){
+                    var appToken = context.Request.Params["apptoken"];
+                    Log.Information("apptoken is: " + appToken);
+                    string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
+                    context.Response.Write(ex);
                 }
                 else if (action == "")
                 {
