@@ -3,7 +3,7 @@
   "resources":
   [{
     "en-GB": {
-      "PluginDisplayname": "Pushover",
+      "PluginDisplayname": "Sharepoint",
       "UserAPIKey": "User API Key",
       "APPToken": "App Token",
       "PushoverErrorConfigurationTitle": "The following settings have not been configured:",
