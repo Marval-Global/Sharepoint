@@ -669,11 +669,11 @@
                             
                             console.log("apptoken is:", apptoken);
                             const response = fetch(_fullPluginPathHandler,{
-                                method: 'POST',
-                                headers: { "Content-Type": "application/json; charset=utf-8" },
+                                method: "POST",
+                                "headers": [["content-type", "application/json"]],
                                 body: JSON.stringify({
                                     "apptoken": apptoken,
-                                    "action": "getSites"
+                                    action: "getSites"
                                 })
                                 // headers:{'apptoken':apptoken}
 
