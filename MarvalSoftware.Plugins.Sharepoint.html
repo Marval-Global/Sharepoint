@@ -662,15 +662,28 @@
                     }
 
                     async function fetchSharePointSites() {
+                         getMicrosoftAccessToken().then(apptoken =>{
+                            console.log("apptoken is:", apptoken);
                         try {
-                            const response = await fetch(_fullPluginPathHandler + '?endpoint=getSites', {
-                                method: 'GET'
+                        //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+                            
+                            console.log("apptoken is:", apptoken);
+                            const response = fetch(_fullPluginPathHandler,{
+                                method: 'POST',
+                                headers: { "Content-Type": "application/json; charset=utf-8" },
+                                body: JSON.stringify({
+                                    "apptoken": apptoken,
+                                    "action": "getSites"
+                                })
+                                // headers:{'apptoken':apptoken}
+
                             });
-                            if (!response.ok) { //throw error if not ok
+                            response.then(response =>{
+                                        if (!response.ok) { //throw error if not ok
                                 throw new Error(`HTTP! error! status: ${response.status}`);
                             }
-                            const sitesJson = await response.json(); //in theory should have all our sites if response is correct
-                            console.log("Sharepoint sites are: ", sitesJson);
+                            response.json().then(sitesJson =>{
+                                    console.log("Sharepoint sites are: ", sitesJson);
 
                             const $dropdown = $('sitesDropdown');
                             $dropdown.empty();
@@ -679,16 +692,22 @@
                             sitesJson.value.forEach(site => {
                                 $dropdown.append($('<option').val(site.id).text(site.name || site.webUrl));
                             });
+                            })
+                            }); //in theory should have all our sites if response is correct
+                            
+                            
                         } catch (error) {
                             console.log("Error fetching sites: ", error);
                         }
-                    }
+                         })}
 
                     async function getMicrosoftAccessToken() {
                         try {
                             // Get the Client ID from your SharePoint handler or hardcode it here
-                            const clientIdUrl = "/_layouts/15/handler/APIHandler.ashx?endpoint=ClientID"; // adjust as needed
+                            const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
+                            
                             const clientId = await (await fetch(clientIdUrl)).text();
+                            console.log("client id is:", clientId);
 
                             const msalInstance = await msal.createStandardPublicClientApplication({
                                 auth: {
@@ -805,14 +824,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
                 _getAuth: async function () {
 
-                    let hostString = await (await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=ChatbotHostOverride")).text()
-                    let tenantId = await (await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=TenantID")).text()
-                    let secret = await (await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=SecretKey")).text()
+                    let hostString = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ChatbotHostOverride")).text()
+                    let tenantId = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=TenantID")).text()
+                    let secret = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=SecretKey")).text()
 
 
                     
 
-                        var url = Sharepoint._getPluginPath() + "Handler.ashx?endpoint=ClientID"
+                        var url = Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
                         //var id = await (await fetch(url)).text()
 
