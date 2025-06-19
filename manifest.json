@@ -1,5 +1,5 @@
 ﻿{
-  "Name": "MarvalSoftware.Plugins.Pushover",
+  "Name": "MarvalSoftware.Plugins.Sharepoint",
   "Organisation": "MarvalSoftware",
   "DisplayName": "@@PluginDisplayname",
   "Icon": "img/Pushover_16.png",
@@ -16,6 +16,6 @@
     "@@UserAPIKey",
     "@@APPToken"
   ],
-  "HtmlImportFile": "MarvalSoftware.Plugins.Pushover.html",
-  "TagName": "marvalsoftware-plugins-pushover"
+  "HtmlImportFile": "MarvalSoftware.Plugins.Sharepoint.html",
+  "TagName": "marvalsoftware-plugins-sharepoint"
 }
