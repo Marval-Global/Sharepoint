@@ -5,11 +5,7 @@
     "en-GB": {
       "PluginDisplayname": "Sharepoint",
       "UserAPIKey": "User API Key",
-      "APPToken": "App Token",
-      "PushoverErrorConfigurationTitle": "The following settings have not been configured:",
-      "PushoverErrorConfigurationFooter": "Please add these via the plugin page",
-      "PushoverErrorPopupTitle": "Invalid Pushover Configuration",
-      "PushoverNoItems": "No Items"
+      "ClientID": "Microsoft Application Client ID"
     }
   }]
 }
