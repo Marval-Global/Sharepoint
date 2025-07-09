@@ -225,6 +225,7 @@
 
     </div>
     <select id="sitesDropdown"><option>Loading!</option></select>
+    <button id="uploadFile">upload</button>
 
 
 </template>
@@ -613,6 +614,12 @@
 
                         }
 
+                        async function getAttachment() {
+                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment";
+                            let attachment = await (await fetch(url)).json();
+                            console.log("attachment", attachment);
+                        }
+
 
                         async function getLatestPluginVersion() {
 
@@ -644,15 +651,15 @@
                         
 
                         fetchSharePointSites();
-                        this._getAuth();
+                        //this._getAuth() 
                         this._setUpQuickMenu();
                         this._requestNumber = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getRequestNumber();
                         this._requestID = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log(MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage());
                         this._requestDescription = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestDescription;
                         this._contactEmail = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getContactPreferredEmail();
-                        addIconColumnFirst(this._getPluginPath() + "img/sharepoint_16.png", function ($row, index) {
-                            Sharepoint._popup();
+                        addIconColumnFirst(this._getPluginPath() + "img/sharepoint_16.png", function ($row, index, eventTarget) {
+                            Sharepoint._popup(eventTarget);
                             alert(`Clicked row ${index + 1}`);
                         });
 
@@ -660,14 +667,16 @@
 
 
                     }
+                    
 
                     async function fetchSharePointSites() {
+                        //Sharepoint._getAuth();
                          getMicrosoftAccessToken().then(apptoken =>{
-                            console.log("apptoken is:", apptoken);
+                           // console.log("apptoken is:", apptoken);
                         try {
                         //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
                             
-                            console.log("apptoken is:", apptoken);
+                          //  console.log("apptoken is:", apptoken);
                             const response = fetch(_fullPluginPathHandler,{
                                 method: "POST",
                                 "headers": [["content-type", "application/json"]],
@@ -685,12 +694,12 @@
                             response.json().then(sitesJson =>{
                                     console.log("Sharepoint sites are: ", sitesJson);
 
-                            const $dropdown = $('sitesDropdown');
+                            const $dropdown = $('#sitesDropdown');
                             $dropdown.empty();
                             $dropdown.append('<option value = "">-- Select a Site --</option>');
 
                             sitesJson.value.forEach(site => {
-                                $dropdown.append($('<option').val(site.id).text(site.name || site.webUrl));
+                                $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
                             });
                             })
                             }); //in theory should have all our sites if response is correct
@@ -756,7 +765,7 @@
                             if (typeof onClickCallback === 'function') {
                                 $icon.find('a.icon-link').on('click', function (e) {
                                     e.preventDefault();
-                                    onClickCallback($row, index);
+                                    onClickCallback($row, index, e.target);
                                 });
                             }
 
@@ -883,6 +892,46 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     
                 },
 
+                _uploadToSharepoint: function (sender, e) {
+                    e.preventDefault();
+
+                    var payload = {
+                        message: formulatedMessage,
+                        action: "SendSharepointMessage"
+                    }
+                    //if (window.top.document.getElementById("CheckBox").checked) {
+                    //    var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
+                    //    payload = {
+                    //        message: formulatedMessage,
+                    //        action: "SendSharepointMessage"
+                    //    }
+                    //} else {//not checked
+                    //    payload = {
+                    //        message: messageText,
+                    //        action: "SendSharepointMessage"
+                    //    }
+                    //}
+                    //console.log("We are here");
+
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=SendSharepointMessage",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        data: JSON.stringify(payload),
+                        success: function (result) {
+                            if (Object.keys(result).length > 0) {
+                                this._errorPopup(result);
+                            }
+                            else {
+                                this._popup();
+                            }
+                        }.bind(this)
+                    });
+                },
+
                 _getPluginPath: function () {
                     return this.attributes["data-pluginpath"].value;
                 },
@@ -944,8 +993,26 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     value = value.replace(/\n /, "\n");
                     element.value = value;
                 },
+                _getAttachment: async function () {
+                    try {
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment";
+                        console.log("url is", url);
+                        let attachment = await (await fetch(url)).json();
+                        console.log("attachment", attachment);
+                        return attachment;
+                    } catch(ex){
+            console.error("we have error", ex);
+                    }
+                    
+        },
 
-                _popup: function () {
+                _popup: function (eventTarget) {
+                    console.log(eventTarget);
+                    console.log(document.location.search);
+                    let url = (new URLSearchParams(window.top.location.search)).get("id");
+                    console.log(url);
+                    
+                    //let eventElement = eventTarget);
                     if (!this._pluginWindow) {
                         this._pluginWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
@@ -957,8 +1024,19 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             isResizable: true,
                             isMaximizable: true,
                             bodyElement: this
+
                         });
                         this._renderElement();
+                        
+                        this._getAttachment();
+
+
+                        //eventElement.parentElement.nextSibling.innerText;
+                        if (eventTarget != undefined) {
+                            console.log(eventTarget.parentElement.parentElement.nextSibling.innerText);
+                        }
+                        
+                        
                         //this._showGroups();
 
                         //this._getAllPages();
