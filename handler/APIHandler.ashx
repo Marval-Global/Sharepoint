@@ -30,6 +30,24 @@ public class Handler : PluginHandler
 
     }
 
+    public class fullResponse
+    {
+        public int responseCode { get; set; }//res code
+        public string responseDes { get; set; } //res desc
+        public string responseBody { get; set; } //res body
+    }
+
+    public class SharePointUploadResponse
+    {
+        public HttpStatusCode StatusCode { get; set; }
+        public string StatusDescription { get; set; }
+        public string Content { get; set; }
+        public bool IsSuccess { get; set; }
+        public string Error { get; set; }
+        public string ContentType { get; set; }
+        public WebHeaderCollection Headers { get; set; }
+    }
+
 
     private string APIKey { get; set; }
 
@@ -43,8 +61,8 @@ public class Handler : PluginHandler
 
     private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
     private string MarvalAPIKey { get { return this.GlobalSettings["@@MarvalAPIKey"]; } }
- 
-   
+
+
 
 
     private int MsmRequestNo { get; set; }
@@ -198,11 +216,60 @@ public class Handler : PluginHandler
         }
     }
 
+    private string ProcessRequest(HttpWebRequest request)
+    {
+        fullResponse myRes = new fullResponse();
+        try
+        {
+            //var resStatus = ((HttpWebResponse)request.WebResponse).StatusCode;
+            //request.Headers.Add("Authorization", "Bearer " + this.UserAPIKey);
+            HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+            var res = "";
+            var resStatus = ((HttpStatusCode)response.StatusCode);
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                res = reader.ReadToEnd();
+            }
+            HttpContext.Current.Response.StatusCode = (int)resStatus;
+            HttpContext.Current.Response.ContentType = "application/json";
+            HttpContext.Current.Response.Write(res);
+            HttpContext.Current.Response.End();
+            return null;
+
+        }
+        catch (WebException webEx)
+        {
+            var result = "";
+            var errStatus = ((HttpWebResponse)webEx.Response).StatusCode;
+            var errResp = webEx.Response;
+
+            //myRes.responseCode = Int32.Parse(errStatus.ToString());
+            Log.Information("err is" + errStatus.ToString());
+            myRes.responseDes = ((HttpWebResponse)errResp).StatusDescription;
+            var res = "";
+            using (StreamReader reader = new StreamReader(errResp.GetResponseStream()))
+            {
+                res = reader.ReadToEnd();
+            }
+            //myRes.responseBody = res;
+            HttpContext.Current.Response.StatusCode = (int)errStatus;
+            HttpContext.Current.Response.ContentType = "application/json";
+            HttpContext.Current.Response.Write(res);
+            HttpContext.Current.Response.End();
+
+            return null;
+
+        }
+    }
+
     public override void HandleRequest(HttpContext context)
     {
         var param = context.Request.HttpMethod;
         var browserObject = context.Request.Browser;
-            
+        HttpWebRequest httpWebRequest;
+        HttpWebRequest request;
+        string microsoftToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IkpWbzhtYVAyYkxZcndXQlo4cmFRVThSRGxfRGlHX1daZXY0bEZhSjNJLTQiLCJhbGciOiJSUzI1NiIsIng1dCI6Il9qTndqZVNudlRUSzhYRWRyNVFVUGtCUkxMbyIsImtpZCI6Il9qTndqZVNudlRUSzhYRWRyNVFVUGtCUkxMbyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85YmNhM2NkZS1iM2Y3LTRjOWQtYWU4NC1lYmNkZWUzODI5OTAvIiwiaWF0IjoxNzUyMDM4ODcyLCJuYmYiOjE3NTIwMzg4NzIsImV4cCI6MTc1MjA0Mzk2OSwiYWNjdCI6MCwiYWNyIjoiMSIsImFjcnMiOlsicDEiXSwiYWlvIjoiQVdRQW0vOFpBQUFBZTNKanZpWFYxSTQrOG9NWTF3cmJONDZuc0tTTEpib3hEVkVvc1U5bmx5K3BnRFdPcXliWFJYd3pTZVFVbUFzVnJWb002NUtOaDBDRi83NXE5Mmc5dnAxNTRVWTBYeFhyOVhFcmFQRTl5eitrWG1RU1FLaVVXNGUxa2lZaGpYSWQiLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik1hcnZhbCBBdXN0cmFsaWEgT2ZmaWNlIDM2NSBBZG1pbiIsImFwcGlkIjoiYjZhODQ5NzYtZDNiYy00ZjdkLWFlNDItYTUwNDcyYTY0MTE2IiwiYXBwaWRhY3IiOiIwIiwiZmFtaWx5X25hbWUiOiJOZ3V5ZW4iLCJnaXZlbl9uYW1lIjoiRHlsYW4iLCJpZHR5cCI6InVzZXIiLCJpcGFkZHIiOiI0LjE5Ni43Ni4yNTMiLCJuYW1lIjoiRHlsYW4gTmd1eWVuIiwib2lkIjoiZWRmYzJhOTYtMzFkNS00NGFkLTg3NGQtYjUzZGJkZTZjMmMyIiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0QTU1NjI2RDIiLCJyaCI6IjEuQVI4QTNqekttX2V6blV5dWhPdk43amdwa0FNQUFBQUFBQUFBd0FBQUFBQUFBQUJNQWZjZkFBLiIsInNjcCI6IkRpcmVjdG9yeS5SZWFkLkFsbCBEaXJlY3RvcnkuUmVhZFdyaXRlLkFsbCBHcm91cE1lbWJlci5SZWFkLkFsbCBHcm91cE1lbWJlci5SZWFkV3JpdGUuQWxsIE1haWwuU2VuZCBNYWlsLlNlbmQuU2hhcmVkIFNpdGVzLlJlYWQuQWxsIFNpdGVzLlJlYWRXcml0ZS5BbGwgU2l0ZXMuU2VsZWN0ZWQgVGVhbU1lbWJlci5SZWFkLkFsbCBUZWFtTWVtYmVyLlJlYWRXcml0ZS5BbGwgVGVhbU1lbWJlci5SZWFkV3JpdGVOb25Pd25lclJvbGUuQWxsIFVzZXIuUmVhZCBVc2VyLlJlYWRXcml0ZS5BbGwgVXNlckF1dGhlbnRpY2F0aW9uTWV0aG9kLlJlYWRXcml0ZS5BbGwgcHJvZmlsZSBvcGVuaWQgZW1haWwiLCJzaWQiOiIwMDRmYWU4OS00NmEwLTVlOWUtYjRmYy1iNDQxZjYxZGRkYjYiLCJzaWduaW5fc3RhdGUiOlsia21zaSJdLCJzdWIiOiIzTnRKMzZ4Y01HMWZ2cDFjeFRhblJjb3ZWU1YyU2ZJRjlHbE5ra3VHY1ZNIiwidGVuYW50X3JlZ2lvbl9zY29wZSI6IkVVIiwidGlkIjoiOWJjYTNjZGUtYjNmNy00YzlkLWFlODQtZWJjZGVlMzgyOTkwIiwidW5pcXVlX25hbWUiOiJkeWxhbi5uZ3V5ZW5AbWFydmFsLmNvbS5hdSIsInVwbiI6ImR5bGFuLm5ndXllbkBtYXJ2YWwuY29tLmF1IiwidXRpIjoiaFp2VU1KWWFFRWE0MlMtbE91OHRBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il0sInhtc19mdGQiOiJvUDluay0wd0NfQkxERENoUTE3eHowMmdTN1hfSkJ0R1JZUFpvY0Q5VkRZQmMzZGxaR1Z1WXkxa2MyMXoiLCJ4bXNfaWRyZWwiOiIxIDI4IiwieG1zX3N0Ijp7InN1YiI6ImZDMDlXY1VoY2R1MUZyWlAwTVFDaFo1WFA0ZWZBZFFWV1pncURDd0cyV1kifSwieG1zX3RjZHQiOjE1MDY1ODY4MjJ9.sZpBQTcv97kTfASCAzT3iH-QSqEFVmokAPXp62yYAHWmvo6AxDDeyG7HujVfA5w95dtMPga_ouFV4kMSwZTibhvVYuvJPXW_-JXU4XLOC5wpdf_g6BLnM8LIb9XC5idxyS6X3KnjyPL3pchvr21IbZfXm4OtTAR7QJtdLLuVOXKw7UwMRDI1hbhB-2gm9vVHa8ahdL1C19I2K4q8L7rDbwqmRLezTQu1w3BtL4BR4Er_EZSJGyHUTrjhb12eShWIry2LkSMGibPSlal_CHcVjfjcGdILYrvmWe5zd9MFfAGSI52-bhTyLq8cNYQviBAPobHEOoIDsL2FomymL0pkHA";
+
         //MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
         //lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
@@ -212,17 +279,18 @@ public class Handler : PluginHandler
         {
 
             case "GET":
-                    MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
-lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
+                MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
+                lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
-this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
+                this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
                 // Trace.Write("paramval is" + getParamVal);
                 // Log.information
+                Log.Information("paramval is" + getParamVal);
                 if (getParamVal == "none")
                 {
 
-             
+
 
                     context.Response.Write("Hi");
                 }
@@ -232,7 +300,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 // }
                 else if (getParamVal == "ChatbotHostOverride")
                 {
-         context.Response.Write("Hi");
+                    context.Response.Write("Hi");
                 }
                 else if (getParamVal == "ClientID")
                 {
@@ -296,10 +364,58 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 else if (getParamVal == "SecretKey")
                 {
                     context.Response.Write("Hi");
+                }else if (getParamVal == "getAttachment")
+                {
+                    try
+                    {
+                        // Step 1: Get the attachment from the MSM API
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/3/attachments/1/content?mode=Attachment";
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            // Step 2: Upload to SharePoint
+                            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/testing.txt:/content";
+                            // Create request for SharePoint upload
+                            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(sharePointUrl);
+                            sharePointRequest.Method = "PUT";
+                            sharePointRequest.Headers["Authorization"] = "Bearer " + microsoftToken; // Use Graph API token
+
+                            sharePointRequest.ContentType = "application/octet-stream";
+                            sharePointRequest.ContentLength = attachmentData.Length;
+                            Log.Information("data len " + attachmentData.Length);
+                            // Write the attachment data to the request stream
+                            using (Stream requestStream = sharePointRequest.GetRequestStream())
+                            {
+                                requestStream.Write(attachmentData, 0, attachmentData.Length);
+                            }
+                            // Execute the SharePoint upload request
+                            var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                            context.Response.Write("File uploaded successfully");
+                        }
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
                 }
+
+
                 else
                 {
-                    context.Response.Write("No valid parameter requested");
+                    context.Response.Write("Something is not working");
                 }
                 break;
             case "POST":
@@ -310,7 +426,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 //     return;
                 // }
                 string json;
-    
+
                 using (var reader = new StreamReader(context.Request.InputStream))
                 {
                     json = reader.ReadToEnd();
@@ -319,7 +435,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 RequestData data;
                 try
                 {
-             
+
                     data = JsonConvert.DeserializeObject<RequestData>(json);
                 }
                 catch (JsonException)
@@ -335,7 +451,7 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
 
 
                 if (action == "getSites"){
-                  
+
                     Log.Information("apptoken is: " + apptoken);
                     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", apptoken);
                     context.Response.Write(ex);
@@ -351,7 +467,153 @@ this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
                 break;
         }
     }
+    private string ProcessRequest2(HttpWebRequest request)
+    {
+        try
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(responseStream))
+                    {
+                        string responseText = reader.ReadToEnd();
+                        // Log the response status
+                        Log.Information("HTTP Status: {response.StatusCode} - {response.StatusDescription}");
+                        // For SharePoint uploads, successful responses are usually 200 or 201
+                        if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+                        {
+                            //Log.Information("SharePoint upload successful");
+                            return responseText;
+                        }
+                        else
+                        {
+                            // Log.Warning($"Unexpected status code: {response.StatusCode}");
+                            return responseText;
+                        }
+                    }
+                }
+            }
+        }
+        catch (WebException webEx)
+        {
+            // Handle web-specific errors
+            if (webEx.Response != null)
+            {
+                using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (Stream errorStream = errorResponse.GetResponseStream())
+                    {
+                        using (StreamReader errorReader = new StreamReader(errorStream))
+                        {
+                            string errorText = errorReader.ReadToEnd();
+                            Log.Error("Web Exception - Status: {errorResponse.StatusCode}, Error:" + errorText);
+                            throw new Exception("SharePoint API Error: {errorResponse.StatusCode} - " + errorText);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Log.Error("Web Exception without response: "+webEx.Message);
+                throw new Exception("Network Error: {webEx.Message}");
+                return "";
+            }
+        }
+        catch (Exception ex)
+        {
+            return "";
+            Log.Error("General Exception in ProcessRequest: " +ex.Message);
+            throw;
+        }
+        return "";
+    }
 
+    // Alternative version that returns more detailed response info
+    private SharePointUploadResponse ProcessRequestDetailed(HttpWebRequest request)
+    {
+        try
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(responseStream))
+                    {
+                        string responseText = reader.ReadToEnd();
+                        return new SharePointUploadResponse
+                        {
+                            StatusCode = response.StatusCode,
+                            StatusDescription = response.StatusDescription,
+                            Content = responseText,
+                            IsSuccess = response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created,
+                            ContentType = response.ContentType,
+                            Headers = response.Headers
+                        };
+                    }
+                }
+            }
+        }
+        catch (WebException webEx)
+        {
+            if (webEx.Response != null)
+            {
+                using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (Stream errorStream = errorResponse.GetResponseStream())
+                    {
+                        using (StreamReader errorReader = new StreamReader(errorStream))
+                        {
+                            string errorText = errorReader.ReadToEnd();
+                            return new SharePointUploadResponse
+                            {
+                                StatusCode = errorResponse.StatusCode,
+                                StatusDescription = errorResponse.StatusDescription,
+                                Content = errorText,
+                                IsSuccess = false,
+                                Error = "SharePoint API Error: {errorResponse.StatusCode} - " + errorText
+                            };
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return new SharePointUploadResponse
+                {
+                    IsSuccess = false,
+                    Error = "Network Error: "+webEx.Message
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            return new SharePointUploadResponse
+            {
+                IsSuccess = false,
+                Error = "General Exception: "+ex.Message
+            };
+        }
+    }
+    // Helper method to process request and return byte array
+    private byte[] ProcessRequestAsBytes(HttpWebRequest request)
+    {
+        try
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream responseStream = response.GetResponseStream())
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                responseStream.CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Error processing request as bytes: " + ex.Message, ex);
+            return null;
+        }
+    }
     private string GetDBString()
     {
         string connectionString = "";
