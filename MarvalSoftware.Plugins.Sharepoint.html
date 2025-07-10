@@ -18,6 +18,9 @@
             font-weight: normal;
             cursor: pointer;
         }
+        #uploadFile{
+            cursor:pointer;
+        }
 
         .LinkedProjectsHeader {
             /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
@@ -225,6 +228,7 @@
 
     </div>
     <select id="sitesDropdown"><option>Loading!</option></select>
+    
     <button id="uploadFile">upload</button>
 
 
@@ -306,6 +310,7 @@
                 _requestActionMessageID: null,
                 _rowIndex: null,
                 _attachmentName: null,
+                _microsoftToken: null,
 
 
 
@@ -672,44 +677,48 @@
 
                     async function fetchSharePointSites() {
                         //Sharepoint._getAuth();
-                         getMicrosoftAccessToken().then(apptoken =>{
+                        console.log("we are calling fetchsharepointsites");
+                         let apptoken = await getMicrosoftAccessToken()
                            // console.log("apptoken is:", apptoken);
                         try {
                         //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
                             
                           //  console.log("apptoken is:", apptoken);
-                            const response = fetch(_fullPluginPathHandler,{
+                            const response = await fetch(_fullPluginPathHandler+"?endpoint=getSites",{
                                 method: "POST",
                                 "headers": [["content-type", "application/json"]],
                                 body: JSON.stringify({
                                     "apptoken": apptoken,
-                                    action: "getSites"
+                                    endpoint: "getSites"
                                 })
                                 // headers:{'apptoken':apptoken}
 
                             });
-                            response.then(response =>{
-                                        if (!response.ok) { //throw error if not ok
-                                throw new Error(`HTTP! error! status: ${response.status}`);
-                            }
-                            response.json().then(sitesJson =>{
+                            let sitesJson = await response.json()
+                            
                                     console.log("Sharepoint sites are: ", sitesJson);
 
-                            const $dropdown = $('#sitesDropdown');
+                                console.log("we should be appending sites now");
+                                let $dropdown = $('#sitesDropdown');
+                                if ($dropdown) {
+                                    console.log("sites dropdown does exist");
+                                }
                             $dropdown.empty();
                             $dropdown.append('<option value = "">-- Select a Site --</option>');
 
-                            sitesJson.value.forEach(site => {
+                                sitesJson.value.forEach(site => {
+                                    console.log("site here is", site);
                                 $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
                             });
-                            })
-                            }); //in theory should have all our sites if response is correct
+                                console.log("appending should finish!");
+                            
+                            ; //in theory should have all our sites if response is correct
                             
                             
                         } catch (error) {
                             console.log("Error fetching sites: ", error);
                         }
-                         })}
+                         }
 
                     async function getMicrosoftAccessToken() {
                         try {
@@ -733,6 +742,7 @@
                             const response = await msalInstance.loginPopup(loginRequest);
 
                             console.log("Logged in successfully, access token:", response.accessToken);
+                            Sharepoint._microsoftToken = response.accessToken;
                             return response.accessToken;
 
                         } catch (err) {
@@ -964,8 +974,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
 
                 _renderElement: function () {
+                    var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
                     var template = document.querySelector("template").content;
                     this._element = window.top.document.importNode(template, true);
+                    this._uploadMessage = this._element.querySelector("#uploadFile");
+                    if (this._uploadMessage) {
+                        console.log("uploadmsg does exist");
+                    }
+                    eventManager.addHandler(this._uploadMessage, "click", this._getAttachment, this);
 
 
                     // this._body = this._element.querySelector("textarea");
@@ -994,16 +1010,36 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     value = value.replace(/\n /, "\n");
                     element.value = value;
                 },
-                _getAttachment: async function () {
+                _getAttachment: async function (sender, e) {
+                    e.preventDefault(); //prevent default everytime
                     try {
                         //console.log("req id is", reqId, "identifier is ", this._rowIndex);
+                        console.log(" we are calling get attachment now");
                         let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
+                        console.log("we are going to this attachment url ", url);
+                        let payLoad = {
+                            microsoftToken : Sharepoint._microsoftToken
+                        }
                         console.log("url is", url);
-                        let attachment = await (await fetch(url)).json();
-                        console.log("attachment", attachment);
-                        return attachment;
+                        const result = await fetch(url, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                            body: JSON.stringify(payLoad)
+                        });
+                        if (!result.ok) {
+                            const errorText = await result.text();
+                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
+                        }
+
+                        const attachment = await result.json();
+                        console.log("attachment feedback", attachment);
+
+                        //return attachment;
+
                     } catch(ex){
             console.error("we have error", ex);
                     }
@@ -1032,7 +1068,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         this._renderElement();
                         
-                        this._getAttachment();
+                        //this._getAttachment();
 
 
                         //eventElement.parentElement.nextSibling.innerText;
