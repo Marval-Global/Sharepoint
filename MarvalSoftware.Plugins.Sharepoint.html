@@ -304,6 +304,8 @@
                 _contactEmail: null,
                 _fullPluginPathHandler: null,
                 _requestActionMessageID: null,
+                _rowIndex: null,
+                _attachmentName: null,
 
 
 
@@ -614,11 +616,7 @@
 
                         }
 
-                        async function getAttachment() {
-                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment";
-                            let attachment = await (await fetch(url)).json();
-                            console.log("attachment", attachment);
-                        }
+                        
 
 
                         async function getLatestPluginVersion() {
@@ -659,8 +657,11 @@
                         this._requestDescription = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestDescription;
                         this._contactEmail = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getContactPreferredEmail();
                         addIconColumnFirst(this._getPluginPath() + "img/sharepoint_16.png", function ($row, index, eventTarget) {
+                            Sharepoint._rowIndex = index + 1;
+                            Sharepoint._attachmentName = $row.attr("title");
                             Sharepoint._popup(eventTarget);
                             alert(`Clicked row ${index + 1}`);
+                            //Sharepoint._rowIndex = index;
                         });
 
                         //displayGroups();
@@ -995,7 +996,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
                 _getAttachment: async function () {
                     try {
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment";
+                        //console.log("req id is", reqId, "identifier is ", this._rowIndex);
+                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                        console.log("req id is", reqId, "identifier is ", this._rowIndex);
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
                         console.log("url is", url);
                         let attachment = await (await fetch(url)).json();
                         console.log("attachment", attachment);
