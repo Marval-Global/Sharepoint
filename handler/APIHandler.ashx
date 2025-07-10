@@ -273,16 +273,18 @@ public class Handler : PluginHandler
         //lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
         //this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
-
+        var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
+        Log.Information("endpoint is, ", getParamVal);
         switch (param)
         {
+
 
             case "GET":
                 MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
                 lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
                 this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
-                var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
+                //var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
                 // Trace.Write("paramval is" + getParamVal);
                 // Log.information
                 Log.Information("paramval is" + getParamVal);
@@ -363,13 +365,94 @@ public class Handler : PluginHandler
                 else if (getParamVal == "SecretKey")
                 {
                     context.Response.Write("Hi");
-                }else if (getParamVal == "getAttachment")
+                }//else if (getParamVal == "getAttachment")
+                 //{
+                 //    try
+                 //    {
+                 //        string requestBody;
+                 //        var identifer = context.Request.QueryString["identifier"];
+                 //        var reqId = context.Request.QueryString["reqId"];
+                 //        var attachmentName = context.Request.QueryString["attachmentName"];
+                 //        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                 //        using(var reader = new StreamReader(context.Request.InputStream))
+                 //        {
+                 //            requestBody = reader.ReadToEnd();//read contents from body in frontend
+                 //        }
+                 //        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+
+                //        // Step 1: Get the attachment from the MSM API
+                //        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/"+reqId+"/attachments/"+identifer+"/content?mode=Attachment";
+                //        Log.Information("url here is" + attachmentUrl);
+                //        httpWebRequest = BuildRequest(attachmentUrl);
+                //        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                //        httpWebRequest.Method = "GET";
+                //        // Get the attachment data as byte array
+                //        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                //        Log.Information("we are at line 367");
+
+                //        if (attachmentData != null && attachmentData.Length > 0)
+                //        {
+                //            // Step 2: Upload to SharePoint
+                //            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/"+attachmentName+":/content";
+                //            // Create request for SharePoint upload
+                //            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(sharePointUrl);
+                //            sharePointRequest.Method = "PUT";
+                //            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+
+                //            sharePointRequest.ContentType = "application/octet-stream";
+                //            sharePointRequest.ContentLength = attachmentData.Length;
+                //            Log.Information("data len " + attachmentData.Length);
+                //            // Write the attachment data to the request stream
+                //            using (Stream requestStream = sharePointRequest.GetRequestStream())
+                //            {
+                //                requestStream.Write(attachmentData, 0, attachmentData.Length);
+                //            }
+                //            // Execute the SharePoint upload request
+                //            var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                //            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                //            context.Response.Write("File uploaded successfully");
+                //        }
+                //        else
+                //        {
+                //            Log.Warning("No attachment data received from MSM API");
+                //            context.Response.Write("No attachment data found");
+                //        }
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        Log.Error("Exception during attachment upload: " + e.Message, e);
+                //        context.Response.Write("Error uploading file: " + e.Message);
+                //    }
+                //}
+
+
+                else
                 {
+                    context.Response.Write("Something is not working");
+                }
+                break;
+            case "POST":
+                Log.Information("we are at 434, with getparamval" + getParamVal);
+
+                if (getParamVal == "getAttachment")
+                {
+                    Log.Information("we are in if");
+
                     try
                     {
+                        Log.Information("we are in try in  attachment");
+
+                        string requestBody;
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
                         var attachmentName = context.Request.QueryString["attachmentName"];
+                        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                        using(var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            requestBody = reader.ReadToEnd();//read contents from body in frontend
+                        }
+                        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+
                         // Step 1: Get the attachment from the MSM API
                         string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/"+reqId+"/attachments/"+identifer+"/content?mode=Attachment";
                         Log.Information("url here is" + attachmentUrl);
@@ -383,11 +466,12 @@ public class Handler : PluginHandler
                         if (attachmentData != null && attachmentData.Length > 0)
                         {
                             // Step 2: Upload to SharePoint
+                            string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
                             string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/"+attachmentName+":/content";
                             // Create request for SharePoint upload
                             HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(sharePointUrl);
                             sharePointRequest.Method = "PUT";
-                            sharePointRequest.Headers["Authorization"] = "Bearer " + microsoftToken; // Use Graph API token
+                            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
 
                             sharePointRequest.ContentType = "application/octet-stream";
                             sharePointRequest.ContentLength = attachmentData.Length;
@@ -398,9 +482,10 @@ public class Handler : PluginHandler
                                 requestStream.Write(attachmentData, 0, attachmentData.Length);
                             }
                             // Execute the SharePoint upload request
-                            var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                            //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
                             //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
-                            context.Response.Write("File uploaded successfully");
+                            Log.Information("we are at line 486");
+                            context.Response.Write(this.ProcessRequest2(sharePointRequest));
                         }
                         else
                         {
@@ -414,59 +499,37 @@ public class Handler : PluginHandler
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
                 }
+                else if (getParamVal == "getSites"){
+                    string json;
 
+                    using (var reader = new StreamReader(context.Request.InputStream))
+                    {
+                        json = reader.ReadToEnd();
+                    }
 
-                else
-                {
-                    context.Response.Write("Something is not working");
-                }
-                break;
-            case "POST":
-                // if (!context.Request.ContentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
-                // {
-                //     context.Response.StatusCode = 415;
-                //     context.Response.End();
-                //     return;
-                // }
-                string json;
+                    RequestData data;
+                    try
+                    {
 
-                using (var reader = new StreamReader(context.Request.InputStream))
-                {
-                    json = reader.ReadToEnd();
-                }
-
-                RequestData data;
-                try
-                {
-
-                    data = JsonConvert.DeserializeObject<RequestData>(json);
-                }
-                catch (JsonException)
-                {
-                    context.Response.StatusCode = 400; // Bad Request
-                    context.Response.Write("Invalid JSON");
-                    context.Response.End();
-                    return;
-                }
-                var action = data.action;
-                var apptoken = data.apptoken;
-                Log.Information("data is" + data);
-
-
-                if (action == "getSites"){
+                        data = JsonConvert.DeserializeObject<RequestData>(json);
+                    }
+                    catch (JsonException)
+                    {
+                        context.Response.StatusCode = 400; // Bad Request
+                        context.Response.Write("Invalid JSON");
+                        context.Response.End();
+                        return;
+                    }
+                    //var action = data.action;
+                    var apptoken = data.apptoken;
+                    Log.Information("apptoken is", apptoken);
+                    Log.Information("data is" + data);
 
                     Log.Information("apptoken is: " + apptoken);
                     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", apptoken);
                     context.Response.Write(ex);
                 }
-                else if (action == "")
-                {
 
-                }
-                else
-                {
-
-                }
                 break;
         }
     }
@@ -482,7 +545,7 @@ public class Handler : PluginHandler
                     {
                         string responseText = reader.ReadToEnd();
                         // Log the response status
-                        Log.Information("HTTP Status: {response.StatusCode} - {response.StatusDescription}");
+                        //Log.Information("HTTP Status:"+ response.StatusCode +response.StatusDescription);
                         // For SharePoint uploads, successful responses are usually 200 or 201
                         if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
                         {
