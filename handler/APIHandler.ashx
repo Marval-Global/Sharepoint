@@ -567,56 +567,70 @@ public class Handler : PluginHandler
                     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", apptoken);
                     context.Response.Write(ex);
                 }
-                //}else if (getParamVal == "createFolder")
-                //{
-                //    Log.Information("we are in if");
+                else if (getParamVal == "createFolder")
+                {
+                    Log.Information("Entering 'createFolder' block.");
 
-                //    try
-                //    {
-                //        Log.Information("we are in try in create folder");
+                    try
+                    {
+                        Log.Information("Processing folder creation...");
 
-                //        string requestBody;
-                //        var identifer = context.Request.QueryString["identifier"];
-                //        var reqId = context.Request.QueryString["reqId"];
-                //        var attachmentName = context.Request.QueryString["attachmentName"];
-                //        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
-                //        using(var reader = new StreamReader(context.Request.InputStream))
-                //        {
-                //            requestBody = reader.ReadToEnd();//read contents from body in frontend
-                //        }
-                //        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+                        // Extract query parameters
+                        var identifier = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+                        var attachmentName = context.Request.QueryString["attachmentName"];
 
-                //            //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
-                //            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/"+attachmentName+":/content";
-                //            // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
-                //            string url4 = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
-                //            string url3 = "https://graph.microsoft.com/v1.0/sites/"+parsedBody.siteId+"/drive/root:/" + parsedBody.folderId +"/"+attachmentName+":/content";
-                //            // Create request for SharePoint upload
-                //            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(sharePointUrl);
-                //            sharePointRequest.Method = "PUT";
-                //            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+                        // Read JSON body from request
+                        string requestBody;
+                        using (var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            requestBody = reader.ReadToEnd();
+                        }
 
-                //            sharePointRequest.ContentType = "application/octet-stream";
+                        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+                        string siteId = parsedBody.siteId;
+                        string folderId = parsedBody.folderId;
+                        string microsoftToken2 = parsedBody.microsoftToken;
 
-                //            // Write the attachment data to the request stream
-                //            using (Stream requestStream = sharePointRequest.GetRequestStream())
-                //            {
-                //                requestStream.Write(attachmentData, 0, attachmentData.Length);
-                //            }
-                //            // Execute the SharePoint upload request
-                //            //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
-                //            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
-                //            Log.Information("we are at line 486");
-                //            context.Response.Write(this.ProcessRequest2(sharePointRequest));
+                        // Create SharePoint folder creation URL
+                        string url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/items/root/children";
+
+                        // Setup request to create folder
+                        HttpWebRequest request2 = (HttpWebRequest)WebRequest.Create(url);
+                        request2.Method = "POST";
+                        request2.Headers["Authorization"] = "Bearer " + microsoftToken2;
+                        request2.ContentType = "application/json";
+
+                        // Build request body to create folder
+                        var body = new Dictionary<string, object>
+{
+    { "name", attachmentName },
+    { "folder", new { } },
+    { "@microsoft.graph.conflictBehavior", "rename" }
+};
 
 
-                //    }
-                //    catch (Exception e)
-                //    {
-                //        Log.Error("Exception during attachment upload: " + e.Message, e);
-                //        context.Response.Write("Error uploading file: " + e.Message);
-                //    }
-        
+
+                        string jsonBody = JsonConvert.SerializeObject(body);
+
+                        using (var streamWriter = new StreamWriter(request2.GetRequestStream()))
+                        {
+                            streamWriter.Write(jsonBody);
+                        }
+
+                        // Send request to Graph API
+                        var responseContent = this.ProcessRequest2(request2);
+                        Log.Information("Folder created successfully.");
+                        context.Response.Write(responseContent);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during folder creation: " + e.Message, e);
+                        context.Response.Write("Error creating folder: " + e.Message);
+                    }
+                }
+
+                
 
         break;
     }
