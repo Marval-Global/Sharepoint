@@ -228,6 +228,7 @@
 
     </div>
     <select id="sitesDropdown"><option>Loading!</option></select>
+    <select id="foldersDropdown"><option>Still loading!</option></select>
     
     <button id="uploadFile">upload</button>
 
@@ -661,6 +662,17 @@
                         console.log(MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage());
                         this._requestDescription = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestDescription;
                         this._contactEmail = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getContactPreferredEmail();
+
+                        //let foldersDropdown = document.getElementById("foldersDropdown");
+                        //if (!foldersDropdown) {
+                        //    console.log("does not exist");
+                        //}
+
+                        //document.getElementById("foldersDropdown").addEventListener("click", function (e) {
+                        //    getAllFolders(e.target.value);
+                        //});
+
+
                         addIconColumnFirst(this._getPluginPath() + "img/sharepoint_16.png", function ($row, index, eventTarget) {
                             Sharepoint._rowIndex = index + 1;
                             Sharepoint._attachmentName = $row.attr("title");
@@ -672,6 +684,52 @@
                         //displayGroups();
 
 
+                    }
+
+                    async function getAllFolders(siteId) {
+                        //Sharepoint._getAuth();
+                        console.log("we are calling GETALLFOLDERS");
+                        let apptoken = Sharepoint.microsoftToken;
+                        console.log("apptokenhere is ", apptoken);
+                        // console.log("apptoken is:", apptoken);
+                        try {
+                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+
+                            //  console.log("apptoken is:", apptoken);
+                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
+                                method: "POST",
+                                "headers": [["content-type", "application/json"]],
+                                body: JSON.stringify({
+                                    "apptoken": apptoken,
+                                    "siteId": siteId
+                                })
+                                // headers:{'apptoken':apptoken}
+
+                            });
+                            let foldersJson = await response.json(); //response promise
+
+                            console.log("All folders are: ", foldersJson);
+
+                            console.log("we should be appending folders now");
+                            let $dropdown = $('#foldersDropdown');
+                            if ($dropdown) {
+                                console.log("folders dropdown does exist");
+                            }
+                            $dropdown.empty();
+                            $dropdown.append('<option value = "">-- Select a Folder --</option>');
+
+                            sitesJson.value.forEach(site => {
+                                console.log("folder here is", site);
+                                $dropdown.append($('<option>').val(site.id).text(site.name));
+                            });
+                            console.log("appending should finish!");
+
+                            ; //in theory should have all our sites if response is correct
+
+
+                        } catch (error) {
+                            console.log("Error fetching sites: ", error);
+                        }
                     }
                     
 
@@ -978,10 +1036,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     var template = document.querySelector("template").content;
                     this._element = window.top.document.importNode(template, true);
                     this._uploadMessage = this._element.querySelector("#uploadFile");
+                    this._foldersElement = this._element.querySelector("#foldersDropdown");
+                    //eventManager.addHandler(this.folderSelected, "input", this._, this);
+
+
+
                     if (this._uploadMessage) {
                         console.log("uploadmsg does exist");
                     }
                     eventManager.addHandler(this._uploadMessage, "click", this._getAttachment, this);
+                    //let siteId = 
+                    //eventManager.addHandler(this._foldersElement, "input", this._getAllFolders(), this);
 
 
                     // this._body = this._element.querySelector("textarea");
@@ -999,6 +1064,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this.groupSelected = this._element.querySelector("#groupsDropdown");
                     eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
 
+                    this.siteSelected = this._element.querySelector("#sitesDropdown");
+                    eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
+                    eventManager.addHandler(this.siteSelected, "input", function (e) {
+                        this._getAllFolders(e.value);
+                    }, this); //should be appending all folders now
+
+                    
 
                     this.appendChild(this._element);
                 },
@@ -1336,6 +1408,57 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             this._clearIncidents();
                         }.bind(this)
                     });
+                },
+
+                /** */
+                                        
+                _getAllFolders: async function(siteId) {
+                        //Sharepoint._getAuth();
+                        console.log("we are calling GETALLFOLDERS");
+                    let apptoken = Sharepoint._microsoftToken;
+
+                   console.log("apptoken is:", apptoken);
+                try {
+                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+
+                            //  console.log("apptoken is:", apptoken);
+                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
+                                method: "POST",
+                                "headers": [["content-type", "application/json"]],
+                                body: JSON.stringify({
+                                    "apptoken": apptoken,
+                                    "siteId": siteId
+                                })
+                                // headers:{'apptoken':apptoken}
+
+                            });
+                    let foldersJson = await response.json(); //response promise
+        
+                            console.log("All folders are: ", foldersJson);
+
+                            console.log("we should be appending folders now");
+                            let $dropdown = $('#foldersDropdown');
+                            if($dropdown) {
+                                console.log("folders dropdown does exist");
+                            }
+                    $dropdown.empty();
+                            $dropdown.append('<option value = "">-- Select a Folder --</option>');
+
+                            foldersJson.value.forEach(site => {
+                                console.log("folder here is", site);
+                                $dropdown.append($('<option>').val(site.id).text(site.name));
+                            });
+                            console.log("appending should finish!");
+        
+                    ; //in theory should have all our sites if response is correct
+
+
+                } catch (error) {
+                    console.log("Error fetching sites: ", error);
+                }
+                },
+                _printSiteId: function (e) {
+                    console.log("site id ", e.value);
                 },
 
                 _getAllIncindentUpdates: function () {
