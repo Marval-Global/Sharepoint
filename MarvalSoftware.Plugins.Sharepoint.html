@@ -622,7 +622,7 @@
 
                         }
 
-                        
+
 
 
                         async function getLatestPluginVersion() {
@@ -652,10 +652,10 @@
                         });
                     }
                     else if (!currentUrl.includes("Plugin.aspx")) {
-                        
+
 
                         fetchSharePointSites();
-                        //this._getAuth() 
+                        //this._getAuth()
                         this._setUpQuickMenu();
                         this._requestNumber = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getRequestNumber();
                         this._requestID = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
@@ -731,18 +731,18 @@
                             console.log("Error fetching sites: ", error);
                         }
                     }
-                    
+
 
                     async function fetchSharePointSites() {
                         //Sharepoint._getAuth();
                         console.log("we are calling fetchsharepointsites");
-                         let apptoken = await getMicrosoftAccessToken()
-                           // console.log("apptoken is:", apptoken);
+                        let apptoken = await getMicrosoftAccessToken()
+                        // console.log("apptoken is:", apptoken);
                         try {
-                        //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-                            
-                          //  console.log("apptoken is:", apptoken);
-                            const response = await fetch(_fullPluginPathHandler+"?endpoint=getSites",{
+                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+
+                            //  console.log("apptoken is:", apptoken);
+                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
                                 method: "POST",
                                 "headers": [["content-type", "application/json"]],
                                 body: JSON.stringify({
@@ -753,36 +753,36 @@
 
                             });
                             let sitesJson = await response.json()
-                            
-                                    console.log("Sharepoint sites are: ", sitesJson);
 
-                                console.log("we should be appending sites now");
-                                let $dropdown = $('#sitesDropdown');
-                                if ($dropdown) {
-                                    console.log("sites dropdown does exist");
-                                }
+                            console.log("Sharepoint sites are: ", sitesJson);
+
+                            console.log("we should be appending sites now");
+                            let $dropdown = $('#sitesDropdown');
+                            if ($dropdown) {
+                                console.log("sites dropdown does exist");
+                            }
                             $dropdown.empty();
                             $dropdown.append('<option value = "">-- Select a Site --</option>');
 
-                                sitesJson.value.forEach(site => {
-                                    console.log("site here is", site);
+                            sitesJson.value.forEach(site => {
+                                console.log("site here is", site);
                                 $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
                             });
-                                console.log("appending should finish!");
-                            
+                            console.log("appending should finish!");
+
                             ; //in theory should have all our sites if response is correct
-                            
-                            
+
+
                         } catch (error) {
                             console.log("Error fetching sites: ", error);
                         }
-                         }
+                    }
 
                     async function getMicrosoftAccessToken() {
                         try {
                             // Get the Client ID from your SharePoint handler or hardcode it here
                             const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-                            
+
                             const clientId = await (await fetch(clientIdUrl)).text();
                             console.log("client id is:", clientId);
 
@@ -907,66 +907,71 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let secret = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=SecretKey")).text()
 
 
-                    
 
-                        var url = Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
-                        //var id = await (await fetch(url)).text()
+                    var url = Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
-                        const msalInstance = await msal.createStandardPublicClientApplication({
-                            auth: {
-                                clientId: "b6a84976-d3bc-4f7d-ae42-a50472a64116",
-                                authority: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
-                            },
-                        });
+                    //var id = await (await fetch(url)).text()
 
-                        var loginRequest = {
-                            scopes: ["https://graph.microsoft.com/.default"]
-                        };
+                    const msalInstance = await msal.createStandardPublicClientApplication({
+                        auth: {
+                            clientId: "b6a84976-d3bc-4f7d-ae42-a50472a64116",
+                            authority: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+                        },
+                    });
+
+                    var loginRequest = {
+                        scopes: ["https://graph.microsoft.com/.default"]
+                    };
+
+                    try {
+                        var response = await msalInstance.loginPopup(loginRequest);
 
                         try {
-                            var response = await msalInstance.loginPopup(loginRequest);
+                            const result = await (await fetch("https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '" + Sharepoint._contactEmail + "'", {
 
-                            try {
-                                const result = await (await fetch("https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '" + Sharepoint._contactEmail + "'", {
+                                method: "GET",
+                                headers: new Headers({
+                                    "Authorization": "Bearer " + response.accessToken,
+                                })
+                            })).json()
 
-                                    method: "GET",
-                                    headers: new Headers({
-                                        "Authorization": "Bearer " + response.accessToken,
-                                    })
-                                })).json()
+                            console.log(response.accessToken);
 
-                                console.log(response.accessToken);
+                            if (result.value.length < 1) {
+                                throw Error("Search for contact returned no results.")
+                            } else {
 
-                                if (result.value.length < 1) {
-                                    throw Error("Search for contact returned no results.")
-                                } else {
-
-                                }
-
-                            } catch (err) {
-                                $("#SharepointError").remove();
-                                $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to find a Sharepoint contact for " + Sharepoint._contactEmail + "</p></div>")
-                                console.error("Sharepoint search error:\n", err)
-                                $("*").remove(".chatbot-container")
                             }
 
                         } catch (err) {
                             $("#SharepointError").remove();
-                            $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to authenticate with Microsoft</p></div>")
+                            $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to find a Sharepoint contact for " + Sharepoint._contactEmail + "</p></div>")
+                            console.error("Sharepoint search error:\n", err)
                             $("*").remove(".chatbot-container")
-                            console.error("MS Auth error:\n", err)
                         }
 
-                    
+                    } catch (err) {
+                        $("#SharepointError").remove();
+                        $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to authenticate with Microsoft</p></div>")
+                        $("*").remove(".chatbot-container")
+                        console.error("MS Auth error:\n", err)
+                    }
+
+
                 },
 
                 _uploadToSharepoint: function (sender, e) {
                     e.preventDefault();
 
+                    let sitesDropdown = $("#sitesDropdown");
+                    let foldersDropdown = $("#foldersDropdown");
+
                     var payload = {
                         message: formulatedMessage,
-                        action: "SendSharepointMessage"
+                        action: "SendSharepointMessage",
+                        //siteId: sitesDropdown.val(),
+                        // folderId: foldersDropdown.val() //jquery is .val()
                     }
                     //if (window.top.document.getElementById("CheckBox").checked) {
                     //    var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
@@ -1045,7 +1050,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("uploadmsg does exist");
                     }
                     eventManager.addHandler(this._uploadMessage, "click", this._getAttachment, this);
-                    //let siteId = 
+                    //let siteId =
                     //eventManager.addHandler(this._foldersElement, "input", this._getAllFolders(), this);
 
 
@@ -1070,7 +1075,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._getAllFolders(e.value);
                     }, this); //should be appending all folders now
 
-                    
+
 
                     this.appendChild(this._element);
                 },
@@ -1084,6 +1089,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
                 _getAttachment: async function (sender, e) {
                     e.preventDefault(); //prevent default everytime
+                    let sitesDropdown = $("#sitesDropdown");
+                    let foldersDropdown = $("#foldersDropdown");
+
                     try {
                         //console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log(" we are calling get attachment now");
@@ -1091,8 +1099,13 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
                         console.log("we are going to this attachment url ", url);
+                        console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
+
                         let payLoad = {
-                            microsoftToken : Sharepoint._microsoftToken
+                            microsoftToken: Sharepoint._microsoftToken,
+                            siteId: sitesDropdown.val(),
+                            folderId: foldersDropdown.find("option:selected").text()
+
                         }
                         console.log("url is", url);
                         const result = await fetch(url, {
@@ -1112,18 +1125,61 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         //return attachment;
 
-                    } catch(ex){
-            console.error("we have error", ex);
+                    } catch (ex) {
+                        console.error("we have error", ex);
                     }
-                    
-        },
+
+                },
+                _createFolder: async function (sender, e) {
+                    e.preventDefault(); //prevent default everytime
+                    let sitesDropdown = $("#sitesDropdown");
+                    let foldersDropdown = $("#foldersDropdown");
+
+                    try {
+                        //console.log("req id is", reqId, "identifier is ", this._rowIndex);
+                        console.log(" we are calling get create folder now");
+                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                        console.log("req id is", reqId, "identifier is ", this._rowIndex);
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
+                        console.log("we are going to this create url ", url);
+                        console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
+
+                        let payLoad = {
+                            microsoftToken: Sharepoint._microsoftToken,
+                            siteId: sitesDropdown.val(),
+                            folderId: foldersDropdown.text()
+
+                        }
+                        console.log("url is", url);
+                        const result = await fetch(url, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                            body: JSON.stringify(payLoad)
+                        });
+                        if (!result.ok) {
+                            const errorText = await result.text();
+                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
+                        }
+
+                        const attachment = await result.json();
+                        console.log("attachment feedback", attachment);
+
+                        //return attachment;
+
+                    } catch (ex) {
+                        console.error("we have error", ex);
+                    }
+
+                },
 
                 _popup: function (eventTarget) {
                     console.log(eventTarget);
                     console.log(document.location.search);
                     let url = (new URLSearchParams(window.top.location.search)).get("id");
                     console.log(url);
-                    
+
                     //let eventElement = eventTarget);
                     if (!this._pluginWindow) {
                         this._pluginWindow = new MarvalSoftware.UI.Window({
@@ -1140,6 +1196,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         this._renderElement();
                         
+
                         //this._getAttachment();
 
 
@@ -1147,8 +1204,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         if (eventTarget != undefined) {
                             console.log(eventTarget.parentElement.parentElement.nextSibling.innerText);
                         }
-                        
-                        
+
+
                         //this._showGroups();
 
                         //this._getAllPages();
@@ -1411,51 +1468,51 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
 
                 /** */
-                                        
-                _getAllFolders: async function(siteId) {
-                        //Sharepoint._getAuth();
-                        console.log("we are calling GETALLFOLDERS");
+
+                _getAllFolders: async function (siteId) {
+                    //Sharepoint._getAuth();
+                    console.log("we are calling GETALLFOLDERS");
                     let apptoken = Sharepoint._microsoftToken;
 
-                   console.log("apptoken is:", apptoken);
-                try {
-                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+                    console.log("apptoken is:", apptoken);
+                    try {
+                        //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
-                            //  console.log("apptoken is:", apptoken);
-                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
-                                method: "POST",
-                                "headers": [["content-type", "application/json"]],
-                                body: JSON.stringify({
-                                    "apptoken": apptoken,
-                                    "siteId": siteId
-                                })
-                                // headers:{'apptoken':apptoken}
+                        //  console.log("apptoken is:", apptoken);
+                        const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
+                            method: "POST",
+                            "headers": [["content-type", "application/json"]],
+                            body: JSON.stringify({
+                                "apptoken": apptoken,
+                                "siteId": siteId
+                            })
+                            // headers:{'apptoken':apptoken}
 
-                            });
-                    let foldersJson = await response.json(); //response promise
-        
-                            console.log("All folders are: ", foldersJson);
+                        });
+                        let foldersJson = await response.json(); //response promise
 
-                            console.log("we should be appending folders now");
-                            let $dropdown = $('#foldersDropdown');
-                            if($dropdown) {
-                                console.log("folders dropdown does exist");
-                            }
-                    $dropdown.empty();
-                            $dropdown.append('<option value = "">-- Select a Folder --</option>');
+                        console.log("All folders are: ", foldersJson);
 
-                            foldersJson.value.forEach(site => {
-                                console.log("folder here is", site);
-                                $dropdown.append($('<option>').val(site.id).text(site.name));
-                            });
-                            console.log("appending should finish!");
-        
-                    ; //in theory should have all our sites if response is correct
+                        console.log("we should be appending folders now");
+                        let $dropdown = $('#foldersDropdown');
+                        if ($dropdown) {
+                            console.log("folders dropdown does exist");
+                        }
+                        $dropdown.empty();
+                        $dropdown.append('<option value = "">-- Select a Folder --</option>');
+
+                        foldersJson.value.forEach(site => {
+                            console.log("folder here is", site);
+                            $dropdown.append($('<option>').val(site.id).text(site.name));
+                        });
+                        console.log("appending should finish!");
+
+                        ; //in theory should have all our sites if response is correct
 
 
-                } catch (error) {
-                    console.log("Error fetching sites: ", error);
-                }
+                    } catch (error) {
+                        console.log("Error fetching sites: ", error);
+                    }
                 },
                 _printSiteId: function (e) {
                     console.log("site id ", e.value);
