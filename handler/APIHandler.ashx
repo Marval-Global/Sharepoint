@@ -28,6 +28,7 @@ public class Handler : PluginHandler
 
         public string apptoken { get; set; }
         public string siteId { get; set; }
+        public string folderId { get; set; }
 
     }
 
@@ -435,7 +436,7 @@ public class Handler : PluginHandler
             case "POST":
                 Log.Information("we are at 434, with getparamval" + getParamVal);
 
-                if (getParamVal == "getAttachment")
+                if (getParamVal == "getAttachment") //upload attachment
                 {
                     Log.Information("we are in if");
 
@@ -448,14 +449,14 @@ public class Handler : PluginHandler
                         var reqId = context.Request.QueryString["reqId"];
                         var attachmentName = context.Request.QueryString["attachmentName"];
                         //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
-                        using(var reader = new StreamReader(context.Request.InputStream))
+                        using (var reader = new StreamReader(context.Request.InputStream))
                         {
                             requestBody = reader.ReadToEnd();//read contents from body in frontend
                         }
                         dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
 
                         // Step 1: Get the attachment from the MSM API
-                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/"+reqId+"/attachments/"+identifer+"/content?mode=Attachment";
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/attachments/" + identifer + "/content?mode=Attachment";
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -467,10 +468,12 @@ public class Handler : PluginHandler
                         if (attachmentData != null && attachmentData.Length > 0)
                         {
                             // Step 2: Upload to SharePoint
-                            string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
-                            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/"+attachmentName+":/content";
+                            //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
+                            // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
+                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
                             // Create request for SharePoint upload
-                            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(sharePointUrl);
+                            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
                             sharePointRequest.Method = "PUT";
                             sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
 
@@ -499,7 +502,8 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
-                }else if (getParamVal == "getAllFolders")
+                }
+                else if (getParamVal == "getAllFolders")
                 {
                     string json;
 
@@ -532,7 +536,8 @@ public class Handler : PluginHandler
                     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children", apptoken);
                     context.Response.Write(ex);
                 }
-                else if (getParamVal == "getSites") {
+                else if (getParamVal == "getSites")
+                {
                     string json;
 
                     using (var reader = new StreamReader(context.Request.InputStream))
@@ -562,217 +567,267 @@ public class Handler : PluginHandler
                     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", apptoken);
                     context.Response.Write(ex);
                 }
+                //}else if (getParamVal == "createFolder")
+                //{
+                //    Log.Information("we are in if");
 
-                break;
+                //    try
+                //    {
+                //        Log.Information("we are in try in create folder");
+
+                //        string requestBody;
+                //        var identifer = context.Request.QueryString["identifier"];
+                //        var reqId = context.Request.QueryString["reqId"];
+                //        var attachmentName = context.Request.QueryString["attachmentName"];
+                //        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                //        using(var reader = new StreamReader(context.Request.InputStream))
+                //        {
+                //            requestBody = reader.ReadToEnd();//read contents from body in frontend
+                //        }
+                //        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+
+                //            //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                //            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/"+attachmentName+":/content";
+                //            // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
+                //            string url4 = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                //            string url3 = "https://graph.microsoft.com/v1.0/sites/"+parsedBody.siteId+"/drive/root:/" + parsedBody.folderId +"/"+attachmentName+":/content";
+                //            // Create request for SharePoint upload
+                //            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(sharePointUrl);
+                //            sharePointRequest.Method = "PUT";
+                //            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+
+                //            sharePointRequest.ContentType = "application/octet-stream";
+
+                //            // Write the attachment data to the request stream
+                //            using (Stream requestStream = sharePointRequest.GetRequestStream())
+                //            {
+                //                requestStream.Write(attachmentData, 0, attachmentData.Length);
+                //            }
+                //            // Execute the SharePoint upload request
+                //            //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                //            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                //            Log.Information("we are at line 486");
+                //            context.Response.Write(this.ProcessRequest2(sharePointRequest));
+
+
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        Log.Error("Exception during attachment upload: " + e.Message, e);
+                //        context.Response.Write("Error uploading file: " + e.Message);
+                //    }
+        
+
+        break;
+    }
+}
+private string ProcessRequest2(HttpWebRequest request)
+{
+    try
+    {
+        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+        {
+            using (Stream responseStream = response.GetResponseStream())
+            {
+                using (StreamReader reader = new StreamReader(responseStream))
+                {
+                    string responseText = reader.ReadToEnd();
+                    // Log the response status
+                    //Log.Information("HTTP Status:"+ response.StatusCode +response.StatusDescription);
+                    // For SharePoint uploads, successful responses are usually 200 or 201
+                    if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+                    {
+                        //Log.Information("SharePoint upload successful");
+                        return responseText;
+                    }
+                    else
+                    {
+                        // Log.Warning($"Unexpected status code: {response.StatusCode}");
+                        return responseText;
+                    }
+                }
+            }
         }
     }
-    private string ProcessRequest2(HttpWebRequest request)
+    catch (WebException webEx)
     {
-        try
+        // Handle web-specific errors
+        if (webEx.Response != null)
         {
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
             {
-                using (Stream responseStream = response.GetResponseStream())
+                using (Stream errorStream = errorResponse.GetResponseStream())
                 {
-                    using (StreamReader reader = new StreamReader(responseStream))
+                    using (StreamReader errorReader = new StreamReader(errorStream))
                     {
-                        string responseText = reader.ReadToEnd();
-                        // Log the response status
-                        //Log.Information("HTTP Status:"+ response.StatusCode +response.StatusDescription);
-                        // For SharePoint uploads, successful responses are usually 200 or 201
-                        if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
-                        {
-                            //Log.Information("SharePoint upload successful");
-                            return responseText;
-                        }
-                        else
-                        {
-                            // Log.Warning($"Unexpected status code: {response.StatusCode}");
-                            return responseText;
-                        }
+                        string errorText = errorReader.ReadToEnd();
+                        Log.Error("Web Exception - Status: {errorResponse.StatusCode}, Error:" + errorText);
+                        throw new Exception("SharePoint API Error: {errorResponse.StatusCode} - " + errorText);
                     }
                 }
             }
         }
-        catch (WebException webEx)
+        else
         {
-            // Handle web-specific errors
-            if (webEx.Response != null)
-            {
-                using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
-                {
-                    using (Stream errorStream = errorResponse.GetResponseStream())
-                    {
-                        using (StreamReader errorReader = new StreamReader(errorStream))
-                        {
-                            string errorText = errorReader.ReadToEnd();
-                            Log.Error("Web Exception - Status: {errorResponse.StatusCode}, Error:" + errorText);
-                            throw new Exception("SharePoint API Error: {errorResponse.StatusCode} - " + errorText);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                Log.Error("Web Exception without response: "+webEx.Message);
-                throw new Exception("Network Error: {webEx.Message}");
-                return "";
-            }
-        }
-        catch (Exception ex)
-        {
+            Log.Error("Web Exception without response: "+webEx.Message);
+            throw new Exception("Network Error: {webEx.Message}");
             return "";
-            Log.Error("General Exception in ProcessRequest: " +ex.Message);
-            throw;
         }
-        return "";
     }
-
-    // Alternative version that returns more detailed response info
-    private SharePointUploadResponse ProcessRequestDetailed(HttpWebRequest request)
+    catch (Exception ex)
     {
-        try
+        return "";
+        Log.Error("General Exception in ProcessRequest: " +ex.Message);
+        throw;
+    }
+    return "";
+}
+
+// Alternative version that returns more detailed response info
+private SharePointUploadResponse ProcessRequestDetailed(HttpWebRequest request)
+{
+    try
+    {
+        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
         {
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream responseStream = response.GetResponseStream())
             {
-                using (Stream responseStream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(responseStream))
                 {
-                    using (StreamReader reader = new StreamReader(responseStream))
+                    string responseText = reader.ReadToEnd();
+                    return new SharePointUploadResponse
                     {
-                        string responseText = reader.ReadToEnd();
+                        StatusCode = response.StatusCode,
+                        StatusDescription = response.StatusDescription,
+                        Content = responseText,
+                        IsSuccess = response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created,
+                        ContentType = response.ContentType,
+                        Headers = response.Headers
+                    };
+                }
+            }
+        }
+    }
+    catch (WebException webEx)
+    {
+        if (webEx.Response != null)
+        {
+            using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
+            {
+                using (Stream errorStream = errorResponse.GetResponseStream())
+                {
+                    using (StreamReader errorReader = new StreamReader(errorStream))
+                    {
+                        string errorText = errorReader.ReadToEnd();
                         return new SharePointUploadResponse
                         {
-                            StatusCode = response.StatusCode,
-                            StatusDescription = response.StatusDescription,
-                            Content = responseText,
-                            IsSuccess = response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created,
-                            ContentType = response.ContentType,
-                            Headers = response.Headers
+                            StatusCode = errorResponse.StatusCode,
+                            StatusDescription = errorResponse.StatusDescription,
+                            Content = errorText,
+                            IsSuccess = false,
+                            Error = "SharePoint API Error: {errorResponse.StatusCode} - " + errorText
                         };
                     }
                 }
             }
         }
-        catch (WebException webEx)
-        {
-            if (webEx.Response != null)
-            {
-                using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
-                {
-                    using (Stream errorStream = errorResponse.GetResponseStream())
-                    {
-                        using (StreamReader errorReader = new StreamReader(errorStream))
-                        {
-                            string errorText = errorReader.ReadToEnd();
-                            return new SharePointUploadResponse
-                            {
-                                StatusCode = errorResponse.StatusCode,
-                                StatusDescription = errorResponse.StatusDescription,
-                                Content = errorText,
-                                IsSuccess = false,
-                                Error = "SharePoint API Error: {errorResponse.StatusCode} - " + errorText
-                            };
-                        }
-                    }
-                }
-            }
-            else
-            {
-                return new SharePointUploadResponse
-                {
-                    IsSuccess = false,
-                    Error = "Network Error: "+webEx.Message
-                };
-            }
-        }
-        catch (Exception ex)
+        else
         {
             return new SharePointUploadResponse
             {
                 IsSuccess = false,
-                Error = "General Exception: "+ex.Message
+                Error = "Network Error: "+webEx.Message
             };
         }
     }
-    // Helper method to process request and return byte array
-    private byte[] ProcessRequestAsBytes(HttpWebRequest request)
+    catch (Exception ex)
     {
-        try
+        return new SharePointUploadResponse
         {
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            using (Stream responseStream = response.GetResponseStream())
-            using (MemoryStream memoryStream = new MemoryStream())
+            IsSuccess = false,
+            Error = "General Exception: "+ex.Message
+        };
+    }
+}
+// Helper method to process request and return byte array
+private byte[] ProcessRequestAsBytes(HttpWebRequest request)
+{
+    try
+    {
+        using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+        using (Stream responseStream = response.GetResponseStream())
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+            responseStream.CopyTo(memoryStream);
+            return memoryStream.ToArray();
+        }
+    }
+    catch (Exception ex)
+    {
+        Log.Error("Error processing request as bytes: " + ex.Message, ex);
+        return null;
+    }
+}
+private string GetDBString()
+{
+    string connectionString = "";
+
+    string msmdLocation = GetAppPath("MSM");
+    string path = msmdLocation;
+    string newPath = Path.GetFullPath(Path.Combine(path, @"..\"));
+    string openFilePath = newPath + "connectionStrings.config";
+
+    XmlDocument xmlDoc = new XmlDocument();
+    xmlDoc.Load(openFilePath);
+
+    XmlNodeList nodeList = xmlDoc.SelectNodes("/appSettings/add[@key='DatabaseConnectionString']");
+
+    if (nodeList.Count > 0)
+    {
+        // Get the value attribute of the node
+        connectionString = nodeList[0].Attributes["value"].Value;
+    }
+    else
+    {
+    }
+    return connectionString;
+}
+private string GetAppPath(string productName)
+{
+    const string foldersPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\Folders";
+    var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+
+    var subKey = baseKey.OpenSubKey(foldersPath);
+    if (subKey == null)
+    {
+        baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
+        subKey = baseKey.OpenSubKey(foldersPath);
+    }
+    return subKey != null ? subKey.GetValueNames().FirstOrDefault(kv => kv.Contains(productName)) : "ERROR";
+}
+
+private string GetCustomersJSON(string CIId)
+{
+    string connString = GetDBString();
+    using (SqlConnection conn = new SqlConnection())
+    {
+        conn.ConnectionString = connString;
+        using (SqlCommand cmd = new SqlCommand())
+        {
+            cmd.CommandText = "select guid from directoryRelationship where CIId = " + CIId;
+            cmd.Connection = conn;
+            conn.Open();
+            string returnVal = "";
+            using (SqlDataReader sdr = cmd.ExecuteReader())
             {
-                responseStream.CopyTo(memoryStream);
-                return memoryStream.ToArray();
+                sdr.Read();
+                returnVal = Convert.ToString(sdr["guid"]);
             }
-        }
-        catch (Exception ex)
-        {
-            Log.Error("Error processing request as bytes: " + ex.Message, ex);
-            return null;
+            conn.Close();
+
+            return returnVal;
         }
     }
-    private string GetDBString()
-    {
-        string connectionString = "";
-
-        string msmdLocation = GetAppPath("MSM");
-        string path = msmdLocation;
-        string newPath = Path.GetFullPath(Path.Combine(path, @"..\"));
-        string openFilePath = newPath + "connectionStrings.config";
-
-        XmlDocument xmlDoc = new XmlDocument();
-        xmlDoc.Load(openFilePath);
-
-        XmlNodeList nodeList = xmlDoc.SelectNodes("/appSettings/add[@key='DatabaseConnectionString']");
-
-        if (nodeList.Count > 0)
-        {
-            // Get the value attribute of the node
-            connectionString = nodeList[0].Attributes["value"].Value;
-        }
-        else
-        {
-        }
-        return connectionString;
-    }
-    private string GetAppPath(string productName)
-    {
-        const string foldersPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\Folders";
-        var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-
-        var subKey = baseKey.OpenSubKey(foldersPath);
-        if (subKey == null)
-        {
-            baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
-            subKey = baseKey.OpenSubKey(foldersPath);
-        }
-        return subKey != null ? subKey.GetValueNames().FirstOrDefault(kv => kv.Contains(productName)) : "ERROR";
-    }
-
-    private string GetCustomersJSON(string CIId)
-    {
-        string connString = GetDBString();
-        using (SqlConnection conn = new SqlConnection())
-        {
-            conn.ConnectionString = connString;
-            using (SqlCommand cmd = new SqlCommand())
-            {
-                cmd.CommandText = "select guid from directoryRelationship where CIId = " + CIId;
-                cmd.Connection = conn;
-                conn.Open();
-                string returnVal = "";
-                using (SqlDataReader sdr = cmd.ExecuteReader())
-                {
-                    sdr.Read();
-                    returnVal = Convert.ToString(sdr["guid"]);
-                }
-                conn.Close();
-
-                return returnVal;
-            }
-        }
-    }
+}
 
 }
