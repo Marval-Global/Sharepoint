@@ -21,6 +21,9 @@
         #uploadFile{
             cursor:pointer;
         }
+        #createFolder{
+            cursor:pointer;
+        }
 
         .LinkedProjectsHeader {
             /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
@@ -231,6 +234,7 @@
     <select id="foldersDropdown"><option>Still loading!</option></select>
     
     <button id="uploadFile">upload</button>
+    <button id="createFolder">Create!</button>
 
 
 </template>
@@ -289,6 +293,7 @@
 
         var MarvalSoftware = window.top.MarvalSoftware;
         var $ = window.top.$;
+        var Sharepoint = null;
 
         MarvalSoftware.Plugins.define("marvalsoftware-plugins-sharepoint",
             {
@@ -312,6 +317,7 @@
                 _rowIndex: null,
                 _attachmentName: null,
                 _microsoftToken: null,
+               // Sharepoint: null,
 
 
 
@@ -677,7 +683,7 @@
                             Sharepoint._rowIndex = index + 1;
                             Sharepoint._attachmentName = $row.attr("title");
                             Sharepoint._popup(eventTarget);
-                            alert(`Clicked row ${index + 1}`);
+                            //alert(`Clicked row ${index + 1}`);
                             //Sharepoint._rowIndex = index;
                         });
 
@@ -732,12 +738,43 @@
                         }
                     }
 
+                    async function getMicrosoftAccessToken() {
+                        try {
+                            // Get the Client ID from your SharePoint handler or hardcode it here
+                            const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
+
+                            const clientId = await (await fetch(clientIdUrl)).text();
+                            console.log("client id is:", clientId);
+
+                            const msalInstance = await msal.createStandardPublicClientApplication({
+                                auth: {
+                                    clientId: clientId,
+                                    authority: "https://login.microsoftonline.com/common"
+                                }
+                            });
+
+                            const loginRequest = {
+                                scopes: ["https://graph.microsoft.com/.default"]
+                            };
+
+                            const response = await msalInstance.loginPopup(loginRequest);
+
+                            console.log("Logged in successfully, access token:", response.accessToken);
+                            Sharepoint._microsoftToken = response.accessToken;
+                            return response.accessToken;
+
+                        } catch (err) {
+                            console.error("MSAL login failed:", err);
+                            throw err;
+                        }
+                    }
+
 
                     async function fetchSharePointSites() {
                         //Sharepoint._getAuth();
                         console.log("we are calling fetchsharepointsites");
-                        let apptoken = await getMicrosoftAccessToken()
-                        // console.log("apptoken is:", apptoken);
+                        let apptoken = await getMicrosoftAccessToken();
+                       console.log("apptoken is:", apptoken);
                         try {
                             //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
@@ -778,37 +815,7 @@
                         }
                     }
 
-                    async function getMicrosoftAccessToken() {
-                        try {
-                            // Get the Client ID from your SharePoint handler or hardcode it here
-                            const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-
-                            const clientId = await (await fetch(clientIdUrl)).text();
-                            console.log("client id is:", clientId);
-
-                            const msalInstance = await msal.createStandardPublicClientApplication({
-                                auth: {
-                                    clientId: clientId,
-                                    authority: "https://login.microsoftonline.com/common"
-                                }
-                            });
-
-                            const loginRequest = {
-                                scopes: ["https://graph.microsoft.com/.default"]
-                            };
-
-                            const response = await msalInstance.loginPopup(loginRequest);
-
-                            console.log("Logged in successfully, access token:", response.accessToken);
-                            Sharepoint._microsoftToken = response.accessToken;
-                            return response.accessToken;
-
-                        } catch (err) {
-                            console.error("MSAL login failed:", err);
-                            throw err;
-                        }
-                    }
-
+                    
 
 
                     function addIconColumnFirst(imageSrc, onClickCallback) {
@@ -1036,6 +1043,37 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
                 },
 
+                _getMicrosoftAccessToken2 : async function() {
+            try {
+                // Get the Client ID from your SharePoint handler or hardcode it here
+                const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
+
+                const clientId = await(await fetch(clientIdUrl)).text();
+                console.log("client id is:", clientId);
+
+                const msalInstance = await msal.createStandardPublicClientApplication({
+                    auth: {
+                        clientId: clientId,
+                        authority: "https://login.microsoftonline.com/common"
+                    }
+                });
+
+                const loginRequest = {
+                    scopes: ["https://graph.microsoft.com/.default"]
+                };
+
+                const response = await msalInstance.loginPopup(loginRequest);
+
+                console.log("Logged in successfully, access token:", response.accessToken);
+                Sharepoint._microsoftToken = response.accessToken;
+                return response.accessToken;
+
+            } catch(err) {
+                console.error("MSAL login failed:", err);
+                throw err;
+            }
+        },
+
                 _renderElement: function () {
                     var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
                     var template = document.querySelector("template").content;
@@ -1043,8 +1081,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._uploadMessage = this._element.querySelector("#uploadFile");
                     this._foldersElement = this._element.querySelector("#foldersDropdown");
                     //eventManager.addHandler(this.folderSelected, "input", this._, this);
-
-
+                    
 
                     if (this._uploadMessage) {
                         console.log("uploadmsg does exist");
@@ -1068,6 +1105,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     this.groupSelected = this._element.querySelector("#groupsDropdown");
                     eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
+
+                    this.folderBtn = this._element.querySelector("#createFolder");
+                    eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
 
                     this.siteSelected = this._element.querySelector("#sitesDropdown");
                     eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
@@ -1108,7 +1148,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         }
                         console.log("url is", url);
-                        const result = await fetch(url, {
+                        let result = await fetch(url, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json; charset=utf-8"
@@ -1116,11 +1156,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             body: JSON.stringify(payLoad)
                         });
                         if (!result.ok) {
-                            const errorText = await result.text();
+                            let errorText = await result.text();
                             throw new Error(`HTTP error ${result.status}: ${errorText}`);
                         }
 
-                        const attachment = await result.json();
+                        let attachment = await result.json();
                         console.log("attachment feedback", attachment);
 
                         //return attachment;
