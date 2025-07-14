@@ -18,11 +18,13 @@
             font-weight: normal;
             cursor: pointer;
         }
-        #uploadFile{
-            cursor:pointer;
+
+        #uploadFile {
+            cursor: pointer;
         }
-        #createFolder{
-            cursor:pointer;
+
+        #createFolder {
+            cursor: pointer;
         }
 
         .LinkedProjectsHeader {
@@ -232,9 +234,26 @@
     </div>
     <select id="sitesDropdown"><option>Loading!</option></select>
     <select id="foldersDropdown"><option>Still loading!</option></select>
-    
+
+
     <button id="uploadFile">upload</button>
     <button id="createFolder">Create!</button>
+
+    <table id="itemsTable" border="1" style="margin-top: 10px; width: 100%;">
+        <thead>
+            <tr>
+                <th>Notes</th>
+                <th>Attachments</th>
+                <th>Emails</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="3" style="text-align: center;">(Empty)</td>
+            </tr>
+        </tbody>
+    </table>
+    <button id="uploadAll">Upload All Attachments</button>
 
 
 </template>
@@ -802,7 +821,7 @@
                             $dropdown.append('<option value = "">-- Select a Site --</option>');
 
                             sitesJson.value.forEach(site => {
-                                console.log("site here is", site);
+                                //console.log("site here is", site);
                                 $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
                             });
                             console.log("appending should finish!");
@@ -1127,7 +1146,112 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     value = value.replace(/\n /, "\n");
                     element.value = value;
                 },
-                _getAttachment: async function (sender, e) {
+                _getAllAttachments: async function (sender, e) {
+                    //e.preventDefault(); //prevent default everytime
+                    let sitesDropdown = $("#sitesDropdown"); // need table
+                    let itemsTable = $("#itemsTable tbody");
+
+                    try {
+                        console.log(" getting all attachments ");
+                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;                 
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAllAttachments&reqId=" + reqId;
+                        console.log("we are going to this attachment url ", url)
+
+                        console.log("url is", url);
+                        let result = await fetch(url, {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                        });
+                        if (!result.ok) {
+                            let errorText = await result.text();
+                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
+                        }
+
+                        let attachment = await result.json();
+                        console.log("attachmentS feedback", attachment);
+                        // Clear existing rows (including the "(Empty)" row)
+                        itemsTable.empty();
+                        
+
+                        // Add new rows
+                        attachment.collection.items.forEach(attachment => {
+                            let fileName = attachment.entity.data.fileName;
+                            let row = document.createElement("tr");
+                            row.innerHTML = `
+                
+  <td></td> <!-- Notes column -->
+  <td>${fileName}
+                    <input type="checkbox" name="selectAttachment" value="${fileName}"></td> <!-- Attachments column -->
+  <td></td> <!-- Emails column -->
+
+
+            `;
+                            itemsTable[0].appendChild(row);
+                        });
+
+
+                    } catch (ex) {
+                        console.error("we have error", ex);
+                    }
+
+                },
+                _uploadAllAttachments: async function (identifier) {
+                    let sitesDropdown = $("#sitesDropdown");
+                    let foldersDropdown = $("#foldersDropdown");
+
+                    // Find all checked checkboxes in the attachments column
+                    let checkedBoxes = $("#itemsTable tbody input[type='checkbox']:checked");
+                    if (checkedBoxes.length === 0) {
+                        console.warn("No attachments selected.");
+                        alert("Please select at least one attachment to upload.");
+                        return;
+                    }
+
+                    let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                    let siteId = sitesDropdown.val();
+                    let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
+
+                    for (let checkbox of checkedBoxes) {
+                        let attachmentName = $(checkbox).val(); // file name stored in value
+
+                        console.log("Uploading attachment:", attachmentName);
+
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier="+identifier+ "&attachmentName=" + attachmentName;
+
+                        let payload = {
+                            microsoftToken: Sharepoint._microsoftToken,
+                            siteId: siteId,
+                            folderId: folderId
+                        };
+
+                        try {
+                            let result = await fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json; charset=utf-8"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!result.ok) {
+                                let errorText = await result.text();
+                                throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
+                            }
+
+                            let response = await result.json();
+                            console.log(`Uploaded: ${attachmentName}`, response);
+                        } catch (ex) {
+                            console.error("Upload error for", attachmentName, ex);
+                        }
+                    }
+
+                    alert("Upload complete.");
+                },
+
+                
+                _getAttachment: async function (sender, e, identifier = null) {
                     e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
                     let foldersDropdown = $("#foldersDropdown");
@@ -1225,7 +1349,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._pluginWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
                             title: "Sharepoint",
-                            height: 200,
+                            height: 500,
                             width: 800,
                             minHeight: 700,
                             minWidth: 432,
@@ -1235,6 +1359,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         });
                         this._renderElement();
+                        this._getAllAttachments();
                         
 
                         //this._getAttachment();
