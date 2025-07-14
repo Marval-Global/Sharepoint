@@ -1293,18 +1293,56 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //e.preventDefault();
                     let sitesDropdown = $("#sitesDropdown");
                     let foldersDropdown = $("#foldersDropdown");
-
+                    let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                    let siteId = sitesDropdown.val();
+                    let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
                     // Find all checked checkboxes in the attachments column
                     let checkedBoxes = $("#itemsTable tbody input[type='checkbox']:checked");
-                    if (checkedBoxes.length === 0) {
+                    let notesBoxes = $("#notesTable tbody input[type='checkbox']:checked");
+                    if (checkedBoxes.length === 0 && notesBoxes.length === 0) {
                         console.warn("No attachments selected.");
                         alert("Please select at least one attachment to upload.");
                         return;
                     }
 
-                    let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
-                    let siteId = sitesDropdown.val();
-                    let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
+                    
+
+
+
+                    for (let notebox of notesBoxes) {
+                        let attachmentName = $(notebox).val(); // file name stored in value
+                        let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
+
+                        console.log("Uploading attachment:", attachmentName);
+
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + attachmentName;
+                        //should be uploading all notes
+                        let payload = {
+                            microsoftToken: Sharepoint._microsoftToken,
+                            siteId: siteId,
+                            folderId: folderId
+                        };
+
+                        try {
+                            let result = await fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json; charset=utf-8"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!result.ok) {
+                                let errorText = await result.text();
+                                throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
+                            }
+
+                            let response = await result.json();
+                            console.log(`Uploaded: ${attachmentName}`, response);
+                        } catch (ex) {
+                            console.error("Upload error for", attachmentName, ex);
+                        }
+                    }
 
                     for (let checkbox of checkedBoxes) {
                         let attachmentName = $(checkbox).val(); // file name stored in value
