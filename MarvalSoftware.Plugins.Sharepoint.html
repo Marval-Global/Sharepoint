@@ -12,8 +12,9 @@
             font-weight: bold;
             /*            height:500px !important;*/
         }
-        #uploadAll{
-            cursor:pointer;
+
+        #uploadAll {
+            cursor: pointer;
         }
 
         .messageButton {
@@ -50,6 +51,10 @@
             font-size: 18px !important;
             font-family: 'Inter', 'Open Sans', sans-serif;
             border-radius: 10px;
+        }
+
+        .itemsTable{
+            display:flex;
         }
 
         #message {
@@ -242,20 +247,46 @@
     <button id="uploadFile">upload</button>
     <button id="createFolder">Create!</button>
 
-    <table id="itemsTable" border="1" style="margin-top: 10px; width: 100%;">
+    <div class="itemsTable">
+    <table id="notesTable" border="1" style="margin-top: 10px; width: 100%;">
         <thead>
             <tr>
                 <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align: center;">(Empty)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table id="itemsTable"  border="1" style="margin-top: 10px; width: 100%;">
+        <thead>
+            <tr>
                 <th>Attachments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align: center;">(Empty)</td>
+            </tr>
+        </tbody>
+    </table>
+    <table id="emailsTable" border="1" style="margin-top: 10px; width: 100%;">
+        <thead>
+            <tr>
                 <th>Emails</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td colspan="3" style="text-align: center;">(Empty)</td>
+                <td style="text-align: center;">(Empty)</td>
             </tr>
         </tbody>
     </table>
+        </div>
+
     <button id="uploadAll">Upload All Attachments</button>
 
 
@@ -1154,6 +1185,56 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     value = value.replace(/[ ]{2,}/gi, " ");
                     value = value.replace(/\n /, "\n");
                     element.value = value;
+                }, _getAllNotes: async function (sender, e) {
+                    //preventDefault(); //prevent default everytime
+                    let sitesDropdown = $("#sitesDropdown"); // need table
+                    let notesTable = $("#notesTable tbody");
+
+                    try {
+                        console.log(" getting all attachments ");
+                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAllNotes&reqId=" + reqId;
+                        console.log("we are going to this attachment url ", url)
+
+                        console.log("url is", url);
+                        let result = await fetch(url, {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                        });
+                        if (!result.ok) {
+                            let errorText = await result.text();
+                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
+                        }
+
+                        let notes = await result.json();
+                        console.log("notes feedback", notes);
+                        // Clear existing rows (including the "(Empty)" row)
+                        notesTable.empty();
+
+
+                        // Add new rows
+                        notes.collection.items.forEach(note => {
+                            let fileName = note.entity.data.contentSummary;
+                            let row = document.createElement("tr");
+                            row.innerHTML = `
+              
+
+<td>${fileName}
+                  <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${note.entity.data.id}"></td> <!-- Attachments column -->
+
+
+
+          `;
+                            notesTable[0].appendChild(row);
+                        });
+
+
+                    } catch (ex) {
+                        console.error("we have error", ex);
+                    }
+
                 },
                 _getAllAttachments: async function (sender, e) {
                     //preventDefault(); //prevent default everytime
@@ -1190,10 +1271,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             let row = document.createElement("tr");
                             row.innerHTML = `
                 
-  <td></td> <!-- Notes column -->
+  
   <td>${fileName}
                     <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${attachment.entity.data.id}"></td> <!-- Attachments column -->
-  <td></td> <!-- Emails column -->
+  
 
 
             `;
@@ -1373,7 +1454,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         this._renderElement();
                         this._getAllAttachments();
-                        
+                        this._getAllNotes();
 
                         //this._getAttachment();
 
