@@ -511,6 +511,73 @@ public class Handler : PluginHandler
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
                 }
+                if (getParamVal == "uploadNote") //upload attachment
+                {
+                    Log.Information("we are in if");
+
+                    try
+                    {
+                        Log.Information("we are in try in upload notes");
+
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+                        var attachmentName = context.Request.QueryString["attachmentName"];
+                        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                        using (var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            requestBody = reader.ReadToEnd();//read contents from body in frontend
+                        }
+                        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+
+                        // Step 1: Get the attachment from the MSM API
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes/" + identifer;
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            // Step 2: Upload to SharePoint
+                            //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
+                            // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
+                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                            // Create request for SharePoint upload
+                            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
+                            sharePointRequest.Method = "PUT";
+                            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+
+                            sharePointRequest.ContentType = "application/octet-stream";
+                            sharePointRequest.ContentLength = attachmentData.Length;
+                            Log.Information("data len " + attachmentData.Length);
+                            // Write the attachment data to the request stream
+                            using (Stream requestStream = sharePointRequest.GetRequestStream())
+                            {
+                                requestStream.Write(attachmentData, 0, attachmentData.Length);
+                            }
+                            // Execute the SharePoint upload request
+                            //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                            Log.Information("we are at line 486");
+                            context.Response.Write(this.ProcessRequest2(sharePointRequest));
+                        }
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                }
                 else if (getParamVal == "getAllFolders")
                 {
                     string json;
