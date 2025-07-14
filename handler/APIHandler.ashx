@@ -537,7 +537,29 @@ public class Handler : PluginHandler
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
                         httpWebRequest.Method = "GET";
                         // Get the attachment data as byte array
-                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        //byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        string noteJson = this.ProcessRequest2(httpWebRequest); // raw JSON string
+                        dynamic noteData = JsonConvert.DeserializeObject(noteJson); //deserialise so we cna access the data in the body
+                            Log.Information("noteJson = " + noteJson);
+Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
+
+
+                        // Build a plain-text file content
+                        string textContent =
+                        "Summary: " + noteData.entity.data.contentSummary + "\r\n" +
+                        "Author: " + noteData.entity.data.author.name + "\r\n" +
+                        "Created On: " + noteData.entity.data.createdOn;
+
+
+                        // Convert the text to byte array for upload
+                        byte[] attachmentData = Encoding.UTF8.GetBytes(textContent); //need to remember that needs to be in bytes format when we are doing stream write
+
+                        // Optional: append .txt extension to make it clearer
+                        if (!attachmentName.EndsWith(".txt"))
+                        {
+                            attachmentName += ".txt";
+                        }
+
                         Log.Information("we are at line 367");
 
                         if (attachmentData != null && attachmentData.Length > 0)
