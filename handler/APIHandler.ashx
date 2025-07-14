@@ -367,7 +367,40 @@ public class Handler : PluginHandler
                 else if (getParamVal == "SecretKey")
                 {
                     context.Response.Write("Hi");
-                }
+                }else if (getParamVal == "getAllNotes")
+                    {
+                        try
+                        {
+                            string requestBody;
+                            var identifer = context.Request.QueryString["identifier"];
+                            var reqId = context.Request.QueryString["reqId"];
+
+                            string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes";
+                            Log.Information("url here is" + attachmentUrl);
+                            httpWebRequest = BuildRequest(attachmentUrl);
+                            httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                            httpWebRequest.Method = "GET";
+                            // Get the attachment data as byte array
+                            byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                            Log.Information("we are at line 367");
+
+                            if (attachmentData != null && attachmentData.Length > 0)
+                            {
+                                context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                                context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
+                            }
+                            else
+                            {
+                                Log.Warning("No attachment data received from MSM API");
+                                context.Response.Write("No attachment data found");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error("Exception during attachment upload: " + e.Message, e);
+                            context.Response.Write("Error uploading file: " + e.Message);
+                        }
+                    }
                 else if (getParamVal == "getAllAttachments")
                 {
                     try
@@ -375,11 +408,6 @@ public class Handler : PluginHandler
                         string requestBody;
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
-                        //using (var reader = new StreamReader(context.Request.InputStream))
-                        //{
-                        //    requestBody = reader.ReadToEnd();//read contents from body in frontend
-                        //}
-                        //dynamic parsedBody = JsonConvert.DeserializeObject(requestBody); //there is no body
 
                         string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/attachments";
                         Log.Information("url here is" + attachmentUrl);
@@ -422,7 +450,7 @@ public class Handler : PluginHandler
 
                     try
                     {
-                        Log.Information("we are in try in  attachment");
+                        Log.Information("we are in try in attachment");
 
                         string requestBody;
                         var identifer = context.Request.QueryString["identifier"];
