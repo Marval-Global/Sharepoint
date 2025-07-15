@@ -2,9 +2,9 @@
 <script type="text/javascript" src="template.js"></script>
 <template>
     <style>
-        #groupsDropdown {
+/*        #groupsDropdown {
             font-weight: normal;
-        }
+        }*/
 
         .content {
             border-radius: 10px;
@@ -68,7 +68,7 @@
             height: 200px;
         }
 
-            marvalsoftware-plugins-sharepoint > .config-area {
+/*            marvalsoftware-plugins-sharepoint > .config-area {
                 height: 100px;
                 padding: 0px 10px 10px 10px;
                 box-shadow: 0 1px 0 0 #ebe8e4;
@@ -77,7 +77,7 @@
                 marvalsoftware-plugins-sharepoint > .config-area > div {
                     padding: 10px 0 0 0;
                 }
-
+*/
             marvalsoftware-plugins-sharepoint > .message-area {
                 /*                display: block;*/
                 height: 100px;
@@ -218,26 +218,7 @@
             }
     </style>
     <div class="config-area">
-        <div>
-            <!--<label>Pages:</label>-->
-            <!--<select id="pages">
-                <option value="0"></option>
-            </select>-->
-            Message to send:
-            <br />
-            <input id="message" />
-            <br />
-            <br />
-            Do you want to include incident details?: <input type="checkbox" id="CheckBox" />
-            <br />
-            <br />
-            <select id="groupsDropdown"><option>Loading…</option> </select>
-            <br />
-            <br />
-            <button id="sendMessage" class="messageButton">Send</button>
-
-
-        </div>
+        
 
     </div>
     <select id="sitesDropdown"><option>Loading!</option></select>
@@ -245,7 +226,7 @@
 
 
     <button id="uploadFile">upload</button>
-    <button id="createFolder">Create!</button>
+    <button id="createFolder">Create Folder!</button>
 
     <div class="itemsTable">
     <table id="notesTable" border="1" style="margin-top: 10px; width: 100%;">
@@ -713,7 +694,7 @@
                     else if (!currentUrl.includes("Plugin.aspx")) {
 
 
-                        fetchSharePointSites();
+                        //fetchSharePointSites();
                         //this._getAuth()
                         this._setUpQuickMenu();
                         this._requestNumber = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getRequestNumber();
@@ -736,6 +717,8 @@
                             Sharepoint._rowIndex = index + 1;
                             Sharepoint._attachmentName = $row.attr("title");
                             Sharepoint._popup(eventTarget);
+                            //fetchSharePointSites();
+                            
                             //alert(`Clicked row ${index + 1}`);
                             //Sharepoint._rowIndex = index;
                         });
@@ -960,6 +943,51 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
 
                 },
+                _fetchSharePointSites: async function() {
+            //Sharepoint._getAuth();
+            console.log("we are calling fetchsharepointsites");
+                    //let apptoken = await getMicrosoftAccessToken();
+                    let apptoken = await this._getMicrosoftAccessToken2();
+            console.log("apptoken is:", apptoken);
+            try {
+                //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
+
+                //  console.log("apptoken is:", apptoken);
+                const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
+                    method: "POST",
+                    "headers": [["content-type", "application/json"]],
+                    body: JSON.stringify({
+                        "apptoken": apptoken,
+                        endpoint: "getSites"
+                    })
+                    // headers:{'apptoken':apptoken}
+
+                });
+                let sitesJson = await response.json()
+
+        console.log("Sharepoint sites are: ", sitesJson);
+
+                console.log("we should be appending sites now");
+                let $dropdown = $('#sitesDropdown');
+                if($dropdown) {
+                    console.log("sites dropdown does exist");
+                }
+        $dropdown.empty();
+                $dropdown.append('<option value = "">-- Select a Site --</option>');
+
+                sitesJson.value.forEach(site => {
+                    //console.log("site here is", site);
+                    $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
+                });
+                console.log("appending should finish!");
+
+        ; //in theory should have all our sites if response is correct
+
+
+    } catch (error) {
+        console.log("Error fetching sites: ", error);
+    }
+},
                 _getAuth: async function () {
 
                     let hostString = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ChatbotHostOverride")).text()
@@ -1086,15 +1114,15 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         return key;
                     }
                 },
-                _updateButtonVisual() {
-                    if (window.top.document.getElementById("message").value != "" && window.top.document.getElementById("groupsDropdown").value != "") {
-                        window.top.document.getElementById("sendMessage").style.backgroundColor = "green";
-                        window.top.document.getElementById("sendMessage").disabled = false;
-                    } else {
-                        window.top.document.getElementById("sendMessage").style.backgroundColor = "gray";
-                        window.top.document.getElementById("sendMessage").disabled = true;
-                    }
-                },
+                //_updateButtonVisual() {
+                //    if (window.top.document.getElementById("message").value != "" && window.top.document.getElementById("groupsDropdown").value != "") {
+                //        window.top.document.getElementById("sendMessage").style.backgroundColor = "green";
+                //        window.top.document.getElementById("sendMessage").disabled = false;
+                //    } else {
+                //        window.top.document.getElementById("sendMessage").style.backgroundColor = "gray";
+                //        window.top.document.getElementById("sendMessage").disabled = true;
+                //    }
+                //},
 
                 _getMicrosoftAccessToken2 : async function() {
             try {
@@ -1154,16 +1182,16 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     this._cards = this._element.querySelector(".cards");
                     //this._trimWhiteSpaces(this._body);
                     //var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
-                    this._sendMessageButton = this._element.querySelector("#sendMessage");
-                    eventManager.addHandler(this._sendMessageButton, "click", this._postMessage, this);
+                    //this._sendMessageButton = this._element.querySelector("#sendMessage");
+                    //eventManager.addHandler(this._sendMessageButton, "click", this._postMessage, this);
                     this._createElement = this._element.querySelector(".action-buttons > button");
                     this._refreshLink = this._element.querySelector("a");
 
-                    this.messageInput = this._element.querySelector("#message");
-                    eventManager.addHandler(this.messageInput, "input", this._updateButtonVisual, this);
+                    //this.messageInput = this._element.querySelector("#message");
+                    //eventManager.addHandler(this.messageInput, "input", this._updateButtonVisual, this);
 
-                    this.groupSelected = this._element.querySelector("#groupsDropdown");
-                    eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
+                    //this.groupSelected = this._element.querySelector("#groupsDropdown");
+                    //eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
 
                     this.folderBtn = this._element.querySelector("#createFolder");
                     eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
@@ -1493,6 +1521,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._renderElement();
                         this._getAllAttachments();
                         this._getAllNotes();
+                        this._fetchSharePointSites();
 
                         //this._getAttachment();
 
@@ -1707,18 +1736,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let email = this._contactEmail ? this._contactEmail : " No email defined";
                     let description = window.top.document.getElementById("ctl00_cph_description").value;
                     var payload = {};
-                    if (window.top.document.getElementById("CheckBox").checked) {
-                        var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
-                        payload = {
-                            message: formulatedMessage,
-                            action: "SendSharepointMessage"
-                        }
-                    } else {//not checked
-                        payload = {
-                            message: messageText,
-                            action: "SendSharepointMessage"
-                        }
-                    }
+                    //if (window.top.document.getElementById("CheckBox").checked) {
+                    //    var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
+                    //    payload = {
+                    //        message: formulatedMessage,
+                    //        action: "SendSharepointMessage"
+                    //    }
+                    //} else {//not checked
+                    //    payload = {
+                    //        message: messageText,
+                    //        action: "SendSharepointMessage"
+                    //    }
+                    //}
                     console.log("We are here");
 
 
