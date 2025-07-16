@@ -480,8 +480,9 @@ public class Handler : PluginHandler
                             //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
                             string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
                             // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
-                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root" + parsedBody.folderId + "/" + attachmentName + ":/content";
                             // Create request for SharePoint upload
+                            Log.Information("url3 of uploading to " + url3);
                             HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
                             sharePointRequest.Method = "PUT";
                             sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
@@ -569,7 +570,8 @@ public class Handler : PluginHandler
                             //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
                             string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
                             // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
-                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                            Log.Information("url3 of uploading to " + url3);
                             // Create request for SharePoint upload
                             HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
                             sharePointRequest.Method = "PUT";
@@ -633,7 +635,7 @@ public class Handler : PluginHandler
                     string folderPath = data.folderPath;
                     if (!String.IsNullOrEmpty(folderPath))//if exists
                     {
-                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/"+folderPath+"/children";
+                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root"+folderPath+":/children";
                     }
                     else
                     {
@@ -641,6 +643,7 @@ public class Handler : PluginHandler
                     }
 
                     Log.Information("apptoken is: " + apptoken);
+                    Log.Information("url of get all folders is " + url);
                     string ex = GetRequest((url), apptoken);
                     context.Response.Write(ex);
                 }
