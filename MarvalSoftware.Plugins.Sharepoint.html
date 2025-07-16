@@ -437,16 +437,6 @@
             </div>
         </div>
 
-        <div class="notes">
-            <h3>API Integration Notes:</h3>
-            <ul>
-                <li>Replace the mock <code>fetchChildren</code> function with actual Microsoft Graph API calls</li>
-                <li>Add proper error handling and authentication</li>
-                <li>Consider implementing virtual scrolling for large folder structures</li>
-                <li>Add context menus for folder operations (create, rename, delete, etc.)</li>
-                <li>Implement search functionality across the folder structure</li>
-            </ul>
-        </div>
     </div>
 
     <select id="sitesDropdown"><option>Loading!</option></select>
@@ -1647,7 +1637,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
                     eventManager.addHandler(this.siteSelected, "input", function (e) {
                         this._getAllFolders(e.value);
-                        this._getAllFolders(e.value, "test:");
+                        //this._getAllFolders(e.value, "test:");
+                        this._renderTree();//call when we seelect a site
                         console.log("we should be calling get all folders twice and getting the response ");
 
                     }, this); //should be appending all folders now
@@ -1799,10 +1790,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + attachmentName;
                         //should be uploading all notes
+                        console.log("we are uploading notes to this url " + url);
                         let payload = {
                             microsoftToken: Sharepoint._microsoftToken,
                             siteId: siteId,
-                            folderId: folderId
+                            folderId: Sharepoint._currentPath
                         };
 
                         try {
@@ -1834,10 +1826,11 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier="+identifier+ "&attachmentName=" + attachmentName;
                         //should change backend getAttachment name to something better
+                        console.log("we are uploading files to this url " + url);
                         let payload = {
                             microsoftToken: Sharepoint._microsoftToken,
                             siteId: siteId,
-                            folderId: folderId
+                            folderId: Sharepoint._currentPath
                         };
 
                         try {
@@ -1958,15 +1951,40 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
         },
 
                 // Mock API call function
-        _fetchChildren : async function (folderId)
-        {   
-                console.log("we are in fetch children now");
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 800));
+                _fetchChildren: async function (folderId) {
+                    // Find the full path for this folder
+                    const parentElement = window.top.document.querySelector(`[data-item-id="${folderId}"]`);
+                    if (!parentElement) return { value: [] };
 
-                // Return mock data for demonstration
-                return mockSubfolderData[folderId] || { value: [] };
-            },
+                    // Get the folder name
+                    const name = parentElement.querySelector('.folder-name').textContent;
+
+                    // Build the new path
+                    if (name) {
+                        if (Sharepoint._currentPath) {//path exists then 
+                            Sharepoint._currentPath += "/"+name;
+                        } else { //could do a ternary operator ?
+                            Sharepoint._currentPath += ":/" + name;
+                        }
+                       
+                    }
+
+                    // If you are storing the path as a string like "Folder1:/Folder2:/", you may need to reconstruct it
+                   // let newPath = parentPath + name + ":/";
+
+                    // Get the selected siteId
+                    let siteId = window.top.document.getElementById('sitesDropdown').value;
+
+                    // Call the real API
+                    const foldersJson = await Sharepoint._getAllFolders(siteId, Sharepoint._currentPath);
+
+                    // Only return folders
+                    return {
+                        value: (foldersJson && foldersJson.value)
+                            ? foldersJson.value.filter(item => item.folder)
+                            : []
+                    };
+                },
 
         // SVG icons
 //        const icons = {
@@ -2013,6 +2031,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         const expandBtn = document.createElement('button');
                         expandBtn.className = 'expand-button2';
                         expandBtn.innerHTML = icons.chevronRight;
+                        if (isExpanded) {
+                            expandBtn.querySelector('.chevron').classList.add('expanded');
+                        }
                         expandBtn.addEventListener('click', (e) => {
                             e.preventDefault();
                             self._toggleFolder(item.id, expandBtn, e);
@@ -2045,6 +2066,23 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemElement.addEventListener('mouseleave', () => itemElement.classList.remove('hovered'));
 
                     return itemElement;
+                }, _collapseDescendants: function (folderId) {
+                    // Remove from expandedFolders
+                    expandedFolders.delete(folderId);
+
+                    // Remove the children container for this folder
+                    const childrenContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
+                    if (childrenContainer) {
+                        // For each child folder, recursively collapse
+                        const childFolderElements = childrenContainer.querySelectorAll('.tree-item');
+                        childFolderElements.forEach(childEl => {
+                            const childId = childEl.dataset.itemId;
+                            if (expandedFolders.has(childId)) {
+                                Sharepoint.collapseDescendants(childId);
+                            }
+                        });
+                        childrenContainer.remove();
+                    }
                 },
 
                 // Toggle folder expand/collapse
@@ -2057,13 +2095,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
             const isExpanded = expandedFolders.has(folderId);
 
             if (isExpanded) {
-                console.log("it is already expanded");
-                // Collapse folder
-                expandedFolders.delete(folderId);
-                const childrenContainer = document.querySelector(`[data-children-of="${folderId}"]`);
-                if (childrenContainer) {
-                    childrenContainer.remove();
-                }
+                Sharepoint._collapseDescendants(folderId);
+                //console.log("it is already expanded");
+                //// Collapse folder
+                //expandedFolders.delete(folderId);
+                //const childrenContainer = document.querySelector(`[data-children-of="${folderId}"]`);
+                //if (childrenContainer) {
+                //    childrenContainer.remove();
+                //}
             } else {
                 // Expand folder
                 console.log("we are expanding now")
@@ -2084,7 +2123,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.error('Error fetching children:', error);
                         expandedFolders.delete(folderId);
                     } finally {
+                        console.log("we should be deleting folder now!");
                         loadingFolders.delete(folderId);
+                        //expandedFolders.delete(folderId);
                     }
                 }
 
@@ -2095,7 +2136,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
             Sharepoint._updateTreeItem(folderId);
             const itemElement = window.top.document.querySelector(`[data-item-id="${folderId}"]`);
             let name = itemElement.querySelector('.folder-name').textContent;//search by class for folder name
-            Sharepoint._currentPath += "/" + name;
+            //Sharepoint._currentPath += name + ":/";//update path
+            let siteId = window.top.document.getElementById('sitesDropdown').value;
+            //await Sharepoint._renderTree();//should be fine
             console.log("name at line 2090 is ", name);
             console.log("new current path is ", Sharepoint._currentPath)
            // updateTreeItem(folderId);
@@ -2179,17 +2222,33 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
             parentElement.insertAdjacentElement('afterend', childrenContainer);
         },
 
-        // Initial render
-        _renderTree:function() {
-            const container = window.top.document.getElementById('treeContent');
-            container.innerHTML = '';
+                _renderTree: async function () {
+                    const container = window.top.document.getElementById('treeContent');
+                    container.innerHTML = '';
 
-            mockApiData.value.forEach(item => {
-                const itemElement = Sharepoint._createTreeItem(item, 0);
-                container.appendChild(itemElement);
-            });
+                    // Get the selected siteId from the dropdown
+                    let siteId = window.top.document.getElementById('sitesDropdown').value;
+                    if (!siteId) {
+                        container.innerHTML = '<div>Please select a site.</div>';
+                        return;
+                    }
 
-        },
+                    // Fetch folders from backend
+                    console.log("we are calling with siteId ", siteId, " and folder path ", Sharepoint._currentPath);
+                    let foldersJson = await this._getAllFolders(siteId,Sharepoint._currentPath);
+
+                    if (foldersJson && foldersJson.value && Array.isArray(foldersJson.value)) {
+                        // Only show items that are folders (have a .folder property)
+                        foldersJson.value
+                            .filter(item => item.folder) // Only folders
+                            .forEach(item => {
+                                const itemElement = Sharepoint._createTreeItem(item, 0);
+                                container.appendChild(itemElement);
+                            });
+                    } else {
+                        container.innerHTML = '<div>No folders found.</div>';
+                    }
+                },
 
         // Initialize the tree
         //renderTree();
@@ -2502,6 +2561,12 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //Sharepoint._getAuth();
                     console.log("we are calling GETALLFOLDERS");
                     let apptoken = Sharepoint._microsoftToken;
+                    if (folderPath) {
+                        console.log("folder path in get all folders ", folderPath);
+                    } else {
+                        console.log("folder path is still null")
+                    }
+                    
 
                     //console.log("apptoken is:", apptoken);
                     try {
@@ -2537,7 +2602,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         console.log("appending should finish!");
 
-                        ; //in theory should have all our sites if response is correct
+                        //in theory should have all our sites if response is correct
+                        return foldersJson;//so we can use it later
 
 
                     } catch (error) {
