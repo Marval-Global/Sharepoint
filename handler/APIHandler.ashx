@@ -29,6 +29,7 @@ public class Handler : PluginHandler
         public string apptoken { get; set; }
         public string siteId { get; set; }
         public string folderId { get; set; }
+        public string folderPath { get; set; }
 
     }
 
@@ -368,39 +369,39 @@ public class Handler : PluginHandler
                 {
                     context.Response.Write("Hi");
                 }else if (getParamVal == "getAllNotes")
+                {
+                    try
                     {
-                        try
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes";
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
                         {
-                            string requestBody;
-                            var identifer = context.Request.QueryString["identifier"];
-                            var reqId = context.Request.QueryString["reqId"];
-
-                            string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes";
-                            Log.Information("url here is" + attachmentUrl);
-                            httpWebRequest = BuildRequest(attachmentUrl);
-                            httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
-                            httpWebRequest.Method = "GET";
-                            // Get the attachment data as byte array
-                            byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
-                            Log.Information("we are at line 367");
-
-                            if (attachmentData != null && attachmentData.Length > 0)
-                            {
-                                context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
-                                context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
-                            }
-                            else
-                            {
-                                Log.Warning("No attachment data received from MSM API");
-                                context.Response.Write("No attachment data found");
-                            }
+                            context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                            context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
                         }
-                        catch (Exception e)
+                        else
                         {
-                            Log.Error("Exception during attachment upload: " + e.Message, e);
-                            context.Response.Write("Error uploading file: " + e.Message);
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
                         }
                     }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                }
                 else if (getParamVal == "getAllAttachments")
                 {
                     try
@@ -540,8 +541,8 @@ public class Handler : PluginHandler
                         //byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
                         string noteJson = this.ProcessRequest2(httpWebRequest); // raw JSON string
                         dynamic noteData = JsonConvert.DeserializeObject(noteJson); //deserialise so we cna access the data in the body
-                            Log.Information("noteJson = " + noteJson);
-Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
+                        Log.Information("noteJson = " + noteJson);
+                        Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
 
 
                         // Build a plain-text file content
@@ -603,6 +604,7 @@ Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
                 else if (getParamVal == "getAllFolders")
                 {
                     string json;
+                    string url = "";
 
 
                     using (var reader = new StreamReader(context.Request.InputStream))
@@ -628,9 +630,18 @@ Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
                     Log.Information("apptoken is", apptoken);
                     Log.Information("data is" + data);
                     string siteId = data.siteId;
+                    string folderPath = data.folderPath;
+                    if (!String.IsNullOrEmpty(folderPath))//if exists
+                    {
+                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/"+folderPath+"/children";
+                    }
+                    else
+                    {
+                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children"; //meaning get root folders
+                    }
 
                     Log.Information("apptoken is: " + apptoken);
-                    string ex = GetRequest("https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children", apptoken);
+                    string ex = GetRequest((url), apptoken);
                     context.Response.Write(ex);
                 }
                 else if (getParamVal == "getSites")
@@ -898,6 +909,7 @@ Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
             // Get the value attribute of the node
             connectionString = nodeList[0].Attributes["value"].Value;
         }
+
         else
         {
         }
