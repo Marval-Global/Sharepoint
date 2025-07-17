@@ -17,7 +17,10 @@
             border: 1px solid #e5e7eb;
             overflow: hidden;
         }
-
+        .folder-icon.selected,
+.folder-icon.selected path {
+    fill: #22c55e !important;
+}
         .header {
             border-bottom: 1px solid #e5e7eb;
             padding: 16px;
@@ -42,8 +45,8 @@
         .tree-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
+            gap: 5px;
+            padding: 2px 2px;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.2s;
@@ -432,7 +435,7 @@
                 <h2>SharePoint Folders</h2>
                 <p>Browse and explore your folder structure</p>
             </div>
-            <div class="tree-content" id="treeContent">
+            <div class="tree-content" id="treeContent" display="none">
                 <!-- Tree items will be generated here -->
             </div>
         </div>
@@ -488,6 +491,7 @@
     </div>
 
     <button id="uploadAll">Upload All Attachments</button>
+    <div id="selectedFolder">Example</div>
 
 
 </template>
@@ -677,7 +681,9 @@
                 _attachmentName: null,
                 _microsoftToken: null,
                 _currentPath: null,
-                _currentSelectedFolderId : null,
+                _prevId:null,
+                _currentSelectedFolderId: null,
+
                // Sharepoint: null,
 
 
@@ -1611,7 +1617,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (this._uploadButton) {
                         console.log("upload all button does exist");
                     }
-                    eventManager.addHandler(this._uploadButton, "click", this._uploadAllAttachments, this); //should be uploading all now
+                    eventManager.addHandler(this._uploadButton, "click", this._uploadAllAttachments
+                        
+                    , this); //should be uploading all now
                     
 
                     if (this._uploadMessage) {
@@ -2030,11 +2038,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         expandBtn.className = 'expand-button2';
                         expandBtn.innerHTML = icons.chevronRight;
                         if (isExpanded) {
-                            expandBtn.querySelector('.chevron').classList.add('expanded');
+                            expandBtn.querySelector('.chevron').classList.add('expanded');//tyr to add class this way
                         }
+                        $(".expand-button2").on('click', function () {
+                            console.log("clicked button")
+                            $(this).closest('.folder-name').css("color", 'red');
+                        })
                         expandBtn.addEventListener('click', (e) => {
                             e.preventDefault();
-                            self._toggleFolder(item.id, expandBtn, e);
+                            console.log("clicked button")
+                            $(e).closest('.folder-name').css("color", "red");
+                            self._toggleFolder(item.id, expandBtn, e);//toggle folder onclick
                         });
                         controlsDiv.appendChild(expandBtn);
                     }
@@ -2063,6 +2077,24 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemElement.addEventListener('mouseenter', () => itemElement.classList.add('hovered'));
                     itemElement.addEventListener('mouseleave', () => itemElement.classList.remove('hovered'));
 
+                    // Add click handler to the whole tree item
+                    itemElement.addEventListener('click', function (e) {
+                        // Prevent double handling if the expand/collapse button was clicked
+                        if (e.target.closest('.expand-button2')) return;
+
+                        // Set current path and update UI
+                        Sharepoint._prevId = Sharepoint._currentSelectedFolderId;
+                        Sharepoint._currentSelectedFolderId = item.id;
+                        Sharepoint._currentPath = folderPaths[item.id];
+
+                        // Update the selected folder display
+                        $("#selectedFolder").text(Sharepoint._currentPath);
+
+                        // Optionally, update the selected style for the folder name
+                        $('.folder-name').removeClass('selected');
+                        nameSpan.classList.add('selected');
+                    });
+
                     return itemElement;
                 }, _collapseDescendants: function (folderId) {
                     expandedFolders.delete(folderId);
@@ -2084,8 +2116,25 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 // Toggle folder expand/collapse
                 _toggleFolder: async function (folderId, sender, e) {
                     e.preventDefault();
-                    Sharepoint._currentSelectedFolderId = folderId;
-                    Sharepoint._currentPath = folderPaths[folderId];
+                    
+                    Sharepoint._prevId = this._currentSelectedFolderId; //so when we go to new node, old path will be cur path before update
+                    Sharepoint._currentSelectedFolderId = folderId;//set cur id
+                    Sharepoint._currentPath = folderPaths[folderId];//set cur path
+
+                    let selectedFolderDiv = $("#selectedFolder");
+                    selectedFolderDiv.text(Sharepoint._currentPath);//show it
+                    //probably put this in is not expanded
+                    //window.top.document.querySelectorAll(".folder-icon.selected").forEach(el => {
+                    //    el.classList.remove('selected');
+                    //});
+
+                    const selectedItem = $(`[data-item-id="${folderId}"] .folder-name`).css("color", 'red');
+                    console.log("selected item is ", selectedItem.text())
+                    //$(selectedItem).css("color","red");
+                    if (selectedItem.length) {
+                        selectedItem.addClass("selected");
+                        selectedItem.css("fill", "red"); // Use "fill" for SVG color
+                    }
 
                     if (loadingFolders.has(folderId)) return;
 
@@ -2094,7 +2143,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (isExpanded) {
                         Sharepoint._collapseDescendants(folderId);
                     } else {
-                        expandedFolders.add(folderId);
+                        expandedFolders.add(folderId);//we should be expanding it
+                        console.log("we are adding folder id ", folderId, " to expanded: ");
 
                         // Only fetch children if not already loaded
                         if (!folderData[folderId]) {
@@ -2121,47 +2171,43 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     Sharepoint._updateTreeItem(folderId);
                 },
 
-                // Update a specific tree item
-        _updateTreeItem: function(itemId)
-        {   
-            
-            //console.log("we currently at path", Sharepoint._currentPath);
-            ///console.log("we are calling update tree item ")
-            const itemElement = window.top.document.querySelector(`[data-item-id="${itemId}"]`);
-            //we can use query selector on item
-            let name = itemElement.querySelector('.folder-name').textContent;//search by class for folder name
-            console.log("item element is ", itemElement)
-            console.log("name is ", name)
-            //Sharepoint._currentPath += "/"+name;
-            //console.log("new path", Sharepoint._currentPath);
+                _updateTreeItem: function (itemId) {
+                    const itemElement = window.top.document.querySelector(`[data-item-id="${itemId}"]`);
+                    if (!itemElement) {
+                        console.log("No itemElement found for", itemId);
+                        return;
+                    }
 
-            if (!itemElement) return;
+                    const item = Sharepoint._findItemById(itemId);
+                    if (!item) {
+                        console.log("No item found for", itemId);
+                        return;
+                    }
 
-            const item = Sharepoint._findItemById(itemId);
-            if (!item) return;
+                    const level = parseInt(itemElement.style.paddingLeft) / 20 - 0.4;
+                    const newElement = Sharepoint._createTreeItem(item, level);
 
-            const level = parseInt(itemElement.style.paddingLeft) / 20 - 0.4;
-            const newElement = Sharepoint._createTreeItem(item, level);
-            itemElement.replaceWith(newElement);
-        },
+                    // Debug log
+                    console.log("Replacing element for", itemId, "at level", level, "parent", itemElement.parentNode);
+
+                    itemElement.parentNode.replaceChild(newElement, itemElement);
+                },
 
                 // Find item by ID in the data structure
 
-        _findItemById: function(itemId) {
-            // Check root level
-            for (const item of mockApiData.value) {
-                if (item.id === itemId) return item;
-            }
-
-            // Check loaded children
-            for (const children of Object.values(folderData)) {
-                for (const item of children) {
-                    if (item.id === itemId) return item;
-                }
-            }
-
-            return null;
-        },
+                _findItemById: function (itemId) {
+                    // Search root folders
+                    for (const item of (folderData['root'] || [])) {
+                        if (item.id === itemId) return item;
+                    }
+                    // Search all loaded children
+                    for (const children of Object.values(folderData)) {
+                        for (const item of children) {
+                            if (item.id === itemId) return item;
+                        }
+                    }
+                    return null;
+                },
 
         // Render children of a folder
                 _renderChildren: function (folderId) {
@@ -2223,6 +2269,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     if (foldersJson && foldersJson.value && Array.isArray(foldersJson.value)) {
                         // Only show items that are folders (have a .folder property)
+                        folderData['root'] = foldersJson.value.filter(item => item.folder);//remember to add root folders to folder data
+                        
                         foldersJson.value
                             .filter(item => item.folder) // Only folders
                             .forEach(item => {
@@ -2265,7 +2313,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         this._getAllAttachments();
                         this._getAllNotes();
                         this._fetchSharePointSites();
-                        this._renderTree();
+                        //this._renderTree();
                         //window.toggleFolder = Sharepoint._toggleFolder.bind(Sharepoint);
 
                         //renderTree();
