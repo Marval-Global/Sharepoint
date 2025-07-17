@@ -1,2735 +1,959 @@
-
-<script type="text/javascript" src="template.js"></script>
-<template>
-    <style>
-        /*        #groupsDropdown {
-                    font-weight: normal;
-                }*/
-        .container {
-            max-width: 1024px;
-            margin: 0 auto;
-        }
-
-        .folder-tree {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-        }
-
-        .header {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 16px;
-        }
-
-            .header h2 {
-                font-size: 18px;
-                font-weight: 600;
-                color: #374151;
-                margin-bottom: 4px;
-            }
-
-            .header p {
-                font-size: 14px;
-                color: #6b7280 !important;
-            }
-
-        .tree-content {
-            padding: 16px;
-        }
-
-        .tree-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            user-select: none;
-        }
-
-            .tree-item:hover {
-                background-color: #f9fafb;
-            }
-
-            .tree-item.hovered {
-                background-color: #eff6ff;
-            }
-
-                .tree-item.hovered:hover {
-                    background-color: #dbeafe;
-                }
-
-        .tree-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .expand-button2 {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-            padding:0;
-        }
-
-            .expand-button2:hover {
-                background-color: #e5e7eb;
-            }
-
-        .chevron {
-            width: 16px !important;
-            height: 16px !important;
-            fill: #6b7280 !important;
-            transition: transform 0.2s !important;
-        }
-
-            .chevron.expanded {
-                transform: rotate(90deg);
-            }
-
-        .folder-icon {
-            width: 20px;
-            height: 20px;
-            fill: #2563eb;
-        }
-
-        .folder-name {
-            font-size: 14px;
-            color: #374151;
-            font-weight: 500;
-            flex: 1;
-        }
-
-        .item-count {
-            font-size: 12px !important;
-            color: #6b7280 !important;
-            background-color: #f3f4f6 !important;
-            padding: 2px 8px !important;
-            border-radius: 12px !important;
-            margin-left: 8px !important;
-        }
-
-        .last-modified {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-left: 8px;
-        }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #e5e7eb;
-            border-top: 2px solid #2563eb;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .children {
-            margin-left: 20px;
-        }
-
-        .notes {
-            margin-top: 24px;
-            padding: 16px;
-            background-color: #f9fafb;
-            border-radius: 8px;
-        }
-
-            .notes h3 {
-                font-weight: 500;
-                color: #374151;
-                margin-bottom: 8px;
-            }
-
-            .notes ul {
-                list-style: none;
-                font-size: 14px;
-                color: #6b7280 !important;
-            }
-
-            .notes li {
-                margin-bottom: 4px;
-                padding-left: 8px;
-            }
-
-                .notes li::before {
-                    content: "• ";
-                    margin-right: 4px;
-                }
-
-            .notes code {
-                background-color: #f3f4f6;
-                padding: 2px 4px;
-                border-radius: 4px;
-                font-family: 'Courier New', monospace;
-            }
-
-
-
-        .content {
-            border-radius: 10px;
-            font-family: 'Inter', 'Open Sans', sans-serif;
-            font-weight: bold;
-            /*            height:500px !important;*/
-        }
-
-        #uploadAll {
-            cursor: pointer;
-        }
-
-        .messageButton {
-            background-color: #8c9097;
-            font-weight: normal;
-            cursor: pointer;
-        }
-
-        #uploadFile {
-            cursor: pointer;
-        }
-
-        #createFolder {
-            cursor: pointer;
-        }
-
-        .LinkedProjectsHeader {
-            /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
-            color: #00314a !important;
-            font-size: 12px !important;
-            font-family: 'Inter', 'Open Sans', sans-serif;
-        }
-
-            .LinkedProjectsHeader h1 {
-                /* background: linear-gradient(to bottom right,#cbd6e2,#cbd6e2) !important;  */
-                color: #00314a !important;
-                font-size: 12px !important;
-                font-family: 'Inter', 'Open Sans', sans-serif;
-            }
-
-        .headerColourChange {
-            background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
-            color: #00314a !important;
-            font-size: 18px !important;
-            font-family: 'Inter', 'Open Sans', sans-serif;
-            border-radius: 10px;
-        }
-
-        .itemsTable {
-            display: flex;
-        }
-
-        #message {
-            vertical-align: top;
-            /*            height: 100px;*/
-            width: 600px;
-        }
-
-        marvalsoftware-plugins-sharepoint {
-            /*            display: block;*/
-            height: 200px;
-        }
-
-            /*            marvalsoftware-plugins-sharepoint > .config-area {
-                        height: 100px;
-                        padding: 0px 10px 10px 10px;
-                        box-shadow: 0 1px 0 0 #ebe8e4;
-                    }
-
-                        marvalsoftware-plugins-sharepoint > .config-area > div {
-                            padding: 10px 0 0 0;
-                        }
-        */
-            marvalsoftware-plugins-sharepoint > .message-area {
-                /*                display: block;*/
-                height: 100px;
-                padding: 10px;
-                box-shadow: 0 1px 0 0 #ebe8e4;
-            }
-
-                marvalsoftware-plugins-sharepoint > .message-area > .cards {
-                    height:;
-                    overflow-y: auto;
-                    padding: 10px;
-                    box-shadow: 0 1px 0 0 #ebe8e4;
-                }
-
-                    marvalsoftware-plugins-sharepoint > .message-area > .cards .card {
-                        background-color: #fff;
-                        padding: 1.5rem;
-                        margin-bottom: 0.5rem;
-                        border: 1px solid #ebe8e4;
-                        border-radius: 4px;
-                        box-shadow: 0 1px 1px 0 #ebe8e4;
-                    }
-
-                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .timestamp {
-                            font-size: 0.75rem;
-                            font-weight: 500;
-                            color: #666;
-                            width: 10%;
-                        }
-
-                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip {
-                            position: relative;
-                            /*                            display: inline-block;*/
-                        }
-
-                            marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip .tooltiptext {
-                                visibility: hidden;
-                                width: 120px;
-                                background-color: #555;
-/*                                color: #fff;*/
-                                text-align: center;
-                                border-radius: 6px;
-                                padding: 5px 0;
-                                position: absolute;
-                                z-index: 1;
-                                bottom: 125%;
-                                left: 50%;
-                                margin-left: -60px;
-                                opacity: 0;
-                                transition: opacity 0.3s;
-                            }
-
-                                marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip .tooltiptext::after {
-                                    content: "";
-                                    position: absolute;
-                                    top: 100%;
-                                    left: 50%;
-                                    margin-left: -5px;
-                                    border-width: 5px;
-                                    border-style: solid;
-                                    border-color: #555 transparent transparent transparent;
-                                }
-
-                            marvalsoftware-plugins-sharepoint > .message-area > .cards .card .tooltip:hover .tooltiptext {
-                                visibility: visible;
-                                opacity: 1;
-                            }
-
-                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .status {
-                            margin-top: 0.75rem;
-                            font-size: 1rem;
-                            font-weight: 600;
-                        }
-
-                        marvalsoftware-plugins-sharepoint > .message-area > .cards .card .message {
-                            line-height: 22px;
-                            margin-right: 6rem;
-                            color: #666;
-                            font-size: 0.875rem;
-                            white-space: pre-line;
-                        }
-
-            marvalsoftware-plugins-sharepoint > .update-area {
-                height: 20%;
-                padding: 10px 10px 0 10px;
-            }
-
-                marvalsoftware-plugins-sharepoint > .update-area textarea {
-                    width: 100%;
-                    height: 75%;
-                    box-sizing: border-box;
-                    -moz-box-sizing: border-box;
-                    -webkit-box-sizing: border-box;
-                    resize: none;
-                }
-
-                marvalsoftware-plugins-sharepoint > .update-area .action-buttons {
-                    float: right;
-                    padding-top: 10px;
-                }
-
-                    marvalsoftware-plugins-sharepoint > .update-area .action-buttons button {
-                        box-sizing: border-box;
-                        border: 1px solid #ccc;
-                        border-radius: 2px;
-                        background-color: #6697EA; /*changing colour from green to blue*/
-                        cursor: pointer; /*changing to pointer when cursor is over it*/
-                    }
-
-                marvalsoftware-plugins-sharepoint > .update-area label,
-                marvalsoftware-plugins-sharepoint > .message-area label,
-                marvalsoftware-plugins-sharepoint > .config-area > div label {
-                    font-size: 1rem;
-                    font-weight: 600;
-                    /*                    display: inline-block;*/
-                    width: 50px;
-                    padding-bottom: 5px;
-                }
-
-        .headerColourChange {
-            background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
-            color: #00314a !important;
-            font-size: 18px !important;
-            font-family: 'Inter', 'Open Sans', sans-serif;
-        }
-
-        marvalsoftware-plugins-sharepoint > .message-area label {
-            width: 100px !important;
-        }
-
-        marvalsoftware-plugins-sharepoint > .message-area > .header {
-            align-items: center
-        }
-
-            marvalsoftware-plugins-sharepoint > .message-area > .header a img {
-                position: relative;
-                top: 4px;
-            }
-    </style>
-    <div class="config-area">
-
-
-    </div>
-
-    <!--<div id="folderTreeWrapper">--> <!--folder tree stuff goes here-->
-    <!--<div class="container">
-        <div class="folder-tree">
-            <div class="header">
-                <h2>SharePoint Folders</h2>
-                <p>Browse and explore your folder structure</p>
-            </div>
-            <div class="tree-content" id="treeContent">-->
-    <!-- Tree items will be generated here -->
-    <!--</div>
-        </div>
-
-        <div class="notes">
-            <h3>API Integration Notes:</h3>
-            <ul>
-                <li>Replace the mock <code>fetchChildren</code> function with actual Microsoft Graph API calls</li>
-                <li>Add proper error handling and authentication</li>
-                <li>Consider implementing virtual scrolling for large folder structures</li>
-                <li>Add context menus for folder operations (create, rename, delete, etc.)</li>
-                <li>Implement search functionality across the folder structure</li>
-            </ul>
-        </div>
-    </div>-->
-    <!--</div>-->
-    <div class="container">
-        <div class="folder-tree">
-            <div class="header">
-                <h2>SharePoint Folders</h2>
-                <p>Browse and explore your folder structure</p>
-            </div>
-            <div class="tree-content" id="treeContent">
-                <!-- Tree items will be generated here -->
-            </div>
-        </div>
-
-    </div>
-
-    <select id="sitesDropdown"><option>Loading!</option></select>
-    <select id="foldersDropdown"><option>Still loading!</option></select>
-
-
-    <button id="uploadFile">upload</button>
-    <button id="createFolder">Create Folder!</button>
-    <button id="testButton">test button</button>
-
-    <div class="itemsTable">
-        <table id="notesTable" border="1" style="margin-top: 10px; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center;">(Empty)</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table id="itemsTable" border="1" style="margin-top: 10px; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Attachments</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center;">(Empty)</td>
-                </tr>
-            </tbody>
-        </table>
-        <table id="emailsTable" border="1" style="margin-top: 10px; width: 100%;">
-            <thead>
-                <tr>
-                    <th>Emails</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center;">(Empty)</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <button id="uploadAll">Upload All Attachments</button>
-
-
-</template>
-<template class="cardTemplate">
-    <div class="card">
-        <div class="timestamp tooltip">
-            <span class="tooltiptext"></span>
-        </div>
-        <div class="status"></div>
-        <div class="message"></div>
-    </div>
-</template>
-<template class="errorTemplate">
-    <style>
-        .marvalsoftware-sharepoint-errors h3,
-        .marvalsoftware-sharepoint-errors h4 {
-            padding: 8px 0 8px 0;
-        }
-
-        .sharepointConfig > li {
-            display: none;
-        }
-    </style>
-    <div class="marvalsoftware-sharepoint-errors">
-        <div class="title">
-            <h3>Ensure all configuration settings are correct.</h3>
-        </div>
-        <div>
-            <ul class="sharepointConfig">
-                <li id="userAPIKey"> Organisation API Key </li>
-            </ul>
-            <h4></h4>
-        </div>
-    </div>
-</template>
-<template class="miscellaneousErrorsTemplate">
-    <style>
-        .marvalsoftware-sharepoint-errors h3,
-        .marvalsoftware-sharepoint-errors h4 {
-            padding: 8px 0 8px 0;
-        }
-    </style>
-    <div class="marvalsoftware-sharepoint-errors">
-        <div class="title">
-            <h3>Error loading Sharepoint.</h3>
-        </div>
-        <div>
-            <label></label>
-        </div>
-    </div>
-</template>
-
-<script type="text/javascript" src="msal-browser.min.js"></script>
-<script>
-    (function () {
-
-        var MarvalSoftware = window.top.MarvalSoftware;
-        var $ = window.top.$;
-        var Sharepoint = null;
-        let mockApiData = {
-            value: [
-                {
-                    id: '1',
-                    name: 'Documents',
-                    folder: { childCount: 3 },
-                    createdDateTime: '2024-01-15T10:30:00Z',
-                    lastModifiedDateTime: '2024-01-20T14:22:00Z'
-                },
-                {
-                    id: '2',
-                    name: 'Images',
-                    folder: { childCount: 5 },
-                    createdDateTime: '2024-01-10T09:15:00Z',
-                    lastModifiedDateTime: '2024-01-18T16:45:00Z'
-                },
-                {
-                    id: '3',
-                    name: 'Projects',
-                    folder: { childCount: 2 },
-                    createdDateTime: '2024-01-12T11:20:00Z',
-                    lastModifiedDateTime: '2024-01-12T11:20:00Z'
-                },
-                {
-                    id: '4',
-                    name: 'Archives',
-                    folder: { childCount: 1 },
-                    createdDateTime: '2024-01-14T13:45:00Z',
-                    lastModifiedDateTime: '2024-01-16T10:30:00Z'
-                }
-            ]
-        };
-
-        let mockSubfolderData = {
-            '1': {
-                value: [
-                    {
-                        id: '1-1',
-                        name: 'Contracts',
-                        folder: { childCount: 2 },
-                        createdDateTime: '2024-01-15T10:30:00Z',
-                        lastModifiedDateTime: '2024-01-20T14:22:00Z'
-                    },
-                    {
-                        id: '1-2',
-                        name: 'Legal',
-                        folder: { childCount: 1 },
-                        createdDateTime: '2024-01-16T09:15:00Z',
-                        lastModifiedDateTime: '2024-01-16T09:15:00Z'
-                    },
-                    {
-                        id: '1-3',
-                        name: 'Templates',
-                        folder: { childCount: 0 },
-                        createdDateTime: '2024-01-17T14:20:00Z',
-                        lastModifiedDateTime: '2024-01-17T14:20:00Z'
-                    }
-                ]
-            },
-            '2': {
-                value: [
-                    {
-                        id: '2-1',
-                        name: 'Marketing',
-                        folder: { childCount: 3 },
-                        createdDateTime: '2024-01-10T09:15:00Z',
-                        lastModifiedDateTime: '2024-01-10T09:15:00Z'
-                    },
-                    {
-                        id: '2-2',
-                        name: 'Product',
-                        folder: { childCount: 2 },
-                        createdDateTime: '2024-01-11T15:30:00Z',
-                        lastModifiedDateTime: '2024-01-11T15:30:00Z'
-                    },
-                    {
-                        id: '2-3',
-                        name: 'Screenshots',
-                        folder: { childCount: 0 },
-                        createdDateTime: '2024-01-12T11:45:00Z',
-                        lastModifiedDateTime: '2024-01-12T11:45:00Z'
-                    }
-                ]
-            }
-        };
-
-        // Global state
-        let folderData = {};
-        let expandedFolders = new Set();
-        let loadingFolders = new Set();
-        const icons = {
-            chevronRight: `<svg class="chevron" viewBox="0 0 16 16">
-    <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
-</svg>`,
-            folderClosed: `<svg class="folder-icon" viewBox="0 0 20 20">
-    <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z"/>
-</svg>`,
-            folderOpen: `<svg class="folder-icon" viewBox="0 0 20 20">
-    <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z" fill-opacity="0.7"/>
-    <path d="M2 8h16v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8Z"/>
-</svg>`,
-            spinner: `<div class="spinner"></div>`
-        };
-        //window.toggleFolder = toggleFolder;
-        MarvalSoftware.Plugins.define("marvalsoftware-plugins-sharepoint",
-            {
-                _element: null,
-                _body: null,
-                _refreshLink: null,
-                _refreshElement: null,
-                _cards: null,
-                _card: null,
-                _status: null,
-                _message: null,
-                _pages: null,
-                _incidents: null,
-                _createElement: null,
-                _requestNumber: null,
-                _requestID: null,
-                _requestDescription: null,
-                _contactEmail: null,
-                _fullPluginPathHandler: null,
-                _requestActionMessageID: null,
-                _rowIndex: null,
-                _attachmentName: null,
-                _microsoftToken: null,
-                _currentPath:null,
-               // Sharepoint: null,
-
-
-
-
-                init: function () {
-                    
-                    const mockApiData = {
-                        value: [
-                            {
-                                id: '1',
-                                name: 'Documents',
-                                folder: { childCount: 3 },
-                                createdDateTime: '2024-01-15T10:30:00Z',
-                                lastModifiedDateTime: '2024-01-20T14:22:00Z'
-                            },
-                            {
-                                id: '2',
-                                name: 'Images',
-                                folder: { childCount: 5 },
-                                createdDateTime: '2024-01-10T09:15:00Z',
-                                lastModifiedDateTime: '2024-01-18T16:45:00Z'
-                            },
-                            {
-                                id: '3',
-                                name: 'Projects',
-                                folder: { childCount: 2 },
-                                createdDateTime: '2024-01-12T11:20:00Z',
-                                lastModifiedDateTime: '2024-01-12T11:20:00Z'
-                            },
-                            {
-                                id: '4',
-                                name: 'Archives',
-                                folder: { childCount: 1 },
-                                createdDateTime: '2024-01-14T13:45:00Z',
-                                lastModifiedDateTime: '2024-01-16T10:30:00Z'
-                            }
-                        ]
-                    };
-
-                    const mockSubfolderData = {
-                        '1': {
-                            value: [
-                                {
-                                    id: '1-1',
-                                    name: 'Contracts',
-                                    folder: { childCount: 2 },
-                                    createdDateTime: '2024-01-15T10:30:00Z',
-                                    lastModifiedDateTime: '2024-01-20T14:22:00Z'
-                                },
-                                {
-                                    id: '1-2',
-                                    name: 'Legal',
-                                    folder: { childCount: 1 },
-                                    createdDateTime: '2024-01-16T09:15:00Z',
-                                    lastModifiedDateTime: '2024-01-16T09:15:00Z'
-                                },
-                                {
-                                    id: '1-3',
-                                    name: 'Templates',
-                                    folder: { childCount: 0 },
-                                    createdDateTime: '2024-01-17T14:20:00Z',
-                                    lastModifiedDateTime: '2024-01-17T14:20:00Z'
-                                }
-                            ]
-                        },
-                        '2': {
-                            value: [
-                                {
-                                    id: '2-1',
-                                    name: 'Marketing',
-                                    folder: { childCount: 3 },
-                                    createdDateTime: '2024-01-10T09:15:00Z',
-                                    lastModifiedDateTime: '2024-01-10T09:15:00Z'
-                                },
-                                {
-                                    id: '2-2',
-                                    name: 'Product',
-                                    folder: { childCount: 2 },
-                                    createdDateTime: '2024-01-11T15:30:00Z',
-                                    lastModifiedDateTime: '2024-01-11T15:30:00Z'
-                                },
-                                {
-                                    id: '2-3',
-                                    name: 'Screenshots',
-                                    folder: { childCount: 0 },
-                                    createdDateTime: '2024-01-12T11:45:00Z',
-                                    lastModifiedDateTime: '2024-01-12T11:45:00Z'
-                                }
-                            ]
-                        }
-                    };
-
-                    Sharepoint = this;
-                    Sharepoint._currentPath = "";
-                    //window.Sharepoint = this;
-
-                    this._sendInProgress = false; //we will use later to keep track of if we are sending a request
-                    var HeaderText = $('#ctl00_ctl00_cph_entityHeaderText').text();
-                    var currentUrl = window.top.location.href;
-                    var currentHost = window.top.location.host;
-                    _fullPluginPathHandler = "https://" + currentHost + Sharepoint._getPluginPath() + "handler/APIHandler.ashx";
-                    //checkRequestActionMessageExists(); //should be /handler/APIHandler/ashx
-                    //let hostString = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=ChatbotHostOverride")).text()
-                    //let tenantId = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=TenantID")).text()
-                    //let secret = await(await fetch(Sharepoint._getPluginPath() + "Handler.ashx?endpoint=SecretKey")).text()
-
-                    if (currentUrl.includes("Plugin.aspx") && HeaderText == 'MarvalSoftware.Plugins.Sharepoint') {
-                        checkRequestActionMessageExists();
-
-                        function OpenInstallRequestRuleDialog() {
-                            event.preventDefault();
-                            $('#setupActionRuleModal').fadeIn(200);
-
-
-                            var getWorkflowStatuses = fetch(_fullPluginPathHandler, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    action: "getWorkflowStatuses"
-                                })
-                            });
-                            getWorkflowStatuses.then(async workflowStatuses => {
-                                var jsonWorkflowStatusData = await workflowStatuses.json();
-                                // console.log("Have workflows statuses as ", jsonWorkflowStatusData);
-                                var $select = $('#workflowStatusDropdown');
-                                $select.empty();
-                                $select.append('<option value="">-- Select a Workflow Status --</option>');
-                                jsonWorkflowStatusData.forEach(element => {
-                                    $select.append($('<option>').val(element.Identifier).text(element.Name));
-                                })
-                            })
-                            var getWorkflows = fetch(_fullPluginPathHandler, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    action: "getWorkflows"
-                                })
-                            });
-                            getWorkflows.then(async workflows => {
-                                var jsonworkflowData = await workflows.json();
-                                //    console.log("Have workflow data as ", jsonworkflowData);
-                                var $select = $('#workflowDropdown');
-                                $select.empty();
-                                $select.append('<option value="">-- Select a Workflow --</option>');
-                                jsonworkflowData.forEach(element => {
-                                    $select.append($('<option>').val(element.Identifier).text(element.Name));
-                                    //     console.log("Have element ", element);
-                                })
-                            })
-                        }
-
-                        $('head').append(`
-                        <style>
-                        /* ✅ Steps */
-.modal-steps {
-  margin: 0;
-  padding-left: 1.25rem;
-  list-style: disc;
-  color: #073f5c;
-}
-.modal-steps li {
-  margin-bottom: .9rem;
-}
-.modal-steps a {
-  color: #1696B7;
-  text-decoration: underline;
-}
-.modal-steps a:hover {
-  text-decoration: none;
-}
-
-
-.close {
-  position: absolute;
-  top: .75rem;
-  right: .75rem;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #1696B7;
-  //color: #fff;
-  font-size: 1.25rem;
-  line-height: 1;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background .2s ease;
-}
-.close:hover { background: #073f5c; }
-
-/* 📈 Subtle pop-in */
-@keyframes pop {
-  0%   { transform: scale(.85); opacity: 0; }
-  100% { transform: scale(1);   opacity: 1; }
-}
-
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;    /* horizontally center all direct children */
-  text-align: center;      /* center text inside headings, list items, etc. */
-  padding: 1.5rem;         /* optional, for a bit of breathing room */
-}
-
-.modal-content .modal-steps {
-  padding: 0;
-  list-style-position: inside; /* keep the bullets but centered */
-  margin: 1rem 0;
-}
-
-.modal-content input,
-.modal-content .hrefButton,
-.modal-content .close {
-  /* make sure buttons/inputs shrink to their contents */
-  display: inline-block;
-  margin: 0.5rem 0;
-}
-                        .headerColourChange {
-    background: linear-gradient(to bottom right, #cbd6e2, #cbd6e2) !important;
-    color: #00314a !important;
-    font-size: 18px !important;
-    font-family: 'Inter', 'Open Sans', sans-serif;
-}
-                        .modalBox {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: none;                 /* toggle with JS */
-  place-items: center;
-  background: rgba(7, 63, 92, .60);   /* #073f5c with 60 % opacity */
-  backdrop-filter: blur(2px);
-}
-
-/* 🗂️  Content card -------------------------------------------------------- */
-.modal-content {
-  width: min(600px, 90%);
-  
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.25);
-  padding: 2.5rem 2.25rem;
-  animation: pop .35s ease;
-  position: relative;
-  font-family: "Segoe UI", Roboto, sans-serif;
-}
-
-/* 🎀 Header */
-.modal-content h2 {
-  margin: 0 0 1.25rem;
-  font-size: 1.5rem;
-  line-height: 1.2;
-  color: #073f5c;
-}
-.modal-content h2 span {
-  border-bottom: 3px solid #1696B7;
-  padding-bottom: .25rem;
-}
-                            </style>`);
-                        $('#ctl00_ctl00_cph_maintenance_pluginDetailsFieldSet').before(`<button class="hrefButton" id="requestActionMessageInstall">
-  Install Request Action Message
-</button>
-<div id="requestActionMessageResponse"> </div>
-<br>
-<br>
-<button class="hrefButton" id="actionRuleInstall">
-  Open Request Action Rule Dialogue
-</button>
-<br>
-<br>
-<div id="setupActionRuleModal" class="modalBox">
-  <div class="modal-content">
-    <button class="close" title="Close">&times;</button>
-<br>
-    <h2><span>Install the Request Action Rule</span></h2>
-    <br>
-  <p>This section rule is used to determine the criteria for running the request action rule to create a new Sharepoint User.</p>
-  <p>You can modify this later directly in the request action rule.</p>
-  <br>
- <div class="form-group">
-      <label for="workflowDropdown">Choose a workflow for your request action rule:</label><br>
-      <select id="workflowDropdown">
-        <option>Loading…</option>
-      </select>
-    </div>
-<br>
-    <div class="form-group">
-      <label for="workflowStatusDropdown">Choose a workflow status for your request action rule:</label><br>
-      <select id="workflowStatusDropdown" >
-        <option>Loading…</option>
-      </select>
-    </div>
-<br>
-<br>
-     <button class="hrefButton" id="InstallRequestActionRule">
-        Install Request Action Rule
-      </button>
-       <div class="loadingSpinner" id="InstallRequestActionRuleSpinner" role="status" style="display:none" aria-label="Loading…"></div>
-      <br><span id="InstalledRequestionActionRuleResponse"></span>
-      <br>
-      <ul class="modal-steps">
-       <li>
-      </li>
-    </ul>
-  </div>
-</div>
-`);
-                        $('#ct100_overlay_id1').hide();
-                        $('#ctl00_ctl00_cph_maintenance_worksWithMsm').removeClass('unsigned');
-                        $('#ctl00_ctl00_cph_maintenance_worksWithMsm').addClass('signed');
-                        console.log("button should be working");
-                        window.top.document.getElementById("requestActionMessageInstall").onclick = downloadRequestActionMessage;
-                        window.top.document.getElementById("actionRuleInstall").addEventListener("click", OpenInstallRequestRuleDialog);
-                        window.top.document.getElementById("InstallRequestActionRule").onclick = InstallRequestActionRule;
-                        async function InstallRequestActionRule() {
-                            event.preventDefault();
-                            $('#InstallRequestActionRule').attr('disabled', true);
-                            $('#InstallRequestActionRuleSpinner').show();
-                            $('#InstalledRequestionActionRuleResponse').empty();
-                            $('#InstalledRequestionActionRuleResponse').css('color', 'green');
-                            var Workflow = $("#workflowDropdown  option:selected").text();
-                            var WorkflowStatus = $("#workflowStatusDropdown  option:selected").text();
-                            if (Workflow === '-- Select a Workflow --' || WorkflowStatus === '-- Select a Workflow Status --') {
-                                $('#InstalledRequestionActionRuleResponse').empty();
-                                $('#InstallRequestActionRule').attr('disabled', false);
-                                $('#InstalledRequestionActionRuleResponse').append('You must specify an attribute for each item');
-                                $('#InstalledRequestionActionRuleResponse').css('color', 'red');
-                                $('#InstallRequestActionRuleSpinner').hide();
-                                return;
-                            } else {
-
-                                console.log("Selected is ", $("#workflowStatusDropdown option:selected"));
-                                var WorkflowStatusId = $("#workflowStatusDropdown option:selected").val();
-                                var WorkflowId = $("#workflowDropdown option:selected").val();
-                                const encodedFullUrl = encodeURI(_fullPluginPathHandler);
-                                //console.log("we ")
-
-                                var createActionRule = await (await fetch(_fullPluginPathHandler, {
-                                    "method": "POST",
-                                    body: JSON.stringify({ actionMessageId: Sharepoint._requestActionMessageID, actionMessageURL: encodedFullUrl, WorkflowStatusId: WorkflowStatusId, WorkflowId: WorkflowId, action: "createActionRule" }),
-                                    "headers": [["content-type", "application/json"]]
-                                })).json();
-
-                                $('#InstallRequestActionRuleSpinner').hide();
-                                $('#InstallRequestActionRule').attr('disabled', false);
-                                $('#InstalledRequestionActionRuleResponse').append(createActionRule.response);
-
-
-                            }
-
-                        }
-
-                        function checkRequestActionMessageExists() {
-                            var requestActionMessageName = "Sharepoint Integration Message - Automated";
-                            var foundItem = false;
-                            $.get('/MSM/RFP/Forms/RequestActionMessage.aspx', function (html) {
-                                $(html).find('#ctl00_ctl00_ctl00_cph_existingEntitiesContentPlaceHolder_ExistingEntitiesList_loadMoreList_items a.item')
-
-                                    .each(function () {
-
-                                        if ($(this).attr('title') == requestActionMessageName) {
-
-                                            foundItem = true;
-                                            Sharepoint._requestActionMessageID = $(this).attr('href').match(/id=(\d+)$/)[1];
-                                        }
-                                        // console.log($(this).attr('search'));
-
-                                    });
-                                if (foundItem == true) {
-
-                                    //  $('#isRequestActionMessageInstalled').append('You have a request action message in your list of request action messages <a href="/MSM/RFP/Forms/RequestActionMessage.aspx" >here</a>, you do not need to install it.');
-                                    $('#pluginStatus').append('<br><span style="color:green">You have a request action message in your list of request action messages <a href="/MSM/RFP/Forms/RequestActionMessage.aspx" >here</a>, you do not need to install it.</span>');
-                                    //   $('#isRequestActionMessageInstalled').css('color', 'green');
-                                    //   $('#isRequestActionMessageInstalled').attr('')
-                                } else {
-                                    $('#pluginStatus').append('<span style="color:red"><br>You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Sharepoint Integration Message - Automated</span>"');
-                                    // $('#isRequestActionMessageInstalled').append('You currently do not have the action message installed, click the button above to install it.<br>Once installed, it will appear in the list <a href="/MSM/RFP/Forms/RequestActionMessage.aspx">here</a> as an item called "Sharepoint Integration Message - Automated"');
-                                    //  $('#isRequestActionMessageInstalled').css('color', 'red');
-                                }
-                            })
-                                .fail(function () {
-                                    // //  $select.empty()
-                                    //     .append('<option disabled>Error loading list</option>');
-                                });
-
-                        }
-
-                        async function toggleFolder(folderId) {
-                            if (loadingFolders.has(folderId)) return;
-
-                            const isExpanded = expandedFolders.has(folderId);
-
-                            if (isExpanded) {
-                                // Collapse folder
-                                expandedFolders.delete(folderId);
-                                const childrenContainer = document.querySelector(`[data-children-of="${folderId}"]`);
-                                if (childrenContainer) {
-                                    childrenContainer.remove();
-                                }
-                            } else {
-                                // Expand folder
-                                expandedFolders.add(folderId);
-
-                                // Check if we need to load children
-                                if (!folderData[folderId]) {
-                                    loadingFolders.add(folderId);
-                                    updateTreeItem(folderId);
-
-                                    try {
-                                        const response = await fetchChildren(folderId);
-                                        folderData[folderId] = response.value;
-                                    } catch (error) {
-                                        console.error('Error fetching children:', error);
-                                        expandedFolders.delete(folderId);
-                                    } finally {
-                                        loadingFolders.delete(folderId);
-                                    }
-                                }
-
-                                // Render children
-                                renderChildren(folderId);
-                            }
-
-                            updateTreeItem(folderId);
-                        }
-
-
-                        async function getLatestPluginVersion() {
-
-                            var url = "https://raw.githubusercontent.com/Marval-Global/SharepointPlugin/refs/heads/main/manifest.json";
-                            var githubPluginVersion = await (await fetch(url)).json();
-                            var pagePluginVersion = $('#ctl00_ctl00_cph_maintenance_version').text();
-
-                            if (pagePluginVersion == githubPluginVersion.Version) {
-                                $('#ctl00_ctl00_cph_maintenance_version').css("color", "green");
-                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold"); _popup
-
-                                $('#uptodatemessage').fadeIn(250);
-                                setTimeout(() => {
-                                    $('#uptodatemessage').fadeOut(1000);
-                                }, 2000);
-                            } else {
-                                $('#ctl00_ctl00_cph_maintenance_version').css("color", "red");
-                                $('#ctl00_ctl00_cph_maintenance_version').css("font-weight", "bold");
-                                $('#ctl00_ctl00_cph_maintenance_version').append(' - Plugin requires updating. Click <a href="https://github.com/Marval-Global/SharepointPlugin/releases/latest/download/MarvalSoftware.Plugins.Sharepoint.zip">here</a> for the new version.');
-                            }
-                        }
-
-                        $(document).ready(function () {
-
-                            getLatestPluginVersion();
-                        });
-                    }
-                    else if (!currentUrl.includes("Plugin.aspx")) {
-
-
-                        //fetchSharePointSites();
-                        //this._getAuth()
-                        this._setUpQuickMenu();
-                        this._requestNumber = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getRequestNumber();
-                        this._requestID = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
-                        console.log(MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage());
-                        this._requestDescription = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestDescription;
-                        this._contactEmail = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage().getContactPreferredEmail();
-
-                        //let foldersDropdown = document.getElementById("foldersDropdown");
-                        //if (!foldersDropdown) {
-                        //    console.log("does not exist");
-                        //}
-
-                        //document.getElementById("foldersDropdown").addEventListener("click", function (e) {
-                        //    getAllFolders(e.target.value);
-                        //});
-
-
-                        addIconColumnFirst(this._getPluginPath() + "img/sharepoint_16.png", function ($row, index, eventTarget) {
-                            Sharepoint._rowIndex = index + 1;
-                            Sharepoint._attachmentName = $row.attr("title");
-                            Sharepoint._popup(eventTarget);
-                            //fetchSharePointSites();
-                            
-                            //alert(`Clicked row ${index + 1}`);
-                            //Sharepoint._rowIndex = index;
-                        });
-
-                        //displayGroups();
-
-
-                    }
-
-                    async function getAllFolders(siteId) {
-                        //Sharepoint._getAuth();
-                        console.log("we are calling GETALLFOLDERS");
-                        let apptoken = Sharepoint.microsoftToken;
-                        console.log("apptokenhere is ", apptoken);
-                        // console.log("apptoken is:", apptoken);
-                        try {
-                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-
-                            //  console.log("apptoken is:", apptoken);
-                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
-                                method: "POST",
-                                "headers": [["content-type", "application/json"]],
-                                body: JSON.stringify({
-                                    "apptoken": apptoken,
-                                    "siteId": siteId
-                                })
-                                // headers:{'apptoken':apptoken}
-
-                            });
-                            let foldersJson = await response.json(); //response promise
-
-                            console.log("All folders are: ", foldersJson);
-
-                            console.log("we should be appending folders now");
-                            let $dropdown = $('#foldersDropdown');
-                            if ($dropdown) {
-                                console.log("folders dropdown does exist");
-                            }
-                            $dropdown.empty();
-                            $dropdown.append('<option value = "">-- Select a Folder --</option>');
-
-                            sitesJson.value.forEach(site => {
-                                //console.log("folder here is", site);
-                                $dropdown.append($('<option>').val(site.id).text(site.name));
-                            });
-                            console.log("appending should finish!");
-
-                            ; //in theory should have all our sites if response is correct
-
-
-                        } catch (error) {
-                            console.log("Error fetching sites: ", error);
-                        }
-                    }
-
-                    async function getMicrosoftAccessToken() {
-                        try {
-                            // Get the Client ID from your SharePoint handler or hardcode it here
-                            const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-
-                            const clientId = await (await fetch(clientIdUrl)).text();
-                            console.log("client id is:", clientId);
-
-                            const msalInstance = await msal.createStandardPublicClientApplication({
-                                auth: {
-                                    clientId: clientId,
-                                    authority: "https://login.microsoftonline.com/common"
-                                }
-                            });
-
-                            const loginRequest = {
-                                scopes: ["https://graph.microsoft.com/.default"]
-                            };
-
-                            const response = await msalInstance.loginPopup(loginRequest);
-
-                            console.log("Logged in successfully, access token:", response.accessToken);
-                            Sharepoint._microsoftToken = response.accessToken;
-                            return response.accessToken;
-
-                        } catch (err) {
-                            console.error("MSAL login failed:", err);
-                            throw err;
-                        }
-                    }
-
-
-                    async function fetchSharePointSites() {
-                        //Sharepoint._getAuth();
-                        console.log("we are calling fetchsharepointsites");
-                        let apptoken = await getMicrosoftAccessToken();
-                       //console.log("apptoken is:", apptoken);
-                        try {
-                            //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-
-                            //  console.log("apptoken is:", apptoken);
-                            const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
-                                method: "POST",
-                                "headers": [["content-type", "application/json"]],
-                                body: JSON.stringify({
-                                    "apptoken": apptoken,
-                                    endpoint: "getSites"
-                                })
-                                // headers:{'apptoken':apptoken}
-
-                            });
-                            let sitesJson = await response.json()
-
-                            console.log("Sharepoint sites are: ", sitesJson);
-
-                            console.log("we should be appending sites now");
-                            let $dropdown = $('#sitesDropdown');
-                            if ($dropdown) {
-                                console.log("sites dropdown does exist");
-                            }
-                            $dropdown.empty();
-                            $dropdown.append('<option value = "">-- Select a Site --</option>');
-
-                            sitesJson.value.forEach(site => {
-                                //console.log("site here is", site);
-                                $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
-                            });
-                            console.log("appending should finish!");
-
-                            ; //in theory should have all our sites if response is correct
-
-
-                        } catch (error) {
-                            console.log("Error fetching sites: ", error);
-                        }
-                    }
-
-                    
-
-
-                    function addIconColumnFirst(imageSrc, onClickCallback) {
-                        const $table = $('.attachments table.related');
-                        const $theadRow = $table.find('thead tr');
-                        const $tbodyRows = $table.find('tbody tr').not('.noAttachmentsMessage');
-
-                        // 1. Add an empty <th> at the start
-                        $theadRow.prepend(`<th class="icon-column"></th>`);
-
-                        // 2. Add an icon <td> at the start of each row
-                        $tbodyRows.each(function (index) {
-                            const $row = $(this);
-                            const $icon = $(`
-            <td class="icon-column">
-                <a href="#" class="icon-link" title="Open SharePoint">
-                    <img src="${imageSrc}" alt="icon" style="width:16px; height:16px; cursor:pointer;" />
-                </a>
-            </td>
-        `);
-
-                            // Optional: attach click handler if needed now
-                            if (typeof onClickCallback === 'function') {
-                                $icon.find('a.icon-link').on('click', function (e) {
-                                    e.preventDefault();
-                                    onClickCallback($row, index, e.target);
-                                });
-                            }
-
-                            $row.prepend($icon);
-                        });
-                    }
-
-
-
-                    async function downloadRequestActionMessage() { //should be an async function
-                        event.preventDefault();
-                        console.log("we are calling download request action message");
-                        var actionMessageText = `
-
-@{
-    var lastNote = (Model.Notes != null && Model.Notes.Count > 0)
-        ? Model.Notes[Model.Notes.Count - 1]
-        : null;
-
-var requestDescription = @Model.Description;
-var fullMessage = "";
-}
-
-@if (lastNote != null)
+<%@ WebHandler Language = "C#" Class="Handler" %>
+
+using System;
+using System.IO;
+using System.Net;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using Serilog;
+using System.Web.Script.Serialization;
+using System.Web;
+using MarvalSoftware.UI.WebUI.ServiceDesk.RFP.Plugins;
+using System.Linq;
+using System.Xml.Linq;
+using System.Data;
+using System.Data.SqlClient;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+
+public class Handler : PluginHandler
 {
-fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Note:</b><br> " + @lastNote.Content + "<br><b>Last Note Created On:</b><br> "+@lastNote.Created + "<br> <b>Last Note Author</b><br> " + @lastNote.Author + " <br> <b>Service Name:</b><br>"+@Model.Service.Name + "<br>";
+    public class RequestData
+    {
+        public string action { get; set; }
 
-}
+        public string apptoken { get; set; }
+        public string siteId { get; set; }
+        public string folderId { get; set; }
+        public string folderPath { get; set; }
 
-
-{
-                           "Identifier": @Model.Identifier,
-
-                           "ContactName": "@Model.LastUpdatedBy.Name.GivenName @Model.LastUpdatedBy.Name.FamilyName ",
-                           "Email": "@Model.PreferredNotification.Address",
-                        "message": "@fullMessage",
-"serviceName": "@Model.Service.Name",
-"action": "SendSharepointMessage"
-
-
-                        }
-
-                            `;
-                        var currentUrl = window.top.location.host;
-                        var pluginPathHandler = "https://" + currentUrl + Sharepoint._getPluginPath() + "handler/ApiHandler.ashx";
-                        //$('#InstallRequestActionMessage').attr('disabled', true);
-
-                        console.log("actionmsgtext: ", actionMessageText);
-                        var snippetFile = await (await fetch(pluginPathHandler, {
-                            "method": "POST",
-                            body: JSON.stringify({ action: "createActionMessage", actionMessageText: actionMessageText }),
-                            "headers": [["content-type", "application/json"]]
-                        })).json();
-                        console.log("response is: ", snippetFile);
-                        $('#InstallRequestActionMessageSpinner').hide();
-                        $('#InstallRequestActionMessage').attr('disabled', false);
-                        $('#requestActionMessageResponse').append(snippetFile.response);
-                        $('#requestActionMessageResponse').css('color', 'green');
-                        //  console.log("Have snippet as ", snippetFile);
-                    }
-
-
-
-
-                },
-                _fetchSharePointSites: async function() {
-            //Sharepoint._getAuth();
-            console.log("we are calling fetchsharepointsites");
-                    //let apptoken = await getMicrosoftAccessToken();
-                    let apptoken = await this._getMicrosoftAccessToken2();
-            console.log("apptoken is:", apptoken);
-            try {
-                //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-
-                //  console.log("apptoken is:", apptoken);
-                const response = await fetch(_fullPluginPathHandler + "?endpoint=getSites", {
-                    method: "POST",
-                    "headers": [["content-type", "application/json"]],
-                    body: JSON.stringify({
-                        "apptoken": apptoken,
-                        endpoint: "getSites"
-                    })
-                    // headers:{'apptoken':apptoken}
-
-                });
-                let sitesJson = await response.json()
-
-        console.log("Sharepoint sites are: ", sitesJson);
-
-                console.log("we should be appending sites now");
-                let $dropdown = $('#sitesDropdown');
-                if($dropdown) {
-                    console.log("sites dropdown does exist");
-                }
-        $dropdown.empty();
-                $dropdown.append('<option value = "">-- Select a Site --</option>');
-
-                sitesJson.value.forEach(site => {
-                    //console.log("site here is", site);
-                    $dropdown.append($('<option>').val(site.id).text(site.name || site.webUrl));
-                });
-                console.log("appending should finish!");
-
-        ; //in theory should have all our sites if response is correct
-
-
-    } catch (error) {
-        console.log("Error fetching sites: ", error);
     }
-},
-                _getAuth: async function () {
 
-                    let hostString = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ChatbotHostOverride")).text()
-                    let tenantId = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=TenantID")).text()
-                    let secret = await (await fetch(Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=SecretKey")).text()
+    public class fullResponse
+    {
+        public int responseCode { get; set; }//res code
+        public string responseDes { get; set; } //res desc
+        public string responseBody { get; set; } //res body
+    }
 
-
-
-
-                    var url = Sharepoint._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-
-                    //var id = await (await fetch(url)).text()
-
-                    const msalInstance = await msal.createStandardPublicClientApplication({
-                        auth: {
-                            clientId: "b6a84976-d3bc-4f7d-ae42-a50472a64116",
-                            authority: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
-                        },
-                    });
-
-                    var loginRequest = {
-                        scopes: ["https://graph.microsoft.com/.default"]
-                    };
-
-                    try {
-                        var response = await msalInstance.loginPopup(loginRequest);
-
-                        try {
-                            const result = await (await fetch("https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '" + Sharepoint._contactEmail + "'", {
-
-                                method: "GET",
-                                headers: new Headers({
-                                    "Authorization": "Bearer " + response.accessToken,
-                                })
-                            })).json()
-
-                            console.log(response.accessToken);
-
-                            if (result.value.length < 1) {
-                                throw Error("Search for contact returned no results.")
-                            } else {
-
-                            }
-
-                        } catch (err) {
-                            $("#SharepointError").remove();
-                            $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to find a Sharepoint contact for " + Sharepoint._contactEmail + "</p></div>")
-                            console.error("Sharepoint search error:\n", err)
-                            $("*").remove(".chatbot-container")
-                        }
-
-                    } catch (err) {
-                        $("#SharepointError").remove();
-                        $("#SharepointPopup").append("<div id='SharepointError'><br><p style='color: red;'>Unable to authenticate with Microsoft</p></div>")
-                        $("*").remove(".chatbot-container")
-                        console.error("MS Auth error:\n", err)
-                    }
+    public class SharePointUploadResponse
+    {
+        public HttpStatusCode StatusCode { get; set; }
+        public string StatusDescription { get; set; }
+        public string Content { get; set; }
+        public bool IsSuccess { get; set; }
+        public string Error { get; set; }
+        public string ContentType { get; set; }
+        public WebHeaderCollection Headers { get; set; }
+    }
 
 
-                },
+    private string APIKey { get; set; }
 
-                _uploadToSharepoint: function (sender, e) {
-                    e.preventDefault();
+    private string Password { get; set; }
+    private string Username { get; set; }
+    private string Host { get; set; }
 
-                    let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
+    private string DBName { get; set; }
+    private string MarvalHost { get; set; }
+    private string AssignmentGroups { get; set; }
 
-                    var payload = {
-                        message: formulatedMessage,
-                        action: "SendSharepointMessage",
-                        //siteId: sitesDropdown.val(),
-                        // folderId: foldersDropdown.val() //jquery is .val()
-                    }
-                    //if (window.top.document.getElementById("CheckBox").checked) {
-                    //    var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
-                    //    payload = {
-                    //        message: formulatedMessage,
-                    //        action: "SendSharepointMessage"
-                    //    }
-                    //} else {//not checked
-                    //    payload = {
-                    //        message: messageText,
-                    //        action: "SendSharepointMessage"
-                    //    }
-                    //}
-                    //console.log("We are here");
+    private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
+    private string MarvalAPIKey { get { return this.GlobalSettings["@@MarvalAPIKey"]; } }
 
 
 
-                    $.ajax({
-                        type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=SendSharepointMessage",
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        data: JSON.stringify(payload),
-                        success: function (result) {
-                            if (Object.keys(result).length > 0) {
-                                this._errorPopup(result);
-                            }
-                            else {
-                                this._popup();
-                            }
-                        }.bind(this)
-                    });
-                },
 
-                _getPluginPath: function () {
-                    return this.attributes["data-pluginpath"].value;
-                },
+    private int MsmRequestNo { get; set; }
 
-                _getPluginId: function () {
-                    return this.attributes["data-pluginid"].value;
-                },
+    private int lastLocation { get; set; }
 
-                _getPluginCulture: function () {
-                    return this.attributes["data-pluginculture"].value;
-                },
+    public override bool IsReusable { get { return false; } }
 
-                _getString: function (key, formatObject) {
-                    if (MarvalSoftware.Plugins.PluginResourceManager) {
-                        return MarvalSoftware.Plugins.PluginResourceManager.getInstance()
-                            .getString(this._getPluginId(), key, this._getPluginCulture(), formatObject);
-                    } else {
-                        return key;
-                    }
-                },
-                //_updateButtonVisual() {
-                //    if (window.top.document.getElementById("message").value != "" && window.top.document.getElementById("groupsDropdown").value != "") {
-                //        window.top.document.getElementById("sendMessage").style.backgroundColor = "green";
-                //        window.top.document.getElementById("sendMessage").disabled = false;
-                //    } else {
-                //        window.top.document.getElementById("sendMessage").style.backgroundColor = "gray";
-                //        window.top.document.getElementById("sendMessage").disabled = true;
-                //    }
-                //},
+    private HttpWebRequest BuildRequest(string uri = null, string body = null, string method = "GET")
+    {
+        //https://stackoverflow.com/a/2904963
+        ServicePointManager.Expect100Continue = true;
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
+        var request = WebRequest.Create(new UriBuilder(uri).Uri) as HttpWebRequest;
+        request.Method = method.ToUpperInvariant();
+        request.ContentType = "application/json";
 
-                _getMicrosoftAccessToken2 : async function() {
-            try {
-                // Get the Client ID from your SharePoint handler or hardcode it here
-                const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
-
-                const clientId = await(await fetch(clientIdUrl)).text();
-                console.log("client id is:", clientId);
-
-                const msalInstance = await msal.createStandardPublicClientApplication({
-                    auth: {
-                        clientId: clientId,
-                        authority: "https://login.microsoftonline.com/common"
-                    }
-                });
-
-                const loginRequest = {
-                    scopes: ["https://graph.microsoft.com/.default"]
-                };
-
-                const response = await msalInstance.loginPopup(loginRequest);
-
-                console.log("Logged in successfully, access token:", response.accessToken);
-                Sharepoint._microsoftToken = response.accessToken;
-                return response.accessToken;
-
-            } catch(err) {
-                console.error("MSAL login failed:", err);
-                throw err;
+        if (body != null)
+        {
+            using (var writer = new StreamWriter(request.GetRequestStream()))
+            {
+                writer.Write(body);
             }
-        },
-
-                _renderElement: function () {
-                    
-
-                    var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
-                    var template = document.querySelector("template").content;
-                    this._element = window.top.document.importNode(template, true);
-                    this._uploadMessage = this._element.querySelector("#uploadFile");
-                    this._foldersElement = this._element.querySelector("#foldersDropdown");
-                    //eventManager.addHandler(this.folderSelected, "input", this._, this);
-
-                    this._uploadButton = this._element.querySelector("#uploadAll");
-                    if (this._uploadButton) {
-                        console.log("upload all button does exist");
-                    }
-                    eventManager.addHandler(this._uploadButton, "click", this._uploadAllAttachments, this); //should be uploading all now
-                    
-
-                    if (this._uploadMessage) {
-                        console.log("uploadmsg does exist");
-                    }
-                    eventManager.addHandler(this._uploadMessage, "click", this._getAttachment, this);
-                    //let siteId =
-                    //eventManager.addHandler(this._foldersElement, "input", this._getAllFolders(), this);
-
-
-                    // this._body = this._element.querySelector("textarea");
-                    this._cards = this._element.querySelector(".cards");
-                    //this._trimWhiteSpaces(this._body);
-                    //var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
-                    //this._sendMessageButton = this._element.querySelector("#sendMessage");
-                    //eventManager.addHandler(this._sendMessageButton, "click", this._postMessage, this);
-                    this._createElement = this._element.querySelector(".action-buttons > button");
-                    this._refreshLink = this._element.querySelector("a");
-
-                    //this.messageInput = this._element.querySelector("#message");
-                    //eventManager.addHandler(this.messageInput, "input", this._updateButtonVisual, this);
-
-                    //this.groupSelected = this._element.querySelector("#groupsDropdown");
-                    //eventManager.addHandler(this.groupSelected, "input", this._updateButtonVisual, this);
-
-                    this.folderBtn = this._element.querySelector("#createFolder");
-                    eventManager.addHandler(this.folderBtn, "click", this._createFolder, this);
-
-                    this.siteSelected = this._element.querySelector("#sitesDropdown");
-                    eventManager.addHandler(this.siteSelected, "input", this._printSiteId, this);
-                    eventManager.addHandler(this.siteSelected, "input", function (e) {
-                        this._getAllFolders(e.value);
-                        //this._getAllFolders(e.value, "test:");
-                        this._renderTree();//call when we seelect a site
-                        console.log("we should be calling get all folders twice and getting the response ");
-
-                    }, this); //should be appending all folders now
-
-                    //this.expandButton = this._element.querySelector("#expand-button2");
-                    //eventManager.addHandler(this.expandButton, "click", this._toggleFolder(), this);
-
-                    this.appendChild(this._element);
-                },
-                //_consoleLogFolder: function () {
-                //    let res = await Sharepoint._getAllFolders();
-                //},
-
-                _trimWhiteSpaces: function (element) {
-                    var value = element.value;
-                    value = value.replace(/(^\s*)|(\s*$)/gi, "");
-                    value = value.replace(/[ ]{2,}/gi, " ");
-                    value = value.replace(/\n /, "\n");
-                    element.value = value;
-                }, _getAllNotes: async function (sender, e) {
-                    //preventDefault(); //prevent default everytime
-                    let sitesDropdown = $("#sitesDropdown"); // need table
-                    let notesTable = $("#notesTable tbody");
-
-                    try {
-                        console.log(" getting all attachments ");
-                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAllNotes&reqId=" + reqId;
-                        console.log("we are going to this attachment url ", url)
-
-                        console.log("url is", url);
-                        let result = await fetch(url, {
-                            method: "GET",
-                            headers: {
-                                "Content-Type": "application/json; charset=utf-8"
-                            },
-                        });
-                        if (!result.ok) {
-                            let errorText = await result.text();
-                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
-                        }
-
-                        let notes = await result.json();
-                        console.log("notes feedback", notes);
-                        // Clear existing rows (including the "(Empty)" row)
-                        notesTable.empty();
-
-
-                        // Add new rows
-                        notes.collection.items.forEach(note => {
-                            let fileName = note.entity.data.contentSummary;
-                            let row = document.createElement("tr");
-                            row.innerHTML = `
-              
-
-<td>${fileName}
-                  <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${note.entity.data.id}"></td> <!-- Attachments column -->
-
-
-
-          `;
-                            notesTable[0].appendChild(row);
-                        });
-
-
-                    } catch (ex) {
-                        console.error("we have error", ex);
-                    }
-
-                },
-                _getAllAttachments: async function (sender, e) {
-                    //preventDefault(); //prevent default everytime
-                    let sitesDropdown = $("#sitesDropdown"); // need table
-                    let itemsTable = $("#itemsTable tbody");
-
-                    try {
-                        console.log(" getting all attachments ");
-                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;                 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAllAttachments&reqId=" + reqId;
-                        console.log("we are going to this attachment url ", url)
-
-                        console.log("url is", url);
-                        let result = await fetch(url, {
-                            method: "GET",
-                            headers: {
-                                "Content-Type": "application/json; charset=utf-8"
-                            },
-                        });
-                        if (!result.ok) {
-                            let errorText = await result.text();
-                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
-                        }
-
-                        let attachment = await result.json();
-                        console.log("attachmentS feedback", attachment);
-                        // Clear existing rows (including the "(Empty)" row)
-                        itemsTable.empty();
-                        
-
-                        // Add new rows
-                        attachment.collection.items.forEach(attachment => {
-                            let fileName = attachment.entity.data.fileName;
-                            let row = document.createElement("tr");
-                            row.innerHTML = `
-                
-  
-  <td>${fileName}
-                    <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${attachment.entity.data.id}"></td> <!-- Attachments column -->
-  
-
-
-            `;
-                            itemsTable[0].appendChild(row);
-                        });
-
-
-                    } catch (ex) {
-                        console.error("we have error", ex);
-                    }
-
-                },
-                _uploadAllAttachments: async function (sender, e) {
-                    e.preventDefault();
-                    console.log("we are calling upload all attachments");
-                    //e.preventDefault();
-                    let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
-                    let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
-                    let siteId = sitesDropdown.val();
-                    let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
-                    // Find all checked checkboxes in the attachments column
-                    let checkedBoxes = $("#itemsTable tbody input[type='checkbox']:checked");
-                    let notesBoxes = $("#notesTable tbody input[type='checkbox']:checked");
-                    if (checkedBoxes.length === 0 && notesBoxes.length === 0) {
-                        console.warn("No attachments selected.");
-                        alert("Please select at least one attachment to upload.");
-                        return;
-                    }
-
-                    
-
-
-
-                    for (let notebox of notesBoxes) {
-                        let attachmentName = $(notebox).val(); // file name stored in value
-                        let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
-
-                        console.log("Uploading attachment:", attachmentName);
-
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + attachmentName;
-                        //should be uploading all notes
-                        console.log("we are uploading notes to this url " + url);
-                        let payload = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: siteId,
-                            folderId: Sharepoint._currentPath
-                        };
-
-                        try {
-                            let result = await fetch(url, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify(payload)
-                            });
-
-                            if (!result.ok) {
-                                let errorText = await result.text();
-                                throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
-                            }
-
-                            let response = await result.json();
-                            console.log(`Uploaded: ${attachmentName}`, response);
-                        } catch (ex) {
-                            console.error("Upload error for", attachmentName, ex);
-                        }
-                    }
-
-                    for (let checkbox of checkedBoxes) {
-                        let attachmentName = $(checkbox).val(); // file name stored in value
-                        let identifier = checkbox.dataset.attachmentId; //checkboxes store the attachment data
-
-                        console.log("Uploading attachment:", attachmentName);
-
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier="+identifier+ "&attachmentName=" + attachmentName;
-                        //should change backend getAttachment name to something better
-                        console.log("we are uploading files to this url " + url);
-                        let payload = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: siteId,
-                            folderId: Sharepoint._currentPath
-                        };
-
-                        try {
-                            let result = await fetch(url, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify(payload)
-                            });
-
-                            if (!result.ok) {
-                                let errorText = await result.text();
-                                throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
-                            }
-
-                            let response = await result.json();
-                            console.log(`Uploaded: ${attachmentName}`, response);
-                        } catch (ex) {
-                            console.error("Upload error for", attachmentName, ex);
-                        }
-                    }
-
-                    alert("Upload complete.");
-                },
-
-                
-                _getAttachment: async function (sender, e, identifier = null) {
-                    e.preventDefault(); //prevent default everytime
-                    let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
-
-                    try {
-                        //console.log("req id is", reqId, "identifier is ", this._rowIndex);
-                        console.log(" we are calling get attachment now");
-                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
-                        console.log("req id is", reqId, "identifier is ", this._rowIndex);
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
-                        console.log("we are going to this attachment url ", url);
-                        console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
-
-                        let payLoad = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: sitesDropdown.val(),
-                            folderId: foldersDropdown.find("option:selected").text()
-
-                        }
-                        console.log("url is", url);
-                        let result = await fetch(url, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json; charset=utf-8"
-                            },
-                            body: JSON.stringify(payLoad)
-                        });
-                        if (!result.ok) {
-                            let errorText = await result.text();
-                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
-                        }
-
-                        let attachment = await result.json();
-                        console.log("attachment feedback", attachment);
-
-                        //return attachment;
-
-                    } catch (ex) {
-                        console.error("we have error", ex);
-                    }
-
-                },
-                _createFolder: async function (sender, e) {
-                    e.preventDefault(); //prevent default everytime
-                    let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
-
-                    try {
-                        //console.log("req id is", reqId, "identifier is ", this._rowIndex);
-                        console.log(" we are calling get create folder now");
-                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
-                        console.log("req id is", reqId, "identifier is ", this._rowIndex);
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
-                        console.log("we are going to this create url ", url);
-                        console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
-
-                        let payLoad = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: sitesDropdown.val(),
-                            folderId: foldersDropdown.text()
-
-                        }
-                        console.log("url is", url);
-                        const result = await fetch(url, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json; charset=utf-8"
-                            },
-                            body: JSON.stringify(payLoad)
-                        });
-                        if (!result.ok) {
-                            const errorText = await result.text();
-                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
-                        }
-
-                        const attachment = await result.json();
-                        console.log("attachment feedback", attachment);
-
-                        //return attachment;
-
-                    } catch (ex) {
-                        console.error("we have error", ex);
-                    }
-
-                }, _formatDate: function (dateString)
+        }
+
+        return request;
+    }
+    //     private HttpWebRequest BuildRequest(string uri = null, string body = null, string method = "GET", string token = null)
+    // {
+    //     ServicePointManager.Expect100Continue = true;
+    //     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
+
+    //     var request = WebRequest.Create(new UriBuilder(uri).Uri) as HttpWebRequest;
+    //     request.Method = method.ToUpperInvariant();
+    //     request.ContentType = "application/json";
+
+    //     if (!string.IsNullOrWhiteSpace(token))
+    //     {
+    //         request.Headers["Authorization"] = "Bearer " + token;
+    //     }
+
+    //     if (body != null)
+    //     {
+    //         using (var writer = new StreamWriter(request.GetRequestStream()))
+    //         {
+    //             writer.Write(body);
+    //         }
+    //     }
+
+    //     return request;
+    // }
+    private string GetRequest(string url, string token)
+    {
+        try
+        {
+            // Create a web request
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.ContentType = "application/json";
+            request.Headers["Authorization"] = "Bearer " + token;
+
+            // // Write data to request body
+            // using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+            // {
+            //     writer.Write(data);
+            // }
+
+            // Get response
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
                 {
-            if(!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        },
-
-                // Mock API call function
-                _fetchChildren: async function (folderId) {
-                    // Find the full path for this folder
-                    const parentElement = window.top.document.querySelector(`[data-item-id="${folderId}"]`);
-                    if (!parentElement) return { value: [] };
-
-                    // Get the folder name
-                    const name = parentElement.querySelector('.folder-name').textContent;
-
-                    // Build the new path
-                    if (name) {
-                        if (Sharepoint._currentPath) {//path exists then 
-                            Sharepoint._currentPath += "/"+name;
-                        } else { //could do a ternary operator ?
-                            Sharepoint._currentPath += ":/" + name;
-                        }
-                       
-                    }
-
-                    // If you are storing the path as a string like "Folder1:/Folder2:/", you may need to reconstruct it
-                   // let newPath = parentPath + name + ":/";
-
-                    // Get the selected siteId
-                    let siteId = window.top.document.getElementById('sitesDropdown').value;
-
-                    // Call the real API
-                    const foldersJson = await Sharepoint._getAllFolders(siteId, Sharepoint._currentPath);
-
-                    // Only return folders
-                    return {
-                        value: (foldersJson && foldersJson.value)
-                            ? foldersJson.value.filter(item => item.folder)
-                            : []
-                    };
-                },
-
-        // SVG icons
-//        const icons = {
-//            chevronRight: `<svg class="chevron" viewBox="0 0 16 16">
-//    <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
-//</svg>`,
-//            folderClosed: `<svg class="folder-icon" viewBox="0 0 20 20">
-//    <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z"/>
-//</svg>`,
-//            folderOpen: `<svg class="folder-icon" viewBox="0 0 20 20">
-//    <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z" fill-opacity="0.7"/>
-//    <path d="M2 8h16v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8Z"/>
-//</svg>`,
-//            spinner: `<div class="spinner"></div>`
-//        };
-
-                // Create tree item element
-
-        //function createTreeItem(item, level = 0) 
-                _createTreeItem: function (item, level) {
-                    console.log("we are at create tree item");
-                    const self = this;
-
-                    const isExpanded = expandedFolders.has(item.id);
-                    console.log("is expanded is ", isExpanded)
-
-                    const isLoading = loadingFolders.has(item.id);
-                    console.log("is loading is ", isLoading);
-
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'tree-item';
-                    itemElement.style.paddingLeft = `${level * 20 + 8}px`;
-                    itemElement.dataset.itemId = item.id;
-
-                    // Controls container
-                    const controlsDiv = document.createElement('div');
-                    controlsDiv.className = 'tree-controls';
-
-                    if (isLoading) {
-                        // Spinner
-                        controlsDiv.innerHTML = icons.spinner;
-                    } else {
-                        // Expand/collapse button
-                        const expandBtn = document.createElement('button');
-                        expandBtn.className = 'expand-button2';
-                        expandBtn.innerHTML = icons.chevronRight;
-                        if (isExpanded) {
-                            expandBtn.querySelector('.chevron').classList.add('expanded');
-                        }
-                        expandBtn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            self._toggleFolder(item.id, expandBtn, e);
-                        });
-                        controlsDiv.appendChild(expandBtn);
-                    }
-
-                    // Folder icon
-                    const folderIcon = document.createElement('span');
-                    folderIcon.innerHTML = isExpanded ? icons.folderOpen : icons.folderClosed;
-                    controlsDiv.appendChild(folderIcon);
-
-                    // Compose the rest
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'folder-name';
-                    nameSpan.textContent = item.name;
-
-                    const countHtml = item.folder && item.folder.childCount > 0 ?
-                        `<span class="item-count">${item.folder.childCount} items</span>` : '';
-
-                    const dateHtml = `<span class="last-modified">${Sharepoint._formatDate(item.lastModifiedDateTime)}</span>`;
-
-                    itemElement.appendChild(controlsDiv);
-                    itemElement.appendChild(nameSpan);
-                    if (countHtml) itemElement.insertAdjacentHTML('beforeend', countHtml);
-                    itemElement.insertAdjacentHTML('beforeend', dateHtml);
-
-                    // Hover effects
-                    itemElement.addEventListener('mouseenter', () => itemElement.classList.add('hovered'));
-                    itemElement.addEventListener('mouseleave', () => itemElement.classList.remove('hovered'));
-
-                    return itemElement;
-                }, _collapseDescendants: function (folderId) {
-                    // Remove from expandedFolders
-                    expandedFolders.delete(folderId);
-
-                    // Remove the children container for this folder
-                    const childrenContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
-                    if (childrenContainer) {
-                        // For each child folder, recursively collapse
-                        const childFolderElements = childrenContainer.querySelectorAll('.tree-item');
-                        childFolderElements.forEach(childEl => {
-                            const childId = childEl.dataset.itemId;
-                            if (expandedFolders.has(childId)) {
-                                Sharepoint.collapseDescendants(childId);
-                            }
-                        });
-                        childrenContainer.remove();
-                    }
-                },
-
-                // Toggle folder expand/collapse
-        _toggleFolder: async function(folderId, sender, e)
-        {   
-            e.preventDefault();
-            console.log("we are toggling folers")
-            if (loadingFolders.has(folderId)) return;
-
-            const isExpanded = expandedFolders.has(folderId);
-
-            if (isExpanded) {
-                Sharepoint._collapseDescendants(folderId);
-                //console.log("it is already expanded");
-                //// Collapse folder
-                //expandedFolders.delete(folderId);
-                //const childrenContainer = document.querySelector(`[data-children-of="${folderId}"]`);
-                //if (childrenContainer) {
-                //    childrenContainer.remove();
-                //}
-            } else {
-                // Expand folder
-                console.log("we are expanding now")
-                expandedFolders.add(folderId);
-
-                // Check if we need to load children
-                if (!folderData[folderId]) {
-                    loadingFolders.add(folderId);
-                    Sharepoint._updateTreeItem(folderId);
-
-                    try {
-                        console.log("folder id is ", folderId);
-                        const response = await Sharepoint._fetchChildren(folderId);
-                        folderData[folderId] = response.value;
-                        console.log("children for ", folderId, " folder data is ", folderData[folderId]);
-
-                    } catch (error) {
-                        console.error('Error fetching children:', error);
-                        expandedFolders.delete(folderId);
-                    } finally {
-                        console.log("we should be deleting folder now!");
-                        loadingFolders.delete(folderId);
-                        //expandedFolders.delete(folderId);
-                    }
-                }
-
-                // Render children
-                Sharepoint._renderChildren(folderId);
-                console.log("SHOULD BE RENDERING CHIKDERN HRE")
-            }
-            Sharepoint._updateTreeItem(folderId);
-            const itemElement = window.top.document.querySelector(`[data-item-id="${folderId}"]`);
-            let name = itemElement.querySelector('.folder-name').textContent;//search by class for folder name
-            //Sharepoint._currentPath += name + ":/";//update path
-            let siteId = window.top.document.getElementById('sitesDropdown').value;
-            //await Sharepoint._renderTree();//should be fine
-            console.log("name at line 2090 is ", name);
-            console.log("new current path is ", Sharepoint._currentPath)
-           // updateTreeItem(folderId);
-        },
-
-                // Update a specific tree item
-        _updateTreeItem: function(itemId)
-        {   
-            
-            console.log("we currently at path", Sharepoint._currentPath);
-            console.log("we are calling update tree item ")
-            const itemElement = window.top.document.querySelector(`[data-item-id="${itemId}"]`);
-            //we can use query selector on item
-            let name = itemElement.querySelector('.folder-name').textContent;//search by class for folder name
-            console.log("item element is ", itemElement)
-            console.log("name is ", name)
-            //Sharepoint._currentPath += "/"+name;
-            //console.log("new path", Sharepoint._currentPath);
-
-            if (!itemElement) return;
-
-            const item = Sharepoint._findItemById(itemId);
-            if (!item) return;
-
-            const level = parseInt(itemElement.style.paddingLeft) / 20 - 0.4;
-            const newElement = Sharepoint._createTreeItem(item, level);
-            itemElement.replaceWith(newElement);
-        },
-
-                // Find item by ID in the data structure
-
-        _findItemById: function(itemId) {
-            // Check root level
-            for (const item of mockApiData.value) {
-                if (item.id === itemId) return item;
-            }
-
-            // Check loaded children
-            for (const children of Object.values(folderData)) {
-                for (const item of children) {
-                    if (item.id === itemId) return item;
+                    return reader.ReadToEnd();
                 }
             }
+        }
+        catch (WebException webEx)
+        {
+            // If we have a response, we can read the error message from the response body
+            if (webEx.Response != null)
+            {
+                using (var errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                    {
+                        string errorText = reader.ReadToEnd();
+                        // Return or log the error text
+                        return errorText;
+                    }
+                }
+            }
+
+            // If we have no response, return the exception message
+            return webEx.Message;
+        }
+        catch (Exception ex)
+        {
+            // Handle other exceptions
+            return ex.ToString();
+        }
+    }
+
+
+    private string PostRequest(string url, string data)
+    {
+        try
+        {
+            // Create a web request
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            // Write data to request body
+            using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+            {
+                writer.Write(data);
+            }
+
+            // Get response
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+        catch (WebException webEx)
+        {
+            // If we have a response, we can read the error message from the response body
+            if (webEx.Response != null)
+            {
+                using (var errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                    {
+                        string errorText = reader.ReadToEnd();
+                        // Return or log the error text
+                        return errorText;
+                    }
+                }
+            }
+
+            // If we have no response, return the exception message
+            return webEx.Message;
+        }
+        catch (Exception ex)
+        {
+            // Handle other exceptions
+            return ex.ToString();
+        }
+    }
+
+    private string ProcessRequest(HttpWebRequest request)
+    {
+        fullResponse myRes = new fullResponse();
+        try
+        {
+            //var resStatus = ((HttpWebResponse)request.WebResponse).StatusCode;
+            //request.Headers.Add("Authorization", "Bearer " + this.UserAPIKey);
+            HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+            var res = "";
+            var resStatus = ((HttpStatusCode)response.StatusCode);
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                res = reader.ReadToEnd();
+            }
+            HttpContext.Current.Response.StatusCode = (int)resStatus;
+            HttpContext.Current.Response.ContentType = "application/json";
+            HttpContext.Current.Response.Write(res);
+            HttpContext.Current.Response.End();
+            return null;
+
+        }
+        catch (WebException webEx)
+        {
+            var result = "";
+            var errStatus = ((HttpWebResponse)webEx.Response).StatusCode;
+            var errResp = webEx.Response;
+
+            //myRes.responseCode = Int32.Parse(errStatus.ToString());
+            Log.Information("err is" + errStatus.ToString());
+            myRes.responseDes = ((HttpWebResponse)errResp).StatusDescription;
+            var res = "";
+            using (StreamReader reader = new StreamReader(errResp.GetResponseStream()))
+            {
+                res = reader.ReadToEnd();
+            }
+            //myRes.responseBody = res;
+            HttpContext.Current.Response.StatusCode = (int)errStatus;
+            HttpContext.Current.Response.ContentType = "application/json";
+            HttpContext.Current.Response.Write(res);
+            HttpContext.Current.Response.End();
 
             return null;
-        },
 
-        // Render children of a folder
-                _renderChildren: function (folderId) {
-                    console.log("we are rendering children now");
-            const children = folderData[folderId];
-            if (!children || children.length === 0) return;
+        }
+    }
 
-                    const parentElement = window.top.document.querySelector(`[data-item-id="${folderId}"]`);
-                    console.log("Parent element for", folderId, parentElement);
-            if (!parentElement) return;
+    public override void HandleRequest(HttpContext context)
+    {
+        var param = context.Request.HttpMethod;
+        var browserObject = context.Request.Browser;
+        HttpWebRequest httpWebRequest;
+        HttpWebRequest request;
+        string microsoftToken = "eyJ0eXAiOiJKV1QiLCJub25jZSI6IkZ2dnRSbDNQU25Jck54REVHTHdVSExIVmsybm1BWXZUb0ZMVk9RTFNWaEUiLCJhbGciOiJSUzI1NiIsIng1dCI6Il9qTndqZVNudlRUSzhYRWRyNVFVUGtCUkxMbyIsImtpZCI6Il9qTndqZVNudlRUSzhYRWRyNVFVUGtCUkxMbyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85YmNhM2NkZS1iM2Y3LTRjOWQtYWU4NC1lYmNkZWUzODI5OTAvIiwiaWF0IjoxNzUyMTA2MzkyLCJuYmYiOjE3NTIxMDYzOTIsImV4cCI6MTc1MjExMDQ2OSwiYWNjdCI6MCwiYWNyIjoiMSIsImFjcnMiOlsicDEiXSwiYWlvIjoiQVdRQW0vOFpBQUFBclRXbmhER2llSVZCK1B5SzRzeGp0TlBkSzBGSS95QkI5Y2dFL2xITEJxdzlkWmdldjdBQ3I2RGU2SXJKU0YzQmovU3NNamFqb3ZmNEpoa1E5a1huNmVINWJ2VnhqeDNmODZpRTUyYVdSRGVldVM0OVAyWFVEeFhLZUlGanErQ0IiLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcF9kaXNwbGF5bmFtZSI6Ik1hcnZhbCBBdXN0cmFsaWEgT2ZmaWNlIDM2NSBBZG1pbiIsImFwcGlkIjoiYjZhODQ5NzYtZDNiYy00ZjdkLWFlNDItYTUwNDcyYTY0MTE2IiwiYXBwaWRhY3IiOiIwIiwiZmFtaWx5X25hbWUiOiJOZ3V5ZW4iLCJnaXZlbl9uYW1lIjoiRHlsYW4iLCJpZHR5cCI6InVzZXIiLCJpcGFkZHIiOiI0LjE5Ni43Ni4yNTMiLCJuYW1lIjoiRHlsYW4gTmd1eWVuIiwib2lkIjoiZWRmYzJhOTYtMzFkNS00NGFkLTg3NGQtYjUzZGJkZTZjMmMyIiwicGxhdGYiOiIzIiwicHVpZCI6IjEwMDMyMDA0QTU1NjI2RDIiLCJyaCI6IjEuQVI4QTNqekttX2V6blV5dWhPdk43amdwa0FNQUFBQUFBQUFBd0FBQUFBQUFBQUJNQWZjZkFBLiIsInNjcCI6IkRpcmVjdG9yeS5SZWFkLkFsbCBEaXJlY3RvcnkuUmVhZFdyaXRlLkFsbCBHcm91cE1lbWJlci5SZWFkLkFsbCBHcm91cE1lbWJlci5SZWFkV3JpdGUuQWxsIE1haWwuU2VuZCBNYWlsLlNlbmQuU2hhcmVkIFNpdGVzLlJlYWQuQWxsIFNpdGVzLlJlYWRXcml0ZS5BbGwgU2l0ZXMuU2VsZWN0ZWQgVGVhbU1lbWJlci5SZWFkLkFsbCBUZWFtTWVtYmVyLlJlYWRXcml0ZS5BbGwgVGVhbU1lbWJlci5SZWFkV3JpdGVOb25Pd25lclJvbGUuQWxsIFVzZXIuUmVhZCBVc2VyLlJlYWRXcml0ZS5BbGwgVXNlckF1dGhlbnRpY2F0aW9uTWV0aG9kLlJlYWRXcml0ZS5BbGwgcHJvZmlsZSBvcGVuaWQgZW1haWwiLCJzaWQiOiIwMDRmYWU4OS00NmEwLTVlOWUtYjRmYy1iNDQxZjYxZGRkYjYiLCJzaWduaW5fc3RhdGUiOlsia21zaSJdLCJzdWIiOiIzTnRKMzZ4Y01HMWZ2cDFjeFRhblJjb3ZWU1YyU2ZJRjlHbE5ra3VHY1ZNIiwidGVuYW50X3JlZ2lvbl9zY29wZSI6IkVVIiwidGlkIjoiOWJjYTNjZGUtYjNmNy00YzlkLWFlODQtZWJjZGVlMzgyOTkwIiwidW5pcXVlX25hbWUiOiJkeWxhbi5uZ3V5ZW5AbWFydmFsLmNvbS5hdSIsInVwbiI6ImR5bGFuLm5ndXllbkBtYXJ2YWwuY29tLmF1IiwidXRpIjoiUXFHbmFudFBuVXlEVTFQdkFHSWpBQSIsInZlciI6IjEuMCIsIndpZHMiOlsiYjc5ZmJmNGQtM2VmOS00Njg5LTgxNDMtNzZiMTk0ZTg1NTA5Il0sInhtc19mdGQiOiJOQkx4WnNHWTFkckZWX3NIeVJWSFNCZ3RXb0U4WDg4TjFjNVBvX0J5ekE0QmMzZGxaR1Z1WXkxa2MyMXoiLCJ4bXNfaWRyZWwiOiIxIDE0IiwieG1zX3N0Ijp7InN1YiI6ImZDMDlXY1VoY2R1MUZyWlAwTVFDaFo1WFA0ZWZBZFFWV1pncURDd0cyV1kifSwieG1zX3RjZHQiOjE1MDY1ODY4MjJ9.JuiUZ4PGO4HfwSH-vuYHpefPDAZGHoZvsaN1JZQnnH5BPRInWCKdyuV7ltD0LEILo3Iq0a53cmLEvSB54vfgH3a6KavEeqGAbJExTWenle9OwS1K9vIZfGCgV6KSd2-yvjSEOxe9kjbsRc6zI275sg5kW6nItVB5IJRZTHZALDl4_QCX_XuIaI0Z_I2E4-0ji-yaZNlMPpOxGlEbuzdnkmgGM6bn4l4VX6woQmlreEsAQnZ2T55ND3iF7OqjY70eeVGD2unjJsYukVrC5yJ8ws9LqXaKTVvjF0mC_tirNRssXBbUxgrYh7cKbToj5Fq_-k_roNQS2Hco2s-NDJ7XQQ";
+        //MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
+        //lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
 
-            // Remove existing children container
-            const existingContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
-            if (existingContainer) {
-                existingContainer.remove();
-            }
-
-            // Create new children container
-            const childrenContainer = document.createElement('div');
-            childrenContainer.className = 'children';
-            childrenContainer.dataset.childrenOf = folderId;
-
-            // Calculate level
-            const parentLevel = parseInt(parentElement.style.paddingLeft) / 20 - 0.4;
-            const childLevel = parentLevel + 1;
-
-                    // Add child items
-            console.log("childeren is ", children)
-            children.forEach(child => {
-                const childElement = Sharepoint._createTreeItem(child, childLevel);
-                childrenContainer.appendChild(childElement);
-            });
-
-            // Insert after parent
-            parentElement.insertAdjacentElement('afterend', childrenContainer);
-        },
-
-                _renderTree: async function () {
-                    const container = window.top.document.getElementById('treeContent');
-                    container.innerHTML = '';
-
-                    // Get the selected siteId from the dropdown
-                    let siteId = window.top.document.getElementById('sitesDropdown').value;
-                    if (!siteId) {
-                        container.innerHTML = '<div>Please select a site.</div>';
-                        return;
-                    }
-
-                    // Fetch folders from backend
-                    console.log("we are calling with siteId ", siteId, " and folder path ", Sharepoint._currentPath);
-                    let foldersJson = await this._getAllFolders(siteId,Sharepoint._currentPath);
-
-                    if (foldersJson && foldersJson.value && Array.isArray(foldersJson.value)) {
-                        // Only show items that are folders (have a .folder property)
-                        foldersJson.value
-                            .filter(item => item.folder) // Only folders
-                            .forEach(item => {
-                                const itemElement = Sharepoint._createTreeItem(item, 0);
-                                container.appendChild(itemElement);
-                            });
-                    } else {
-                        container.innerHTML = '<div>No folders found.</div>';
-                    }
-                },
-
-        // Initialize the tree
-        //renderTree();
-
-        // Make toggleFolder available globally
-        //window.toggleFolder = toggleFolder;
-
-                _popup: function (eventTarget) {
-                    console.log(eventTarget);
-                    console.log(document.location.search);
-                    let url = (new URLSearchParams(window.top.location.search)).get("id");
-                    console.log(url);
-
-                    //let eventElement = eventTarget);
-                    if (!this._pluginWindow) {
-                        this._pluginWindow = new MarvalSoftware.UI.Window({
-                            appendToElement: window.top.document.getElementById("aspnetForm"),
-                            title: "Sharepoint",
-                            height: 1000,
-                            width: 1000,
-                            minHeight: 700,
-                            minWidth: 432,
-                            isResizable: true,
-                            isMaximizable: true,
-                            bodyElement: this
-
-                        });
-                        this._renderElement();
-                        this._getAllAttachments();
-                        this._getAllNotes();
-                        this._fetchSharePointSites();
-                        this._renderTree();
-                        //window.toggleFolder = Sharepoint._toggleFolder.bind(Sharepoint);
-
-                        //renderTree();
-
-                        //this._getAttachment();
+        //this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
+        var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
+        Log.Information("endpoint is, ", getParamVal);
+        switch (param)
+        {
 
 
-                        //eventElement.parentElement.nextSibling.innerText;
-                        if (eventTarget != undefined) {
-                            console.log(eventTarget.parentElement.parentElement.nextSibling.innerText);
+            case "GET":
+                MsmRequestNo = !string.IsNullOrWhiteSpace(context.Request.Params["requestNumber"]) ? int.Parse(context.Request.Params["requestNumber"]) : 0;
+                lastLocation = !string.IsNullOrWhiteSpace(context.Request.Params["lastLocation"]) ? int.Parse(context.Request.Params["lastLocation"]) : 0;
+
+                this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
+                //var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
+                // Trace.Write("paramval is" + getParamVal);
+                // Log.information
+                Log.Information("paramval is" + getParamVal);
+                if (getParamVal == "none")
+                {
+
+
+
+                    context.Response.Write("Hi");
+                }
+                // }else if (getParamVal == "getClientID"){
+                //     var response = PostRequest("https://graph.microsoft.com/v1.0/sites/root");
+                //      context.Response.Write(response);
+                // }
+                else if (getParamVal == "ChatbotHostOverride")
+                {
+                    context.Response.Write("Hi");
+                }
+                else if (getParamVal == "ClientID")
+                {
+                    context.Response.Write(ClientID);
+                    // }else if (getParamVal == "getSites"){
+                    //     var appToken = context.Request.Params["apptoken"];
+                    //     Log.Information("apptoken is: " + appToken);
+                    //     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
+                    //     context.Response.Write(ex);
+                    // }}
+                }
+                else if (getParamVal == "generatePassword")
+                {
+                    context.Response.Write("Hi");
+                }
+                else if (getParamVal == "TenantID")
+                {
+                    context.Response.Write("Hi");
+                }
+                else if (getParamVal == "getprivatekey")
+                {
+                    var response = PostRequest("https", "");
+                    context.Response.Clear();
+                    context.Response.ContentType = "application/octet-stream"; // or "text/plain" if it's text
+                    context.Response.AddHeader("Content-Disposition", "attachment; filename=privatekey.txt");
+                    context.Response.Write(response);
+                    context.Response.Flush();
+                    context.Response.End();
+
+                }
+                else if (getParamVal == "getpublickey")
+                {
+                    var response = PostRequest("https:", "");
+                    context.Response.Clear();
+                    context.Response.ContentType = "application/octet-stream"; // or "text/plain" if it's text
+                    context.Response.AddHeader("Content-Disposition", "attachment; filename=publickey.txt");
+                    context.Response.Write(response);
+                    context.Response.Flush();
+                    context.Response.End();
+                }
+                else if (getParamVal == "getchatbotsnippet")
+                {
+                    var response = PostRequest("https:/i/server/downloadFile", "{");
+                    context.Response.Clear();
+                    context.Response.ContentType = "application/octet-stream"; // or "text/plain" if it's text
+                    context.Response.AddHeader("Content-Disposition", "attachment; filename=chatbotsnippet.txt");
+                    context.Response.Write(response);
+                    context.Response.Flush();
+                    context.Response.End();
+                }
+                else if (getParamVal == "databaseValue")
+                {
+                    string jsontwo = this.GetCustomersJSON(context.Request.Params["CIId"]);
+
+                    context.Response.Write(jsontwo);
+                }
+                else if (getParamVal == "AADObjectGUIDLocation")
+                {
+                    context.Response.Write("Hi");
+                }
+                else if (getParamVal == "SecretKey")
+                {
+                    context.Response.Write("Hi");
+                }else if (getParamVal == "getAllNotes")
+                {
+                    try
+                    {
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes";
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                            context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
                         }
-
-
-                        //this._showGroups();
-
-                        //this._getAllPages();
-                    }
-                    //this._resetPopUpValues();
-                    if (!this._pluginWindow.isVisible()) {
-                        this._pluginWindow.centerToViewport();
-                    }
-                    this._pluginWindow.show();
-                    $('.window .content .header').eq(0).addClass('headerColourChange');
-                    $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
-                },
-
-                _errorPopup: function (result) {
-                    var errorTemplate = document.querySelector('.errorTemplate').content;
-                    var errorMessages = window.top.document.importNode(errorTemplate, true);
-                    if (result) {
-                        for (var item in result) {
-                            var id = "#" + item;
-                            errorMessages.querySelector(id).style.display = "block";
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
                         }
-                        errorMessages.querySelector('div > h3').textContent = this._getString("@@SharepointErrorConfigurationTitle");
-                        errorMessages.querySelector('div > h4').textContent = this._getString("@@SharepointErrorConfigurationFooter");
                     }
-                    MarvalSoftware.UI.MessageBox.show(
-                        this._getString("@@SharepointErrorPopupTitle"),
-                        errorMessages,
-                        MarvalSoftware.UI.MessageBox.Types.ERROR,
-                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
-                        MarvalSoftware.UI.MessageBox.Buttons.OK,
-                        450
-                    );
-                },
-
-                _miscellaneousErrorPopup: function (result) {
-                    var miscellaneousErrorsTemplate = document.querySelector('.miscellaneousErrorsTemplate').content;
-                    var errorMessages = window.top.document.importNode(miscellaneousErrorsTemplate, true);
-                    if (result) {
-                        console.log("We have an error ", result);
-                        errorMessages.querySelector('div > label').textContent = result.responseText;
-                    }
-                    MarvalSoftware.UI.MessageBox.show(
-                        this._getString("@@SharepointErrorPopupTitle"),
-                        errorMessages,
-                        MarvalSoftware.UI.MessageBox.Types.ERROR,
-                        [MarvalSoftware.UI.MessageBox.Buttons.OK],
-                        MarvalSoftware.UI.MessageBox.Buttons.OK,
-                        450
-                    );
-                },
-
-                _addCard: function (results) {
-                    this._clearCards();
-                    if (!results.incident_updates || results.incident_updates.length == 0) {
-                        var label = document.createElement("h3")
-                        label.textContent = this._getString("@@SharepointNoItems");
-                        label.align = "center";
-                        label.style.position = "relative";
-                        label.style.top = "150px";
-                        label.style.color = "#808080";
-                        this._cards.appendChild(label);
-                        return;
-                    }
-
-                    for (var i = 0; i < results.incident_updates.length; i++) {
-                        this._resetCard()
-                        var status = results.incident_updates[i].status;
-                        var createdOn = results.incident_updates[i].display_at;
-                        this.timestamp.firstElementChild.innerHTML = new Date(createdOn).toDateString() + " " + this._formattedTime(createdOn);
-                        this.timestamp.innerHTML += this._formattedDate(createdOn).toUpperCase();
-                        this.status.innerText = status.charAt(0).toUpperCase() + status.slice(1);
-                        this.message.innerText = results.incident_updates[i].body;
-                        this._cards.appendChild(this.card);
-                    }
-
-                    this._cards.scrollTop = 0
-                },
-
-                _clearCards: function () {
-                    while (this._cards.firstChild) {
-                        this._cards.removeChild(this._cards.firstChild);
-                    }
-                },
-
-                _resetCard: function () {
-                    var cardTemplate = document.querySelector(".cardTemplate").content;
-                    var element = window.top.document.importNode(cardTemplate, true);
-                    this.card = element.querySelector(".card");
-                    this.timestamp = element.querySelector(".card > .timestamp");
-                    this.status = element.querySelector(".card > .status");
-                    this.message = element.querySelector(".card > .message");
-                },
-
-                _refreshCards: function () {
-                    this._getAllIncindentUpdates();
-                    this._enableOrDisableIncidentsOption();
-                },
-
-                _resetPopUpValues: function () {
-                    this._pages.selectedIndex = "0";
-                    this._body.value = "";
-                    this._clearIncidents();
-                },
-
-                _clearIncidents: function () {
-                    for (var i = this._incidents.options.length - 1; i >= 0; i--) {
-                        this._incidents.remove(i);
-                    }
-
-                    var incident = document.createElement("option")
-                    incident.id = 0;
-                    incident.value = "";
-                    this._incidents.add(incident)
-                    this._refreshCards();
-                },
-
-                _formattedDate: function (updatedBy) {
-                    var minute = 60 * 1000;
-                    var hour = minute * 60;
-                    var day = hour * 24;
-                    var month = day * 30;
-                    var year = day * 365;
-                    var elapsed = new Date().getTime() - new Date(updatedBy).getTime();
-                    if (elapsed < minute) {
-                        return "< 1 min ago";
-                    }
-                    else if (elapsed < hour) {
-                        var calculatedHours = Math.round(elapsed / minute);
-                        return calculatedHours > 1 ? calculatedHours + " minutes ago" : calculatedHours + " min ago";
-                    }
-                    else if (elapsed < day) {
-                        var calculatedDays = Math.round(elapsed / hour);
-                        return calculatedDays > 1 ? calculatedDays + " hours ago" : calculatedDays + " hour ago";
-                    }
-                    else if (elapsed < month) {
-                        var calculatedMonths = Math.round(elapsed / day);
-                        return calculatedMonths > 1 ? calculatedMonths + " days ago" : calculatedMonths + " day ago";
-                    }
-                    else if (elapsed < year) {
-                        var calculatedMonths = Math.round(elapsed / month);
-                        return calculatedMonths > 1 ? calculatedMonths + " months ago" : calculatedMonths + " month ago";
-                    }
-                    else {
-                        var calculatedYears = Math.round(elapsed / year);
-                        return calculatedYears > 1 ? calculatedYears + " years ago" : calculatedYears + " year ago";
-                    }
-                },
-
-                _addZero: function (i) {
-                    if (i < 10) {
-                        i = "0" + i;
-                    }
-                    return i;
-                },
-
-                _formattedTime: function (value) {
-                    var date = new Date(value);
-                    return this._addZero(date.getHours()) + ":" + this._addZero(date.getMinutes());
-                },
-
-                _setUpQuickMenu: function () {
-                    var styleElement = window.top.document.createElement("style");
-                    window.top.document.body.appendChild(styleElement);
-                    styleElement.sheet.insertRule(".marvalSoftware-sharepoint-quick-menu-item { background-image: url(" + this._getPluginPath() + "img/sharepoint_32.png); }", 0);
-
-                    var quickMenuId = window.top.document.querySelector(".quickMenu").id;
-                    var quickMenu = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getControl(quickMenuId);
-                    quickMenu.addMenuItem({
-                        Identifier: "marvalSoftware-sharepoint",
-                        Label: this._getString("@@PluginDisplayname"),
-                        HRef: "javascript:void(0);",
-                        CssClass: "marvalSoftware-sharepoint-quick-menu-item"
-                    });
-                    quickMenu.onMenuItemClicked.subscribe(function (sender, e) {
-                        if (e.menuItem.getIdentifier() === "marvalSoftware-sharepoint") {
-                            //window.open("", "_blank", "width=800,height=600")
-                            this._popup();
-                        }
-                    },
-                        this);
-                },
-
-                _preRequisiteCheck: function (sender, e) {
-
-                    $.ajax({
-                        type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=PreRequisiteCheck",
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        success: function (result) {
-                            if (Object.keys(result).length > 0) {
-                                this._errorPopup(result);
-                            }
-                            else {
-                                this._popup();
-                            }
-                        }.bind(this)
-                    });
-                }, _postMessage: function (sender, e) {
-                    e.preventDefault();
-                    var messageText = $('#message').val();
-                    let email = this._contactEmail ? this._contactEmail : " No email defined";
-                    let description = window.top.document.getElementById("ctl00_cph_description").value;
-                    var payload = {};
-                    //if (window.top.document.getElementById("CheckBox").checked) {
-                    //    var formulatedMessage = messageText + " under request number: " + this._requestNumber + ", request ID: " + this._requestID + ", the request description: " + description + ", from :" + email;
-                    //    payload = {
-                    //        message: formulatedMessage,
-                    //        action: "SendSharepointMessage"
-                    //    }
-                    //} else {//not checked
-                    //    payload = {
-                    //        message: messageText,
-                    //        action: "SendSharepointMessage"
-                    //    }
-                    //}
-                    console.log("We are here");
-
-
-
-                    $.ajax({
-                        type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=SendSharepointMessage",
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        data: JSON.stringify(payload),
-                        success: function (result) {
-                            if (Object.keys(result).length > 0) {
-                                this._errorPopup(result);
-                            }
-                            else {
-                                this._popup();
-                            }
-                        }.bind(this)
-                    });
-                },
-
-
-                _getAllPageIncindents: function () {
-                    $.ajax({
-                        type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=GetAllPageIncidents&pageId=" + this._pages.options[this._pages.selectedIndex].value,
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        success: function (results) {
-                            if (results) {
-                                this._clearIncidents();
-                                for (var i = 0; i < results.length; i++) {
-                                    var incident = document.createElement("option");
-                                    incident.value = results[i].id;
-                                    incident.text = results[i].name;
-                                    this._incidents.add(incident);
-                                }
-                            }
-                        }.bind(this),
-                        error: function (results) {
-                            this._clearIncidents();
-                        }.bind(this)
-                    });
-                },
-
-                /** */
-
-                _getAllFolders: async function (siteId, folderPath = null) {
-                    //Sharepoint._getAuth();
-                    console.log("we are calling GETALLFOLDERS");
-                    let apptoken = Sharepoint._microsoftToken;
-                    if (folderPath) {
-                        console.log("folder path in get all folders ", folderPath);
-                    } else {
-                        console.log("folder path is still null")
-                    }
-                    
-
-                    //console.log("apptoken is:", apptoken);
-                    try {
-                        //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
-
-                        //  console.log("apptoken is:", apptoken);
-                        const response = await fetch(_fullPluginPathHandler + "?endpoint=getAllFolders", {
-                            method: "POST",
-                            "headers": [["content-type", "application/json"]],
-                            body: JSON.stringify({
-                                "apptoken": apptoken,
-                                "siteId": siteId,
-                                "folderPath": folderPath
-                            })
-                            // headers:{'apptoken':apptoken}
-
-                        });
-                        let foldersJson = await response.json(); //response promise
-
-                        console.log("All folders are: ", foldersJson);
-
-                        console.log("we should be appending folders now");
-                        let $dropdown = $('#foldersDropdown');
-                        if ($dropdown) {
-                            console.log("folders dropdown does exist");
-                        }
-                        $dropdown.empty();
-                        $dropdown.append('<option value = "">-- Select a Folder --</option>');
-
-                        foldersJson.value.forEach(site => {
-                          //  console.log("folder here is", site);
-                            $dropdown.append($('<option>').val(site.id).text(site.name));
-                        });
-                        console.log("appending should finish!");
-
-                        //in theory should have all our sites if response is correct
-                        return foldersJson;//so we can use it later
-
-
-                    } catch (error) {
-                        console.log("Error fetching sites: ", error);
-                    }
-                },
-                _printSiteId: function (e) {
-                    console.log("site id ", e.value);
-                },
-
-                _getAllIncindentUpdates: function () {
-                    var pageId = this._pages.options[this._pages.selectedIndex].value;
-                    var incidentNumber = this._incidents.options[this._incidents.selectedIndex].value;
-                    this._showSpinner();
-                    if (incidentNumber) {
-                        $.ajax({
-                            type: "POST",
-                            url: this._getPluginPath() + "handler/ApiHandler.ashx?action=GetAllIncidentUpdates&pageId=" + pageId + "&incidentNumber=" + incidentNumber,
-                            contentType: "application/json; charset=utf-8",
-                            dataType: "json",
-                            success: function (results) {
-                                if (results) {
-                                    this._addCard(results);
-                                }
-                            }.bind(this),
-                            error: function (result) {
-                                if (result) {
-                                    this._addCard(result);
-                                }
-                            }.bind(this)
-                        });
-                    }
-                    this._enableOrDisableMessageTextArea();
-                    this._hideSpinner();
-
-                },
-
-                _getAllPages: function (sender, e) {
-                    $.ajax({
-                        type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=GetAllPages",
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        success: function (results) {
-                            if (results) {
-                                for (var i = 0; i < results.length; i++) {
-                                    var page = document.createElement("option");
-                                    page.value = results[i].id;
-                                    page.text = results[i].name;
-                                    this._pages.add(page);
-                                }
-                            }
-                        }.bind(this)
-                    });
-                },
-
-                _update: function (value) {
-                    this._sendInProgress = true;
-                    this._enableOrDisableSubmit();//as send is in progress, we need to disable the button
-
-                    var data = { incident: { body: value } };
-                    var pageId = this._pages.options[this._pages.selectedIndex].value;
-                    var incidentNumber = this._incidents.options[this._incidents.selectedIndex].value;
-
-
-                    $.ajax({
-                        type: "POST",
-                        url: this._getPluginPath() + "handler/ApiHandler.ashx?action=UpdateSharepointIncident&pageId=" + pageId + "&incidentNumber=" + incidentNumber,
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        data: JSON.stringify(data),
-                        success: function (result, textStatus, xhr) {
-
-
-                            if (result.error) {
-                                this._miscellaneousErrorPopup({ "responseText": xhr.status + " " + result.error.join(", ") });
-                            } else {
-                                this._getAllIncindentUpdates();
-                                this._body.value = "";
-                            }
-                            this._sendInProgress = false;
-                            this._enableOrDisableSubmit();
-                            sendBtn.disabled = false;
-
-                        }.bind(this),
-                        error: function (xhr) {
-
-                            let statusCode = xhr.status;
-                            let message = xhr.responseText;
-
-                            try {
-                                var parsed = JSON.parse(message);
-                                if (parsed.error && Array.isArray(parsed.error)) {
-                                    message = parsed.error.join(", ")
-                                }
-                            } catch (e) {
-
-                            }
-                            this._miscellaneousErrorPopup({
-                                "responseText": statusCode + " " + message
-                            })
-                            this._sendInProgress = false;
-                            this._enableOrDisableSubmit();
-                            sendBtn.disabled = false;
-
-                        }.bind(this)
-                    });
-                },
-
-
-                _enableOrDisableIncidentsOption: function (sender, e) {
-                    if (this._pages.selectedIndex > 0) {
-                        this._incidents.removeAttribute('disabled');
-                    } else {
-                        this._incidents.setAttribute('disabled', '');
-                    }
-                },
-
-
-                _enableOrDisableMessageTextArea: function (sender, e) {
-                    if (this._pages.selectedIndex > 0 && this._incidents.selectedIndex > 0) {
-                        this._body.removeAttribute('disabled');
-                    } else {
-                        this._body.setAttribute('disabled', '');
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
                     }
                 }
-            });
-    })();
-</script>
+                else if (getParamVal == "getAllAttachments")
+                {
+                    try
+                    {
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/attachments";
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                            context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
+                        }
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                }
+
+                else
+                {
+                    context.Response.Write("Something is not working");
+                }
+                break;
+            case "POST":
+                Log.Information("we are at 434, with getparamval" + getParamVal);
+
+                if (getParamVal == "getAttachment") //upload attachment
+                {
+                    Log.Information("we are in if");
+
+                    try
+                    {
+                        Log.Information("we are in try in attachment");
+
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+                        var attachmentName = context.Request.QueryString["attachmentName"];
+                        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                        using (var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            requestBody = reader.ReadToEnd();//read contents from body in frontend
+                        }
+                        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+
+                        // Step 1: Get the attachment from the MSM API
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/attachments/" + identifer + "/content?mode=Attachment";
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            // Step 2: Upload to SharePoint
+                            //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
+                            // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
+                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                            // Create request for SharePoint upload
+                            Log.Information("url3 of uploading to " + url3);
+                            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
+                            sharePointRequest.Method = "PUT";
+                            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+
+                            sharePointRequest.ContentType = "application/octet-stream";
+                            sharePointRequest.ContentLength = attachmentData.Length;
+                            Log.Information("data len " + attachmentData.Length);
+                            // Write the attachment data to the request stream
+                            using (Stream requestStream = sharePointRequest.GetRequestStream())
+                            {
+                                requestStream.Write(attachmentData, 0, attachmentData.Length);
+                            }
+                            // Execute the SharePoint upload request
+                            //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                            Log.Information("we are at line 486");
+                            context.Response.Write(this.ProcessRequest2(sharePointRequest));
+                        }
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                }
+                if (getParamVal == "uploadNote") //upload attachment
+                {
+                    Log.Information("we are in if");
+
+                    try
+                    {
+                        Log.Information("we are in try in upload notes");
+
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+                        var attachmentName = context.Request.QueryString["attachmentName"];
+                        //var microsoftAccessToken = context.Request.QueryString["microsoftToken"];
+                        using (var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            requestBody = reader.ReadToEnd();//read contents from body in frontend
+                        }
+                        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+
+                        // Step 1: Get the attachment from the MSM API
+                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes/" + identifer;
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        //byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        string noteJson = this.ProcessRequest2(httpWebRequest); // raw JSON string
+                        dynamic noteData = JsonConvert.DeserializeObject(noteJson); //deserialise so we cna access the data in the body
+                        Log.Information("noteJson = " + noteJson);
+                        Log.Information("contentSummary = " + noteData.entity.data.contentSummary);
+
+
+                        // Build a plain-text file content
+                        string textContent =
+                        "Summary: " + noteData.entity.data.contentSummary + "\r\n" +
+                        "Author: " + noteData.entity.data.author.name + "\r\n" +
+                        "Created On: " + noteData.entity.data.createdOn;
+
+
+                        // Convert the text to byte array for upload
+                        byte[] attachmentData = Encoding.UTF8.GetBytes(textContent); //need to remember that needs to be in bytes format when we are doing stream write
+
+                        // Optional: append .txt extension to make it clearer
+                        if (!attachmentName.EndsWith(".txt"))
+                        {
+                            attachmentName += ".txt";
+                        }
+
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            // Step 2: Upload to SharePoint
+                            //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                            string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
+                            // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
+                            string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                            Log.Information("url3 of uploading to " + url3);
+                            // Create request for SharePoint upload
+                            HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
+                            sharePointRequest.Method = "PUT";
+                            sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+
+                            sharePointRequest.ContentType = "application/octet-stream";
+                            sharePointRequest.ContentLength = attachmentData.Length;
+                            Log.Information("data len " + attachmentData.Length);
+                            // Write the attachment data to the request stream
+                            using (Stream requestStream = sharePointRequest.GetRequestStream())
+                            {
+                                requestStream.Write(attachmentData, 0, attachmentData.Length);
+                            }
+                            // Execute the SharePoint upload request
+                            //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                            //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                            Log.Information("we are at line 486");
+                            context.Response.Write(this.ProcessRequest2(sharePointRequest));
+                        }
+                        else
+                        {
+                            Log.Warning("No attachment data received from MSM API");
+                            context.Response.Write("No attachment data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                }
+                else if (getParamVal == "getAllFolders")
+                {
+                    string json;
+                    string url = "";
+
+
+                    using (var reader = new StreamReader(context.Request.InputStream))
+                    {
+                        json = reader.ReadToEnd();
+                    }
+
+                    RequestData data;
+                    try
+                    {
+
+                        data = JsonConvert.DeserializeObject<RequestData>(json);//read body from request
+                    }
+                    catch (JsonException)
+                    {
+                        context.Response.StatusCode = 400; // Bad Request
+                        context.Response.Write("Invalid JSON");
+                        context.Response.End();
+                        return;
+                    }
+                    //var action = data.action;
+                    var apptoken = data.apptoken;
+                    Log.Information("apptoken is", apptoken);
+                    Log.Information("data is" + data);
+                    string siteId = data.siteId;
+                    string folderPath = data.folderPath;
+                    if (!String.IsNullOrEmpty(folderPath))//if exists
+                    {
+                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/"+folderPath+":/children";
+                    }
+                    else
+                    {
+                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children"; //meaning get root folders
+                    }
+
+                    Log.Information("apptoken is: " + apptoken);
+                    Log.Information("url of get all folders is " + url);
+                    string ex = GetRequest((url), apptoken);
+                    context.Response.Write(ex);
+                }
+                else if (getParamVal == "getSites")
+                {
+                    string json;
+
+                    using (var reader = new StreamReader(context.Request.InputStream))
+                    {
+                        json = reader.ReadToEnd();
+                    }
+
+                    RequestData data;
+                    try
+                    {
+
+                        data = JsonConvert.DeserializeObject<RequestData>(json);
+                    }
+                    catch (JsonException)
+                    {
+                        context.Response.StatusCode = 400; // Bad Request
+                        context.Response.Write("Invalid JSON");
+                        context.Response.End();
+                        return;
+                    }
+                    //var action = data.action;
+                    var apptoken = data.apptoken;
+                    Log.Information("apptoken is", apptoken);
+                    Log.Information("data is" + data);
+
+                    Log.Information("apptoken is: " + apptoken);
+                    string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", apptoken);
+                    context.Response.Write(ex);
+                }
+                else if (getParamVal == "createFolder")
+                {
+                    Log.Information("Entering 'createFolder' block.");
+
+                    try
+                    {
+                        Log.Information("Processing folder creation...");
+
+                        // Extract query parameters
+                        var identifier = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+                        var attachmentName = context.Request.QueryString["attachmentName"];
+
+                        // Read JSON body from request
+                        string requestBody;
+                        using (var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            requestBody = reader.ReadToEnd();
+                        }
+
+                        dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
+                        string siteId = parsedBody.siteId;
+                        string folderId = parsedBody.folderId;
+                        string microsoftToken2 = parsedBody.microsoftToken;
+
+                        // Create SharePoint folder creation URL
+                        string url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/items/root/children";
+
+                        // Setup request to create folder
+                        HttpWebRequest request2 = (HttpWebRequest)WebRequest.Create(url);
+                        request2.Method = "POST";
+                        request2.Headers["Authorization"] = "Bearer " + microsoftToken2;
+                        request2.ContentType = "application/json";
+
+                        // Build request body to create folder
+                        var body = new Dictionary<string, object>
+{
+    { "name", attachmentName },
+    { "folder", new { } },
+    { "@microsoft.graph.conflictBehavior", "rename" }
+};
+
+
+
+                        string jsonBody = JsonConvert.SerializeObject(body);
+
+                        using (var streamWriter = new StreamWriter(request2.GetRequestStream()))
+                        {
+                            streamWriter.Write(jsonBody);
+                        }
+
+                        // Send request to Graph API
+                        var responseContent = this.ProcessRequest2(request2);
+                        Log.Information("Folder created successfully.");
+                        context.Response.Write(responseContent);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during folder creation: " + e.Message, e);
+                        context.Response.Write("Error creating folder: " + e.Message);
+                    }
+                }
+
+
+
+                break;
+        }
+    }
+    private string ProcessRequest2(HttpWebRequest request)
+    {
+        try
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(responseStream))
+                    {
+                        string responseText = reader.ReadToEnd();
+                        // Log the response status
+                        //Log.Information("HTTP Status:"+ response.StatusCode +response.StatusDescription);
+                        // For SharePoint uploads, successful responses are usually 200 or 201
+                        if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+                        {
+                            //Log.Information("SharePoint upload successful");
+                            return responseText;
+                        }
+                        else
+                        {
+                            // Log.Warning($"Unexpected status code: {response.StatusCode}");
+                            return responseText;
+                        }
+                    }
+                }
+            }
+        }
+        catch (WebException webEx)
+        {
+            // Handle web-specific errors
+            if (webEx.Response != null)
+            {
+                using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (Stream errorStream = errorResponse.GetResponseStream())
+                    {
+                        using (StreamReader errorReader = new StreamReader(errorStream))
+                        {
+                            string errorText = errorReader.ReadToEnd();
+                            Log.Error("Web Exception - Status: {errorResponse.StatusCode}, Error:" + errorText);
+                            throw new Exception("SharePoint API Error: {errorResponse.StatusCode} - " + errorText);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Log.Error("Web Exception without response: "+webEx.Message);
+                throw new Exception("Network Error: {webEx.Message}");
+                return "";
+            }
+        }
+        catch (Exception ex)
+        {
+            return "";
+            Log.Error("General Exception in ProcessRequest: " +ex.Message);
+            throw;
+        }
+        return "";
+    }
+
+    // Alternative version that returns more detailed response info
+    private SharePointUploadResponse ProcessRequestDetailed(HttpWebRequest request)
+    {
+        try
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(responseStream))
+                    {
+                        string responseText = reader.ReadToEnd();
+                        return new SharePointUploadResponse
+                        {
+                            StatusCode = response.StatusCode,
+                            StatusDescription = response.StatusDescription,
+                            Content = responseText,
+                            IsSuccess = response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created,
+                            ContentType = response.ContentType,
+                            Headers = response.Headers
+                        };
+                    }
+                }
+            }
+        }
+        catch (WebException webEx)
+        {
+            if (webEx.Response != null)
+            {
+                using (HttpWebResponse errorResponse = (HttpWebResponse)webEx.Response)
+                {
+                    using (Stream errorStream = errorResponse.GetResponseStream())
+                    {
+                        using (StreamReader errorReader = new StreamReader(errorStream))
+                        {
+                            string errorText = errorReader.ReadToEnd();
+                            return new SharePointUploadResponse
+                            {
+                                StatusCode = errorResponse.StatusCode,
+                                StatusDescription = errorResponse.StatusDescription,
+                                Content = errorText,
+                                IsSuccess = false,
+                                Error = "SharePoint API Error: {errorResponse.StatusCode} - " + errorText
+                            };
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return new SharePointUploadResponse
+                {
+                    IsSuccess = false,
+                    Error = "Network Error: "+webEx.Message
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            return new SharePointUploadResponse
+            {
+                IsSuccess = false,
+                Error = "General Exception: "+ex.Message
+            };
+        }
+    }
+    // Helper method to process request and return byte array
+    private byte[] ProcessRequestAsBytes(HttpWebRequest request)
+    {
+        try
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream responseStream = response.GetResponseStream())
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                responseStream.CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Error processing request as bytes: " + ex.Message, ex);
+            return null;
+        }
+    }
+    private string GetDBString()
+    {
+        string connectionString = "";
+
+        string msmdLocation = GetAppPath("MSM");
+        string path = msmdLocation;
+        string newPath = Path.GetFullPath(Path.Combine(path, @"..\"));
+        string openFilePath = newPath + "connectionStrings.config";
+
+        XmlDocument xmlDoc = new XmlDocument();
+        xmlDoc.Load(openFilePath);
+
+        XmlNodeList nodeList = xmlDoc.SelectNodes("/appSettings/add[@key='DatabaseConnectionString']");
+
+        if (nodeList.Count > 0)
+        {
+            // Get the value attribute of the node
+            connectionString = nodeList[0].Attributes["value"].Value;
+        }
+
+        else
+        {
+        }
+        return connectionString;
+    }
+    private string GetAppPath(string productName)
+    {
+        const string foldersPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\Folders";
+        var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+
+        var subKey = baseKey.OpenSubKey(foldersPath);
+        if (subKey == null)
+        {
+            baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
+            subKey = baseKey.OpenSubKey(foldersPath);
+        }
+        return subKey != null ? subKey.GetValueNames().FirstOrDefault(kv => kv.Contains(productName)) : "ERROR";
+    }
+
+    private string GetCustomersJSON(string CIId)
+    {
+        string connString = GetDBString();
+        using (SqlConnection conn = new SqlConnection())
+        {
+            conn.ConnectionString = connString;
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.CommandText = "select guid from directoryRelationship where CIId = " + CIId;
+                cmd.Connection = conn;
+                conn.Open();
+                string returnVal = "";
+                using (SqlDataReader sdr = cmd.ExecuteReader())
+                {
+                    sdr.Read();
+                    returnVal = Convert.ToString(sdr["guid"]);
+                }
+                conn.Close();
+
+                return returnVal;
+            }
+        }
+    }
+
+}
