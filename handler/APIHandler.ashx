@@ -700,11 +700,11 @@ public class Handler : PluginHandler
 
                         dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
                         string siteId = parsedBody.siteId;
-                        string folderId = parsedBody.folderId;
+                        string folderId = parsedBody.folderId;//should be the folder path
                         string microsoftToken2 = parsedBody.microsoftToken;
 
                         // Create SharePoint folder creation URL
-                        string url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/items/root/children";
+                        string url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/items/root:/"+folderId+":/children";
 
                         // Setup request to create folder
                         HttpWebRequest request2 = (HttpWebRequest)WebRequest.Create(url);
