@@ -39,7 +39,9 @@
             }
 
         .tree-content {
+            height: 300px;
             padding: 16px;
+            overflow: auto;
         }
 
         .tree-item {
@@ -429,7 +431,7 @@
         </div>
     </div>-->
     <!--</div>-->
-    <div class="container">
+    <div class="container" id="treeContainer" display="none">
         <div class="folder-tree">
             <div class="header">
                 <h2>SharePoint Folders</h2>
@@ -443,12 +445,13 @@
     </div>
 
     <select id="sitesDropdown"><option>Loading!</option></select>
-    <select id="foldersDropdown"><option>Still loading!</option></select>
+    <!--<select id="foldersDropdown"><option>Still loading!</option></select>-->
+    <div id="successMessage">Success Message</div>
 
 
-    <button id="uploadFile">upload</button>
+    <!--<button id="uploadFile">upload</button>-->
     <button id="createFolder">Create Folder!</button>
-    <button id="testButton">test button</button>
+    <!--<button id="testButton">test button</button>-->
 
     <div class="itemsTable">
         <table id="notesTable" border="1" style="margin-top: 10px; width: 100%;">
@@ -1198,23 +1201,23 @@
                             });
                             let foldersJson = await response.json(); //response promise
 
-                            console.log("All folders are: ", foldersJson);
+                            //console.log("All folders are: ", foldersJson);
 
-                            console.log("we should be appending folders now");
-                            let $dropdown = $('#foldersDropdown');
-                            if ($dropdown) {
-                                console.log("folders dropdown does exist");
-                            }
-                            $dropdown.empty();
-                            $dropdown.append('<option value = "">-- Select a Folder --</option>');
+                            //console.log("we should be appending folders now");
+                            //let $dropdown = $('#foldersDropdown');
+                            //if ($dropdown) {
+                            //    console.log("folders dropdown does exist");
+                            //}
+                            //$dropdown.empty();
+                            //$dropdown.append('<option value = "">-- Select a Folder --</option>');
 
-                            sitesJson.value.forEach(site => {
-                                //console.log("folder here is", site);
-                                $dropdown.append($('<option>').val(site.id).text(site.name));
-                            });
-                            console.log("appending should finish!");
+                            //sitesJson.value.forEach(site => {
+                            //    //console.log("folder here is", site);
+                            //    $dropdown.append($('<option>').val(site.id).text(site.name));
+                            //});
+                            //console.log("appending should finish!");
 
-                            ; //in theory should have all our sites if response is correct
+                            //; //in theory should have all our sites if response is correct
 
 
                         } catch (error) {
@@ -1501,7 +1504,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     e.preventDefault();
 
                     let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
+                    //let foldersDropdown = $("#foldersDropdown");
 
                     var payload = {
                         message: formulatedMessage,
@@ -1609,8 +1612,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     var eventManager = MarvalSoftware.UI.Dom.EventManager.getInstance();
                     var template = document.querySelector("template").content;
                     this._element = window.top.document.importNode(template, true);
-                    this._uploadMessage = this._element.querySelector("#uploadFile");
-                    this._foldersElement = this._element.querySelector("#foldersDropdown");
+                    //this._uploadMessage = this._element.querySelector("#uploadFile");
+                    //this._foldersElement = this._element.querySelector("#foldersDropdown");
                     //eventManager.addHandler(this.folderSelected, "input", this._, this);
 
                     this._uploadButton = this._element.querySelector("#uploadAll");
@@ -1621,14 +1624,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         
                     , this); //should be uploading all now
                     
-
-                    if (this._uploadMessage) {
-                        console.log("uploadmsg does exist");
-                    }
-                    eventManager.addHandler(this._uploadMessage, "click", this._getAttachment, this);
-                    //let siteId =
-                    //eventManager.addHandler(this._foldersElement, "input", this._getAllFolders(), this);
-
 
                     // this._body = this._element.querySelector("textarea");
                     this._cards = this._element.querySelector(".cards");
@@ -1653,6 +1648,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     eventManager.addHandler(this.siteSelected, "input", function (e) {
                         this._getAllFolders(e.value);
                         //this._getAllFolders(e.value, "test:");
+                        $("#treeContainer").css("display", "show");
                         this._renderTree();//call when we seelect a site
                         console.log("we should be calling get all folders twice and getting the response ");
 
@@ -1704,14 +1700,18 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         // Add new rows
                         notes.collection.items.forEach(note => {
-                            let fileName = note.entity.data.contentSummary;
+                            let noteInfo = note.entity.data;
+                            let fileName = noteInfo.type + " " + noteInfo.createdOn + " " +  noteInfo.author.name;
                             let row = document.createElement("tr");
+                            let summary = noteInfo.contentSummary;
                             row.innerHTML = `
               
 
 <td>${fileName}
-                  <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${note.entity.data.id}"></td> <!-- Attachments column -->
-
+                  <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${note.entity.data.id}">
+                  <div>${summary}</div></td> <!-- Attachments column -->
+                  
+                  
 
 
           `;
@@ -1780,10 +1780,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log("we are calling upload all attachments");
                     //e.preventDefault();
                     let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
+                    //let foldersDropdown = $("#foldersDropdown");
                     let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                     let siteId = sitesDropdown.val();
-                    let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
+                    //let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
                     // Find all checked checkboxes in the attachments column
                     let checkedBoxes = $("#itemsTable tbody input[type='checkbox']:checked");
                     let notesBoxes = $("#notesTable tbody input[type='checkbox']:checked");
@@ -1796,9 +1796,6 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
                     let folderPath = this._currentPath;
                     console.log("folder path in upallat ius ", folderPath);
-
-                    
-
 
 
                     for (let notebox of notesBoxes) {
@@ -1834,8 +1831,19 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                             let response = await result.json();
                             console.log(`Uploaded: ${attachmentName}`, response);
+                            $("#successMessage")
+                                .text("Successfully uploaded notes")
+                                .fadeIn("slow")      // Fade in
+                                .delay(2000)         // Wait 2 seconds
+                                .fadeOut("slow");    // Then fade out
+
                         } catch (ex) {
                             console.error("Upload error for", attachmentName, ex);
+                            $("#successMessage")
+                                .text("Error could not upload notes")
+                                .fadeIn("slow")      // Fade in
+                                .delay(2000)         // Wait 2 seconds
+                                .fadeOut("slow"); 
                         }
                     }
 
@@ -1870,8 +1878,19 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                             let response = await result.json();
                             console.log(`Uploaded: ${attachmentName}`, response);
+                            $("#successMessage")
+                                .text("Successfully uploaded attachments")
+                                .fadeIn("slow")      // Fade in
+                                .delay(2000)         // Wait 2 seconds
+                                .fadeOut("slow");    // Then fade out
+
                         } catch (ex) {
                             console.error("Upload error for", attachmentName, ex);
+                            $("#successMessage")
+                                .text("Error could not upload attachments")
+                                .fadeIn("slow")      // Fade in
+                                .delay(2000)         // Wait 2 seconds
+                                .fadeOut("slow"); 
                         }
                     }
 
@@ -1882,7 +1901,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 _getAttachment: async function (sender, e, identifier = null) {
                     e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
+                    //let foldersDropdown = $("#foldersDropdown");
 
                     try {
                         //console.log("req id is", reqId, "identifier is ", this._rowIndex);
@@ -1891,7 +1910,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
                         console.log("we are going to this attachment url ", url);
-                        console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
+                        //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
                         let payLoad = {
                             microsoftToken: Sharepoint._microsoftToken,
@@ -1925,21 +1944,23 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 _createFolder: async function (sender, e) {
                     e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
-                    let foldersDropdown = $("#foldersDropdown");
+                    //let foldersDropdown = $("#foldersDropdown");
 
                     try {
                         //console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log(" we are calling get create folder now");
                         let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + Sharepoint._attachmentName;
+                        console.log("creating folder with current path ", Sharepoint._currentPath);
+                        let name = Sharepoint._currentPath.replace(/\//g, '');
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name;
                         console.log("we are going to this create url ", url);
-                        console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
+                        //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
                         let payLoad = {
                             microsoftToken: Sharepoint._microsoftToken,
                             siteId: sitesDropdown.val(),
-                            folderId: foldersDropdown.text()
+                            folderId: Sharepoint._currentPath
 
                         }
                         console.log("url is", url);
@@ -1953,14 +1974,34 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         if (!result.ok) {
                             const errorText = await result.text();
                             throw new Error(`HTTP error ${result.status}: ${errorText}`);
+                            $("#successMessage")
+                                .text("Error did not create folder")
+                                .fadeIn("slow")      // Fade in
+                                .delay(2000)         // Wait 2 seconds
+                                .fadeOut("slow"); 
                         }
+
+                        $("#successMessage")
+                            .text("Successfully created folder")
+                            .fadeIn("slow")      // Fade in
+                            .delay(2000)         // Wait 2 seconds
+                            .fadeOut("slow"); 
 
                         const attachment = await result.json();
                         console.log("attachment feedback", attachment);
+                        this._renderTree();
+                        //let res = await Sharepoint._fetchChildren(Sharepoint._currentSelectedFolderId);
+                        //Sharepoint._renderChildren(Sharepoint._currentSelectedFolderId);
+                      //  //simply re render after folder creation
 
                         //return attachment;
 
                     } catch (ex) {
+                        $("#successMessage")
+                            .text("error did not create folder")
+                            .fadeIn("slow")      // Fade in
+                            .delay(2000)         // Wait 2 seconds
+                            .fadeOut("slow"); 
                         console.error("we have error", ex);
                     }
 
@@ -2619,20 +2660,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         let foldersJson = await response.json(); //response promise
 
-                        console.log("All folders are: ", foldersJson);
+                        //console.log("All folders are: ", foldersJson);
 
-                        console.log("we should be appending folders now");
-                        let $dropdown = $('#foldersDropdown');
-                        if ($dropdown) {
-                            console.log("folders dropdown does exist");
-                        }
-                        $dropdown.empty();
-                        $dropdown.append('<option value = "">-- Select a Folder --</option>');
+                        //console.log("we should be appending folders now");
+                        //let $dropdown = $('#foldersDropdown');
+                        //if ($dropdown) {
+                        //    console.log("folders dropdown does exist");
+                        //}
+                        //$dropdown.empty();
+                        //$dropdown.append('<option value = "">-- Select a Folder --</option>');
 
-                        foldersJson.value.forEach(site => {
-                          //  console.log("folder here is", site);
-                            $dropdown.append($('<option>').val(site.id).text(site.name));
-                        });
+                        //foldersJson.value.forEach(site => {
+                        //  //  console.log("folder here is", site);
+                        //    $dropdown.append($('<option>').val(site.id).text(site.name));
+                        //});
                         console.log("appending should finish!");
 
                         //in theory should have all our sites if response is correct
