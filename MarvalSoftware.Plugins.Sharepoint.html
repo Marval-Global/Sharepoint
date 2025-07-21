@@ -9,6 +9,31 @@
             max-width: 1024px;
             margin: 0 auto;
         }
+        .note-item {
+            padding: 8px;
+            border-bottom: 1px solid #ccc;
+            font-family: Arial, sans-serif;
+        }
+/*        #attachmentsDiv{
+            display:flex;
+        }*/
+        #itemsDiv{
+            display:flex !important;
+            
+        }
+
+        #notesDiv,
+        #attachmentsDiv, #emailsDiv {
+            flex: 1; /* Make them grow equally */
+            min-width: 0; /* Prevent overflow if needed */
+            border: 1px solid #ccc; /* Optional: visual separation */
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .note-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
 
         .folder-tree {
             background: white;
@@ -495,6 +520,7 @@
 
     <button id="uploadAll">Upload All Attachments</button>
     <div id="selectedFolder">Example</div>
+    <!--<div id="attachmentsDiv" style="display: none;"></div>-->
 
 
 </template>
@@ -1399,7 +1425,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
             console.log("we are calling fetchsharepointsites");
                     //let apptoken = await getMicrosoftAccessToken();
                     let apptoken = await this._getMicrosoftAccessToken2();
-            console.log("apptoken is:", apptoken);
+            //console.log("apptoken is:", apptoken);
             try {
                 //const clientIdUrl = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=ClientID"
 
@@ -1653,6 +1679,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("we should be calling get all folders twice and getting the response ");
 
                     }, this); //should be appending all folders now
+                    //let creating = browser.windows.create(
+                    //    //createData            // optional object
+                    //)
+
 
                     //this.expandButton = this._element.querySelector("#expand-button2");
                     //eventManager.addHandler(this.expandButton, "click", this._toggleFolder(), this);
@@ -1695,27 +1725,56 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let notes = await result.json();
                         console.log("notes feedback", notes);
                         // Clear existing rows (including the "(Empty)" row)
-                        notesTable.empty();
+                        let notesDiv = window.top.document.getElementById("notesDiv");
+                        if (notesDiv) {
+                            console.log("notes div exists and we are appending to it", notesDiv);
+                        }
 
+                        // Clear old content
+                        notesDiv.innerHTML = "";
 
-                        // Add new rows
+                        // Loop through notes and create elements
                         notes.collection.items.forEach(note => {
                             let noteInfo = note.entity.data;
-                            let fileName = noteInfo.type + " " + noteInfo.createdOn + " " +  noteInfo.author.name;
-                            let row = document.createElement("tr");
+                            let fileName = `${noteInfo.type} ${noteInfo.createdOn} ${noteInfo.author.name}`;
                             let summary = noteInfo.contentSummary;
-                            row.innerHTML = `
-              
 
-<td>${fileName}
-                  <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${note.entity.data.id}">
-                  <div>${summary}</div></td> <!-- Attachments column -->
-                  
-                  
+                            // Create a container for each note
+                            let container = document.createElement("div");
+                            container.className = "note-item";
+                            container.style.marginBottom = "12px";
+                            container.style.padding = "6px 0";
+                            container.style.borderBottom = "1px solid #ddd";
 
+                            // Create the checkbox
+                            let checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.name = "selectAttachment";
+                            checkbox.value = fileName;
+                            checkbox.setAttribute("data-attachment-id", noteInfo.id);
+                            //summaryDiv.className = "note-summary"; // <-- add this
+                            checkbox.style.marginRight = "8px";
 
-          `;
-                            notesTable[0].appendChild(row);
+                            // Create the label
+                            let label = document.createElement("label");
+                            label.textContent = fileName;
+                            label.style.fontWeight = "bold";
+
+                            // Create a summary element
+                            let summaryDiv = document.createElement("div");
+                            summaryDiv.textContent = summary;
+                            summaryDiv.style.marginLeft = "26px"; // align under label text
+                            summaryDiv.style.color = "#555";
+                            summaryDiv.style.fontSize = "0.9em";
+                            summaryDiv.className = "note-summary"; // <-- add this
+
+                            // Append to container
+                            container.appendChild(checkbox);
+                            container.appendChild(label);
+                            container.appendChild(summaryDiv);
+
+                            // Append container to notes div
+                            notesDiv.appendChild(container);
                         });
 
 
@@ -1750,23 +1809,41 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let attachment = await result.json();
                         console.log("attachmentS feedback", attachment);
                         // Clear existing rows (including the "(Empty)" row)
-                        itemsTable.empty();
-                        
+                        let attachmentsDiv = window.top.document.getElementById("attachmentsDiv");
+                        if (attachmentsDiv) {
+                            console.log("we found attachments div and we are now appending");
+                        }
+                        attachmentsDiv.innerHTML = ""; // clear previous
 
-                        // Add new rows
-                        attachment.collection.items.forEach(attachment => {
-                            let fileName = attachment.entity.data.fileName;
-                            let row = document.createElement("tr");
-                            row.innerHTML = `
-                
-  
-  <td>${fileName}
-                    <input type="checkbox" name="selectAttachment" value="${fileName}" data-attachment-id="${attachment.entity.data.id}"></td> <!-- Attachments column -->
-  
+                        // Add new attachment elements
+                        attachment.collection.items.forEach(attachmentItem => {
+                            let fileName = attachmentItem.entity.data.fileName;
+                            let id = attachmentItem.entity.data.id;
 
+                            // Create container for the item
+                            let container = document.createElement("div");
+                            container.className = "attachment-item";
+                            container.style.marginBottom = "8px";
 
-            `;
-                            itemsTable[0].appendChild(row);
+                            // Create checkbox
+                            let checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.name = "selectAttachment";
+                            checkbox.value = fileName;
+                            checkbox.setAttribute("data-attachment-id", id);
+
+                            // Create label or file name text
+                            let label = document.createElement("label");
+                            label.textContent = fileName;
+                            label.style.marginLeft = "8px";
+
+                            // Append to container
+                            container.appendChild(checkbox);
+                            container.appendChild(label);
+
+                            // Append container to the div
+                            attachmentsDiv.appendChild(container);
+                            console.log("appended attachments now");
                         });
 
 
@@ -1776,7 +1853,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                 },
                 _uploadAllAttachments: async function (sender, e) {
-                    e.preventDefault();
+                    //e.preventDefault();
                     console.log("we are calling upload all attachments");
                     //e.preventDefault();
                     let sitesDropdown = $("#sitesDropdown");
@@ -1785,8 +1862,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let siteId = sitesDropdown.val();
                     //let folderId = foldersDropdown.find("option:selected").text(); // or `.val()` if you're using value instead
                     // Find all checked checkboxes in the attachments column
-                    let checkedBoxes = $("#itemsTable tbody input[type='checkbox']:checked");
-                    let notesBoxes = $("#notesTable tbody input[type='checkbox']:checked");
+                    let checkedBoxes = $("#attachmentsDiv input[type='checkbox']:checked");
+                    let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
                     if (checkedBoxes.length === 0 && notesBoxes.length === 0) {
                         console.warn("No attachments selected.");
                         alert("Please select at least one attachment to upload.");
@@ -1801,12 +1878,14 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     for (let notebox of notesBoxes) {
                         let attachmentName = $(notebox).val(); // file name stored in value
                         let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
+                        let summaryText = $(notebox).closest(".note-item").find(".note-summary").text().trim();
 
-                        console.log("Uploading attachment:", attachmentName);
+
+                        console.log("Uploading attachment:", summaryText);
 
                         //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + attachmentName;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + summaryText;
                         //should be uploading all notes
                         console.log("we are uploading notes to this url " + url);
                         let payload = {
@@ -2323,6 +2402,24 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         container.innerHTML = '<div>No folders found.</div>';
                     }
                 },
+                _renderAttachmentsWindow: function () {
+                    let attachmentDiv = window.top.document.getElementById('attachmentsDiv');
+                    let notesDiv = document.createElement("div");
+                    notesDiv.innerText = "div 2";
+                    let emailsDiv = document.createElement('div');
+                    let $attachmentsDiv = $("#attachmentsDiv")
+                    $attachmentsDiv.append("testingf1211");
+                    $attachmentsDiv.append(notesDiv);
+                    $attachmentsDiv.append(emailsDiv);
+                    if (attachmentDiv) {
+                        //attachmentDiv
+
+                        //attachmentDiv.style.display = "block";
+                        console.log("we found attachments div", attachmentDiv);
+                    } else {
+                        console.log("we cannot find attachments div")
+                    }
+                },
 
         // Initialize the tree
         //renderTree();
@@ -2335,6 +2432,42 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log(document.location.search);
                     let url = (new URLSearchParams(window.top.location.search)).get("id");
                     console.log(url);
+                    //let atcDiv = window.top.document.getElementById('attachmentsDiv');
+                    //atcDiv.style.display ="block"
+
+                    let itemsDiv = document.createElement("div");
+                    //itemsDiv.innerHTML = ("test");
+                    itemsDiv.id = "itemsDiv";
+                    //creating our subdivs
+                    let notesDiv = document.createElement("div");
+                    notesDiv.id = "notesDiv";
+
+                    
+                    let attachmentsDiv = document.createElement("div");
+                    attachmentsDiv.id = "attachmentsDiv";
+                    let emailsDiv = document.createElement("div");
+                    emailsDiv.id = "emailsDiv";
+
+                    let uploadButtonTwo = document.createElement("button");
+                    uploadButtonTwo.id = "uploadButtonTwo";
+                    uploadButtonTwo.innerHTML = "upload all";
+                    uploadButtonTwo.onclick = function (e) {
+                        e.preventDefault();
+                        Sharepoint._uploadAllAttachments(e);
+                    };
+
+                    itemsDiv.appendChild(notesDiv);
+                    itemsDiv.appendChild(emailsDiv);
+                    itemsDiv.appendChild(attachmentsDiv);
+                    itemsDiv.appendChild(uploadButtonTwo);
+
+                    console.log("items div is ", itemsDiv);
+
+
+                    //let notesDiv = document.createElement("div");
+                    //notesDiv.innerHtml = ("");
+                    //let emailsDiv = document.createElement("div");
+                    //emailsDiv.innerHtml = ("");
 
                     //let eventElement = eventTarget);
                     if (!this._pluginWindow) {
@@ -2349,34 +2482,88 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             isMaximizable: true,
                             bodyElement: this
 
-                        });
+                        }
+
+                        );
+                        //this._notesWindow = new MarvalSoftware.UI.Window({
+                        //    appendToElement: window.top.document.getElementById("aspnetForm"),
+                        //    title: "Notes",
+                        //    height: 300,
+                        //    width: 300,
+                        //    minHeight: 300,
+                        //    minWidth: 300,
+                        //    isResizable: true,
+                        //    isMaximizable: true,
+                        //    bodyElement: notesDiv
+
+                        //})
+                        //this._emailsWindow = new MarvalSoftware.UI.Window({
+                        //    appendToElement: window.top.document.getElementById("aspnetForm"),
+                        //    title: "Emails",
+                        //    height: 300,
+                        //    width: 300,
+                        //    minHeight: 300,
+                        //    minWidth: 300,
+                        //    isResizable: true,
+                        //    isMaximizable: true,
+                        //    bodyElement: emailsDiv
+
+                        //})
+                        this._attachmentsWindow = new MarvalSoftware.UI.Window({
+                            appendToElement: window.top.document.getElementById("aspnetForm"),
+                            title: "Attachments",
+                            height: 800,
+                            width: 800,
+                            minHeight: 300,
+                            minWidth: 300,
+                            isResizable: true,
+                            isMaximizable: true,
+                            bodyElement: itemsDiv,
+                            //position: absolute,
+                            top: 500,
+                            left: 500,
+                            //position: relative,
+
+                        }
+
+                        );
                         this._renderElement();
-                        this._getAllAttachments();
-                        this._getAllNotes();
+                        //this._getAllAttachments();
+                        //this._getAllNotes();
                         this._fetchSharePointSites();
-                        //this._renderTree();
-                        //window.toggleFolder = Sharepoint._toggleFolder.bind(Sharepoint);
+                        //this._renderAttachmentsWindow();
 
-                        //renderTree();
-
-                        //this._getAttachment();
-
-
-                        //eventElement.parentElement.nextSibling.innerText;
                         if (eventTarget != undefined) {
                             console.log(eventTarget.parentElement.parentElement.nextSibling.innerText);
                         }
-
-
-                        //this._showGroups();
-
-                        //this._getAllPages();
                     }
                     //this._resetPopUpValues();
                     if (!this._pluginWindow.isVisible()) {
                         this._pluginWindow.centerToViewport();
                     }
+                    //this._attachmentsWindow.style(100, 100);
+                    //this._notesWindow.setPosition(200, 200);
+                    //this._emailsWindow.setPosition(300, 300);
+
+                    //this._attachmentsWindow.style.position = "relative";
+
+                    //this._attachmentDiv.style.position = "relative";
+                    //this._attachmentsWindow.append();
+                   this._attachmentsWindow.centerToViewport();
+
                     this._pluginWindow.show();
+                    this._attachmentsWindow.show();
+
+                    setTimeout(200);
+                    //this._renderAttachmentsWindow();
+                    this._getAllNotes();
+                    this._getAllAttachments();
+                    //this._notesWindow.show();
+                    //this._emailsWindow.show();
+
+                   
+                    //set position
+                    
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
                 },
