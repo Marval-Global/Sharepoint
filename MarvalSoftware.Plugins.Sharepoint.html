@@ -2020,6 +2020,93 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     }
 
                 },
+                _getAllEmails: async function () {
+                    try {
+                        console.log(" getting all emails ");
+                        let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
+                        let url = "https://localhost/MSM/RFP/Forms/RequestEmailAuditViewer.aspx?id=" + reqId;
+                        console.log("we are going to this email url ", url)
+
+                        console.log("url is", url);
+                        let result = await fetch(url, {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                        });
+                        if (!result.ok) {
+                            let errorText = await result.text();
+                            throw new Error(`HTTP error ${result.status}: ${errorText}`);
+                        }
+
+                        let emails = await result.text();
+                        let emailsHtml = $(emails); // Parse the HTML string into jQuery object
+                        let emailsBody = emailsHtml.find("#ctl00_cph_grid_body"); // Find the main body
+                        let targetCells = emailsBody.find(".cell-default.cell-body"); // Find the nested class elements
+
+                        console.log("Found target cells:", targetCells);
+
+                        //console.log("emails feedback", emails);
+                        //// Clear existing rows (including the "(Empty)" row)
+                        //let notesDiv = window.top.document.getElementById("emailsDiv");
+                        //if (notesDiv) {
+                        //    console.log("notes div exists and we are appending to it", notesDiv);
+                        //}
+
+
+
+                        //// Clear old content
+                        //notesDiv.innerHTML = "";
+
+                        //// Loop through notes and create elements
+                        //notes.collection.items.forEach(note => {
+                        //    let noteInfo = note.entity.data;
+                        //    let fileName = `${noteInfo.type} ${noteInfo.createdOn} ${noteInfo.author.name}`;
+                        //    let summary = noteInfo.contentSummary;
+
+                        //    // Create a container for each note
+                        //    let container = document.createElement("div");
+                        //    container.className = "note-item";
+                        //    container.style.marginBottom = "12px";
+                        //    container.style.padding = "6px 0";
+                        //    container.style.borderBottom = "1px solid #ddd";
+
+                        //    // Create the checkbox
+                        //    let checkbox = document.createElement("input");
+                        //    checkbox.type = "checkbox";
+                        //    checkbox.name = "selectAttachment";
+                        //    checkbox.value = fileName;
+                        //    checkbox.setAttribute("data-attachment-id", noteInfo.id);
+                        //    //summaryDiv.className = "note-summary"; // <-- add this
+                        //    checkbox.style.marginRight = "8px";
+
+                        //    // Create the label
+                        //    let label = document.createElement("label");
+                        //    label.textContent = fileName;
+                        //    label.style.fontWeight = "bold";
+
+                        //    // Create a summary element
+                        //    let summaryDiv = document.createElement("div");
+                        //    summaryDiv.textContent = summary;
+                        //    summaryDiv.style.marginLeft = "26px"; // align under label text
+                        //    summaryDiv.style.color = "#555";
+                        //    summaryDiv.style.fontSize = "0.9em";
+                        //    summaryDiv.className = "note-summary"; // <-- add this
+
+                        //    // Append to container
+                        //    container.appendChild(checkbox);
+                        //    container.appendChild(label);
+                        //    container.appendChild(summaryDiv);
+
+                        //    // Append container to notes div
+                        //    notesDiv.appendChild(container);
+                        //});
+
+
+                    } catch (ex) {
+                        console.error("we have error", ex);
+                    }
+                },
                 _createFolder: async function (sender, e) {
                     e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
@@ -2553,6 +2640,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                     this._pluginWindow.show();
                     this._attachmentsWindow.show();
+                    this._getAllEmails();
 
                     setTimeout(200);
                     //this._renderAttachmentsWindow();
