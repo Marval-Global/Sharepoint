@@ -1605,6 +1605,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
             try {
                 // Get the Client ID from your SharePoint handler or hardcode it here
                 const clientIdUrl = _fullPluginPathHandler + "?endpoint=ClientID"; // adjust as needed
+                console.log("clientIdUrl")
 
                 const clientId = await(await fetch(clientIdUrl)).text();
                 console.log("client id is:", clientId);
@@ -1864,6 +1865,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     // Find all checked checkboxes in the attachments column
                     let checkedBoxes = $("#attachmentsDiv input[type='checkbox']:checked");
                     let notesBoxes = $("#notesDiv input[type='checkbox']:checked");
+                    let emailBoxes = $("#emailsDiv input[type='checkbox']:checked");
+                    console.log("all ticked email boxes are ", emailBoxes);
+                    console.log("all ticked notes boxes are ", notesBoxes);
+                    console.log("all ticked checked boxes are ", checkedBoxes);
                     if (checkedBoxes.length === 0 && notesBoxes.length === 0) {
                         console.warn("No attachments selected.");
                         alert("Please select at least one attachment to upload.");
@@ -1873,6 +1878,58 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
                     let folderPath = this._currentPath;
                     console.log("folder path in upallat ius ", folderPath);
+
+                    for (let emailbox of emailBoxes) {
+                        let subject = $(emailbox).data("subject");
+                        let address = $(emailbox).data("address");
+                        let messageDate = $(emailbox).data("date");
+                        let identifier = emailbox.dataset.attachmentId;
+
+                        console.log("Uploading email here:", subject, "with microsoft token ", Sharepoint._microsoftToken);
+
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadEmail&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + encodeURIComponent(subject);
+
+                        let payload = {
+                            microsoftToken: Sharepoint._microsoftToken,
+                            siteId: siteId,
+                            folderId: folderPath,
+                            address: address,
+                            messageDate: messageDate
+                        };
+
+                        console.log("payload", payload);
+
+                        try {
+                            let result = await fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json; charset=utf-8"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!result.ok) {
+                                let errorText = await result.text();
+                                throw new Error(`Error uploading "${subject}": ${result.status} - ${errorText}`);
+                            }
+
+                            let response = await result.json();
+                            console.log(`Uploaded email: ${subject}`, response);
+                            $("#successMessage")
+                                .text("Successfully uploaded emails")
+                                .fadeIn("slow")
+                                .delay(2000)
+                                .fadeOut("slow");
+
+                        } catch (ex) {
+                            console.error("Upload error for", subject, ex);
+                            $("#successMessage")
+                                .text("Error could not upload notes")
+                                .fadeIn("slow")
+                                .delay(2000)
+                                .fadeOut("slow");
+                        }
+                    }
 
 
                     for (let notebox of notesBoxes) {
@@ -1888,6 +1945,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + summaryText;
                         //should be uploading all notes
                         console.log("we are uploading notes to this url " + url);
+                        console.log("current token is ", Sharepoint._microsoftToken)
                         let payload = {
                             microsoftToken: Sharepoint._microsoftToken,
                             siteId: siteId,
@@ -2040,11 +2098,41 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }
 
                         let emails = await result.text();
-                        let emailsHtml = $(emails); // Parse the HTML string into jQuery object
-                        let emailsBody = emailsHtml.find("#ctl00_cph_grid_body"); // Find the main body
-                        let targetCells = emailsBody.find(".cell-default.cell-body"); // Find the nested class elements
+                        let emailsHtml = $(emails);
+                        let emailsBody = emailsHtml.find("#ctl00_cph_grid_body");
 
-                        console.log("Found target cells:", targetCells);
+                        // Find all clickable email rows
+                        let emailRows = emailsBody.find("a.row.clickable");
+
+                        emailRows.each(function () {
+                            let row = $(this);
+                            let cells = row.find(".cell-default.cell-body");
+
+                            let messageDate = cells.eq(0).text().trim();
+                            let address = cells.eq(1).text().trim();
+                            let subject = cells.eq(2).text().trim();
+
+                            // Create a new DOM row with a checkbox + data attributes
+                            let customRow = $(`
+    <div class="email-row">
+        <input 
+            type="checkbox" 
+            class="email-checkbox"
+            data-date="${messageDate}"
+            data-address="${address}"
+            data-subject="${subject}"
+        />
+        <span class="email-date">${messageDate}</span>
+        <span class="email-address">${address}</span>
+        <span class="email-subject">${subject}</span>
+    </div>
+`);
+
+
+                            // Append to the target container
+                            $("#emailsDiv").append(customRow);
+                        });
+
 
                         //console.log("emails feedback", emails);
                         //// Clear existing rows (including the "(Empty)" row)
