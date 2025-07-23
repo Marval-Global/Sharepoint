@@ -30,6 +30,7 @@ public class Handler : PluginHandler
         public string siteId { get; set; }
         public string folderId { get; set; }
         public string folderPath { get; set; }
+        public string microsoftToken { get; set; }
 
     }
 
@@ -435,6 +436,39 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
+                }else if (getParamVal == "getAllEmails")
+                {
+                    try
+                    {
+                        string requestBody;
+                        var identifer = context.Request.QueryString["identifier"];
+                        var reqId = context.Request.QueryString["reqId"];
+
+                        string attachmentUrl = "https://localhost/MSM/RFP/Forms/RequestEmailAuditViewer.aspx?id=" + reqId;
+                        Log.Information("url here is" + attachmentUrl);
+                        httpWebRequest = BuildRequest(attachmentUrl);
+                        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+                        httpWebRequest.Method = "GET";
+                        // Get the attachment data as byte array
+                        byte[] attachmentData = this.ProcessRequestAsBytes(httpWebRequest);
+                        Log.Information("we are at line 367");
+
+                        if (attachmentData != null && attachmentData.Length > 0)
+                        {
+                            context.Response.ContentType = "application/octet-stream"; // optionally set MIME type
+                            context.Response.OutputStream.Write(attachmentData, 0, attachmentData.Length);
+                        }
+                        else
+                        {
+                            Log.Warning("No emails data received from MSM API");
+                            context.Response.Write("No emails data found");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during email : " + e.Message, e);
+                        context.Response.Write("Error getting emails: " + e.Message);
+                    }
                 }
 
                 else
@@ -571,10 +605,11 @@ public class Handler : PluginHandler
                             string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
                             // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
                             string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
-                            Log.Information("url3 of uploading to " + url3);
+                            Log.Information("url3 of uploading to " + url3); //are getting here
                             // Create request for SharePoint upload
                             HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
                             sharePointRequest.Method = "PUT";
+                            Log.Information("line 611");
                             sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
 
                             sharePointRequest.ContentType = "application/octet-stream";
@@ -596,6 +631,92 @@ public class Handler : PluginHandler
                             Log.Warning("No attachment data received from MSM API");
                             context.Response.Write("No attachment data found");
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("Exception during attachment upload: " + e.Message, e);
+                        context.Response.Write("Error uploading file: " + e.Message);
+                    }
+                } else if (getParamVal == "uploadEmail") //upload attachment
+                {
+                    Log.Information("we are in if");
+                    string json;
+                    string url = "";
+                    string attachmentName = context.Request.QueryString["attachmentName"];
+
+
+                    using (var reader = new StreamReader(context.Request.InputStream))
+                    {
+                        json = reader.ReadToEnd();
+                    }
+
+                    dynamic parsedBody;
+                    Log.Information("Raw JSON payload received from frontend: " + json);
+                    try
+                    {
+
+                        parsedBody = JsonConvert.DeserializeObject(json);//read body from request
+                        Log.Information("parsed body in emails ios " + parsedBody.folderPath);
+
+                    }
+
+                    catch(JsonException)
+                    {
+                        context.Response.StatusCode = 400; // Bad Request
+                        context.Response.Write("Invalid JSON");
+                        context.Response.End();
+                        return;
+                    }
+                    try
+                    {
+
+                        // Step 2: Upload to SharePoint
+                        //string getAllDocumentsUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/items/root/children";
+                        string sharePointUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/test/" + attachmentName + ":/content";
+                        // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
+                        string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
+                        Log.Information("url3 of uploading to " + url3);
+                        //Log.Information("parsed ")
+                        // Create request for SharePoint upload
+                        HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
+                        sharePointRequest.Method = "PUT";
+                        Log.Information("line 682");
+                        sharePointRequest.Headers["Authorization"] = "Bearer " + parsedBody.microsoftToken; //get token from frontend
+
+                        string subject = context.Request.QueryString["attachmentName"];
+                        attachmentName = Path.GetFileNameWithoutExtension(subject) + ".eml";
+
+                        // Construct .eml content
+
+                        string emlContent =
+"From: " + parsedBody.address + "\r\n" +
+"To: unknown@recipient.com\r\n" +
+"Subject: " + attachmentName + "\r\n" +
+"Date: " + parsedBody.messageDate + "\r\n" +
+"Content-Type: text/plain; charset=UTF-8\r\n" +
+"\r\n" +
+"This is an auto-uploaded email record for subject: " + attachmentName + "\r\n";
+
+
+                        // Convert to byte array
+                        byte[] attachmentData = Encoding.UTF8.GetBytes(emlContent);
+
+
+                        sharePointRequest.ContentType = "application/octet-stream";
+                        sharePointRequest.ContentLength = attachmentData.Length;
+                        Log.Information("data len " + attachmentData.Length);
+                        // Write the attachment data to the request stream
+                        using (Stream requestStream = sharePointRequest.GetRequestStream())
+                        {
+                            requestStream.Write(attachmentData, 0, attachmentData.Length);
+                        }
+                        // Execute the SharePoint upload request
+                        //var sharePointResponse = this.ProcessRequest2(sharePointRequest);
+                        //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
+                        Log.Information("we are at line 486");
+                        context.Response.Write(this.ProcessRequest2(sharePointRequest));
+
+
                     }
                     catch (Exception e)
                     {
