@@ -2,10 +2,348 @@
 <script type="text/javascript" src="template.js"></script>
 <template>
     <style>
+/*        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }*/
+
+        /*body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+
+        .body {
+            max-width: 900px;*/
+/*            margin: 0 auto;*/
+            /*background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;*/
+        }
+
+        #content {
+            background: #f5f5f5;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #32C0F0, #7867AD);
+            color: white;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .section-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                animation: shimmer 2s infinite;
+            }
+
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .section {
+            margin-bottom: 0;
+        }
+
+        .section-content {
+            padding: 15px;
+        }
+
+        /* Notes Section */
+        .note2-item {
+            background: linear-gradient(135deg, rgba(50, 192, 240, 0.1), rgba(120, 103, 173, 0.1));
+            border: 1px solid rgba(50, 192, 240, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .note2-item::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, #32C0F0, #7867AD);
+                transition: width 0.3s ease;
+            }
+
+            .note2-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 15px rgba(50, 192, 240, 0.2);
+                border-color: rgba(50, 192, 240, 0.4);
+            }
+
+                .note2-item:hover::before {
+                    width: 100%;
+                    opacity: 0.1;
+                }
+
+        /* Email Section */
+        .email-row {
+            background: linear-gradient(135deg, rgba(226, 95, 148, 0.1), rgba(241, 93, 93, 0.1));
+            border: 1px solid rgba(226, 95, 148, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: grid;
+            grid-template-columns: auto 130px 200px 1fr;
+            gap: 15px;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .email-row::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, #E25F94, #F15D5D);
+                transition: width 0.3s ease;
+            }
+
+            .email-row:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 15px rgba(226, 95, 148, 0.2);
+                border-color: rgba(226, 95, 148, 0.4);
+            }
+
+                .email-row:hover::before {
+                    width: 100%;
+                    opacity: 0.1;
+                }
+
+        .email-date {
+            font-weight: 600;
+            color: #E25F94;
+            font-size: 12px;
+        }
+
+        .email-address {
+            font-weight: 500;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .email-subject {
+            color: #333;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        /* Attachment Section */
+        .attachment-item {
+            background: linear-gradient(135deg, rgba(120, 103, 173, 0.1), rgba(226, 95, 148, 0.1));
+            border: 1px solid rgba(120, 103, 173, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .attachment-item::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, #7867AD, #E25F94);
+                transition: width 0.3s ease;
+            }
+
+            .attachment-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 15px rgba(120, 103, 173, 0.2);
+                border-color: rgba(120, 103, 173, 0.4);
+            }
+
+                .attachment-item:hover::before {
+                    width: 100%;
+                    opacity: 0.1;
+                }
+
+        /* Checkboxes */
+        input[type="checkbox"] {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+            input[type="checkbox"]:checked {
+                background: linear-gradient(135deg, #32C0F0, #7867AD);
+                border-color: #32C0F0;
+            }
+
+                input[type="checkbox"]:checked::after {
+                    content: '✓';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: white;
+                    font-weight: bold;
+                    font-size: 10px;
+                }
+
+        /* Labels */
+        label {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            font-size: 14px;
+        }
+
+            label:hover {
+                color: #32C0F0;
+            }
+
+        .note2-summary {
+            margin-left: 26px;
+            color: #666;
+            font-size: 12px;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        /* Upload Button */
+        #uploadButtonTwo {
+            height:40px;
+            background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
+            background-size: 300% 300%;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(50, 192, 240, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin: 15px;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        #uploadButtonTwo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(50, 192, 240, 0.4);
+            animation-duration: 1s;
+        }
+
+        #uploadButtonTwo:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .body {
+                margin: 5px;
+                border-radius: 10px;
+            }
+
+            .section-content {
+                padding: 12px;
+            }
+
+            .email-row {
+                grid-template-columns: auto 1fr;
+                gap: 8px;
+            }
+
+            .email-date,
+            .email-address {
+                grid-column: 2;
+            }
+
+            .email-subject {
+                grid-column: 2;
+                margin-top: 3px;
+            }
+        }
+
+        /* Section separators */
+        .section + .section {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hover effects for sections */
+        .section {
+            transition: all 0.3s ease;
+        }
+
+            .section:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
         /*        #groupsDropdown {
                     font-weight: normal;
                 }*/
-        .container {
+        /*.container {
             max-width: 1024px;
             margin: 0 auto;
         }
@@ -13,27 +351,38 @@
             padding: 8px;
             border-bottom: 1px solid #ccc;
             font-family: Arial, sans-serif;
-        }
+        }*/
 /*        #attachmentsDiv{
             display:flex;
         }*/
-        #itemsDiv{
-            display:flex !important;
-            
+        #itemsDiv {
+            margin-top: 20px;
+            display: block; /* or 'flex' if needed for layout */
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: auto; /* adds scrollbars if content overflows */
+            box-sizing: border-box; /* ensures padding doesn't overflow container */
+            margin:15px;
+            padding:20px;
         }
 
-        #notesDiv,
+
+        /*#notesDiv,
         #attachmentsDiv, #emailsDiv {
-            flex: 1; /* Make them grow equally */
-            min-width: 0; /* Prevent overflow if needed */
-            border: 1px solid #ccc; /* Optional: visual separation */
-            padding: 8px;
+            flex: 1;*/ /* Make them grow equally */
+            /*min-width: 0;*/ /* Prevent overflow if needed */
+            /*border: 1px solid #ccc;*/ /* Optional: visual separation */
+            /*padding: 8px;
             box-sizing: border-box;
+            border-radius:25px;
+            margin:10px;
         }
 
         .note-item input[type="checkbox"] {
             margin-right: 8px;
-        }
+        }*/
 
         .folder-tree {
             background: white;
@@ -48,7 +397,7 @@
 }
         .header {
             border-bottom: 1px solid #e5e7eb;
-            padding: 16px;
+            padding: 16px !important;
         }
 
             .header h2 {
@@ -178,36 +527,36 @@
             margin-left: 20px;
         }
 
-        .notes {
+        .notes2 {
             margin-top: 24px;
             padding: 16px;
             background-color: #f9fafb;
             border-radius: 8px;
         }
 
-            .notes h3 {
+            .notes2 h3 {
                 font-weight: 500;
                 color: #374151;
                 margin-bottom: 8px;
             }
 
-            .notes ul {
+            .notes2 ul {
                 list-style: none;
                 font-size: 14px;
                 color: #6b7280 !important;
             }
 
-            .notes li {
+            .notes2 li {
                 margin-bottom: 4px;
                 padding-left: 8px;
             }
 
-                .notes li::before {
+                .notes2 li::before {
                     content: "• ";
                     margin-right: 4px;
                 }
 
-            .notes code {
+            .notes2 code {
                 background-color: #f3f4f6;
                 padding: 2px 4px;
                 border-radius: 4px;
@@ -456,7 +805,7 @@
         </div>
     </div>-->
     <!--</div>-->
-    <div class="container" id="treeContainer" display="none">
+    <div class="container" id="treeContainer">
         <div class="folder-tree">
             <div class="header">
                 <h2>SharePoint Folders</h2>
@@ -582,6 +931,7 @@
         var Sharepoint = null;
         let folderPaths = {}; //empty hashmap, we will have <folderid, path> so <string,string>
         var allPaths = new Map();
+
 
         let mockApiData = {
             value: [
@@ -1704,6 +2054,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown"); // need table
                     let notesTable = $("#notesTable tbody");
+                    
 
                     try {
                         console.log(" getting all attachments ");
@@ -1742,10 +2093,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                             // Create a container for each note
                             let container = document.createElement("div");
-                            container.className = "note-item";
-                            container.style.marginBottom = "12px";
-                            container.style.padding = "6px 0";
-                            container.style.borderBottom = "1px solid #ddd";
+                            container.className = "note2-item";
+                            //container.style.marginBottom = "12px";
+                            //container.style.padding = "6px 0";
+                            //container.style.borderBottom = "1px solid #ddd";
 
                             // Create the checkbox
                             let checkbox = document.createElement("input");
@@ -1753,8 +2104,17 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             checkbox.name = "selectAttachment";
                             checkbox.value = fileName;
                             checkbox.setAttribute("data-attachment-id", noteInfo.id);
+                            checkbox.onchange = function () {
+                                if (this.checked) {
+                                    container.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
+                                    container.style.transform = 'scale(1.02)';
+                                } else {
+                                    container.style.background = '';
+                                    container.style.transform = '';
+                                }
+                            };
                             //summaryDiv.className = "note-summary"; // <-- add this
-                            checkbox.style.marginRight = "8px";
+                            //checkbox.style.marginRight = "8px";
 
                             // Create the label
                             let label = document.createElement("label");
@@ -1764,10 +2124,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             // Create a summary element
                             let summaryDiv = document.createElement("div");
                             summaryDiv.textContent = summary;
-                            summaryDiv.style.marginLeft = "26px"; // align under label text
-                            summaryDiv.style.color = "#555";
-                            summaryDiv.style.fontSize = "0.9em";
-                            summaryDiv.className = "note-summary"; // <-- add this
+                            //summaryDiv.style.marginLeft = "26px"; // align under label text
+                            //summaryDiv.style.color = "#555";
+                            //summaryDiv.style.fontSize = "0.9em";
+                            //summaryDiv.className = "note-summary"; // <-- add this
 
                             // Append to container
                             container.appendChild(checkbox);
@@ -1775,7 +2135,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             container.appendChild(summaryDiv);
 
                             // Append container to notes div
-                            notesDiv.appendChild(container);
+
+                            notesDiv.appendChild(container); 
+
                         });
 
 
@@ -1824,7 +2186,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             // Create container for the item
                             let container = document.createElement("div");
                             container.className = "attachment-item";
-                            container.style.marginBottom = "8px";
+                            //container.style.marginBottom = "8px";
 
                             // Create checkbox
                             let checkbox = document.createElement("input");
@@ -1832,11 +2194,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             checkbox.name = "selectAttachment";
                             checkbox.value = fileName;
                             checkbox.setAttribute("data-attachment-id", id);
+                            checkbox.onchange = function () {
+                                if (this.checked) {
+                                    container.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
+                                    container.style.transform = 'scale(1.02)';
+                                } else {
+                                    container.style.background = '';
+                                    container.style.transform = '';
+                                }
+                            };
 
                             // Create label or file name text
                             let label = document.createElement("label");
                             label.textContent = fileName;
-                            label.style.marginLeft = "8px";
+                            //label.style.marginLeft = "8px";
 
                             // Append to container
                             container.appendChild(checkbox);
@@ -1875,6 +2246,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         return;
                     }
 
+                    
                     //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
                     let folderPath = this._currentPath;
                     console.log("folder path in upallat ius ", folderPath);
@@ -1935,7 +2307,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     for (let notebox of notesBoxes) {
                         let attachmentName = $(notebox).val(); // file name stored in value
                         let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
-                        let summaryText = $(notebox).closest(".note-item").find(".note-summary").text().trim();
+                        let summaryText = $(notebox).closest(".note2-item").find(".note2-summary").text().trim();
 
 
                         console.log("Uploading attachment:", summaryText);
@@ -2129,7 +2501,20 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 `);
 
 
-                            // Append to the target container
+                            // Attach the change handler directly
+                            customRow.find(".email-checkbox").on("change", function () {
+                                if (this.checked) {
+                                    customRow.css({
+                                        background: 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))',
+                                        transform: 'scale(1.02)'
+                                    });
+                                } else {
+                                    customRow.css({
+                                        background: '',
+                                        transform: ''
+                                    });
+                                }
+                            });
                             $("#emailsDiv").append(customRow);
                         });
 
@@ -2607,42 +2992,95 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     console.log(document.location.search);
                     let url = (new URLSearchParams(window.top.location.search)).get("id");
                     console.log(url);
-                    //let atcDiv = window.top.document.getElementById('attachmentsDiv');
-                    //atcDiv.style.display ="block"
 
                     let itemsDiv = document.createElement("div");
-                    //itemsDiv.innerHTML = ("test");
                     itemsDiv.id = "itemsDiv";
-                    //creating our subdivs
-                    let notesDiv = document.createElement("div");
-                    notesDiv.id = "notesDiv";
+                    itemsDiv.className = "body";
+                    itemsDiv.style.display = "block";
 
-                    
-                    let attachmentsDiv = document.createElement("div");
-                    attachmentsDiv.id = "attachmentsDiv";
-                    let emailsDiv = document.createElement("div");
-                    emailsDiv.id = "emailsDiv";
+                    // Helper to create a section
+                    function createSection(headerText, contentId) {
+                        let section = document.createElement("div");
+                        section.className = "section";
 
+                        let sectionHeader = document.createElement("div");
+                        sectionHeader.className = "section-header";
+                        sectionHeader.innerText = headerText;
+
+                        let sectionContent = document.createElement("div");
+                        sectionContent.className = "section-content";
+                        sectionContent.id = contentId;
+
+                        section.appendChild(sectionHeader);
+                        section.appendChild(sectionContent);
+
+                        return section;
+                    }
+
+                    // Create and append Notes section
+                    let notesSection = createSection("📝 Notes", "notesDiv");
+                    itemsDiv.appendChild(notesSection);
+
+                    // Create and append Emails section
+                    let emailsSection = createSection("📧 Emails", "emailsDiv");
+                    itemsDiv.appendChild(emailsSection);
+
+                    // Create and append Attachments section
+                    let attachmentsSection = createSection("📎 Attachments", "attachmentsDiv");
+                    itemsDiv.appendChild(attachmentsSection);
+
+                    // Upload All button
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
-                    uploadButtonTwo.innerHTML = "upload all";
+                    uploadButtonTwo.innerHTML = "🚀 Upload All";
                     uploadButtonTwo.onclick = function (e) {
                         e.preventDefault();
                         Sharepoint._uploadAllAttachments(e);
                     };
 
-                    itemsDiv.appendChild(notesDiv);
-                    itemsDiv.appendChild(emailsDiv);
-                    itemsDiv.appendChild(attachmentsDiv);
                     itemsDiv.appendChild(uploadButtonTwo);
-
                     console.log("items div is ", itemsDiv);
 
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                        const uploadButton = document.getElementById('uploadButtonTwo');
 
-                    //let notesDiv = document.createElement("div");
-                    //notesDiv.innerHtml = ("");
-                    //let emailsDiv = document.createElement("div");
-                    //emailsDiv.innerHtml = ("");
+                        //checkboxes.forEach(checkbox => {
+                        //    checkbox.addEventListener('change', function () {
+                        //        const parent = this.closest('.note-item, .email-row, .attachment-item');
+                        //        if (this.checked) {
+                        //            parent.style.background = 'linear-gradient(135deg, rgba(50, 192, 240, 0.2), rgba(120, 103, 173, 0.2))';
+                        //            parent.style.transform = 'scale(1.02)';
+                        //        } else {
+                        //            parent.style.background = '';
+                        //            parent.style.transform = '';
+                        //        }
+                        //    });
+                        //});
+
+                        uploadButton.addEventListener('click', function () {
+                            const checkedItems = document.querySelectorAll('input[type="checkbox"]:checked');
+                            if (checkedItems.length > 0) {
+                                this.textContent = `✅ Uploading ${checkedItems.length} items...`;
+                                this.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+
+                                setTimeout(() => {
+                                    this.textContent = '🎉 Upload Complete!';
+                                    setTimeout(() => {
+                                        this.textContent = '🚀 Upload All';
+                                        this.style.background = '';
+                                    }, 2000);
+                                }, 1500);
+                            } else {
+                                this.textContent = '⚠️ Select items first';
+                                this.style.background = 'linear-gradient(135deg, #ff9800, #f57c00)';
+                                setTimeout(() => {
+                                    this.textContent = '🚀 Upload All';
+                                    this.style.background = '';
+                                }, 2000);
+                            }
+                        });
+                    });
 
                     //let eventElement = eventTarget);
                     if (!this._pluginWindow) {
@@ -2660,43 +3098,21 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         }
 
                         );
-                        //this._notesWindow = new MarvalSoftware.UI.Window({
-                        //    appendToElement: window.top.document.getElementById("aspnetForm"),
-                        //    title: "Notes",
-                        //    height: 300,
-                        //    width: 300,
-                        //    minHeight: 300,
-                        //    minWidth: 300,
-                        //    isResizable: true,
-                        //    isMaximizable: true,
-                        //    bodyElement: notesDiv
-
-                        //})
-                        //this._emailsWindow = new MarvalSoftware.UI.Window({
-                        //    appendToElement: window.top.document.getElementById("aspnetForm"),
-                        //    title: "Emails",
-                        //    height: 300,
-                        //    width: 300,
-                        //    minHeight: 300,
-                        //    minWidth: 300,
-                        //    isResizable: true,
-                        //    isMaximizable: true,
-                        //    bodyElement: emailsDiv
-
+               
                         //})
                         this._attachmentsWindow = new MarvalSoftware.UI.Window({
                             appendToElement: window.top.document.getElementById("aspnetForm"),
                             title: "Attachments",
-                            height: 800,
-                            width: 800,
+                            height: 1000,
+                            width: 1000,
                             minHeight: 300,
                             minWidth: 300,
                             isResizable: true,
                             isMaximizable: true,
                             bodyElement: itemsDiv,
                             //position: absolute,
-                            top: 500,
-                            left: 500,
+                            //top: 500,
+                            //left: 500,
                             //position: relative,
 
                         }
@@ -2716,14 +3132,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     if (!this._pluginWindow.isVisible()) {
                         this._pluginWindow.centerToViewport();
                     }
-                    //this._attachmentsWindow.style(100, 100);
-                    //this._notesWindow.setPosition(200, 200);
-                    //this._emailsWindow.setPosition(300, 300);
-
-                    //this._attachmentsWindow.style.position = "relative";
-
-                    //this._attachmentDiv.style.position = "relative";
-                    //this._attachmentsWindow.append();
+           
                    this._attachmentsWindow.centerToViewport();
 
                     this._pluginWindow.show();
@@ -2734,11 +3143,8 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     //this._renderAttachmentsWindow();
                     this._getAllNotes();
                     this._getAllAttachments();
-                    //this._notesWindow.show();
-                    //this._emailsWindow.show();
 
                    
-                    //set position
                     
                     $('.window .content .header').eq(0).addClass('headerColourChange');
                     $('.window .content .header').eq(1).addClass('LinkedProjectsHeader');
