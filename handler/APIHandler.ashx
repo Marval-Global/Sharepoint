@@ -19,6 +19,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public class Handler : PluginHandler
 {
@@ -65,7 +66,13 @@ public class Handler : PluginHandler
 
     private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
     private string MarvalAPIKey { get { return this.GlobalSettings["@@MarvalAPIKey"]; } }
-
+    private string MSMBaseUrl
+    {
+        get
+        {
+            return "https://" + HttpContext.Current.Request.Url.Host + MarvalSoftware.UI.WebUI.ServiceDesk.WebHelper.ApplicationPath;
+        }
+    }
 
 
 
@@ -220,6 +227,20 @@ public class Handler : PluginHandler
         }
     }
 
+    private void AddMsmNote(int requestNumber, string note)
+    {
+        Log.Information("Adding note with ID " + requestNumber);
+        IDictionary<string, object> body = new Dictionary<string, object>();
+        body.Add("id", requestNumber);
+        body.Add("content", note);
+        body.Add("type", "public");
+        string jsonNote = JsonHelper.ToJson(body);
+        Log.Information("Have json note as " + jsonNote);//change msm base url
+        var httpWebRequest = BuildRequest(this.MSMBaseUrl + string.Format("/api/serviceDesk/operational/requests/{0}/notes/", requestNumber), JsonHelper.ToJson(body), "POST");
+        httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
+        ProcessRequest2(httpWebRequest);//build req then process it
+    }
+
     private string ProcessRequest(HttpWebRequest request)
     {
         fullResponse myRes = new fullResponse();
@@ -279,6 +300,7 @@ public class Handler : PluginHandler
         //this.MarvalHost = context.Request.Params["host"] ?? string.Empty;
         var getParamVal = context.Request.Params["endpoint"] ?? string.Empty;
         Log.Information("endpoint is, ", getParamVal);
+        Log.Information("msm base yurl is " + MSMBaseUrl);
         switch (param)
         {
 
@@ -377,7 +399,7 @@ public class Handler : PluginHandler
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
 
-                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes";
+                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/notes";
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -411,7 +433,7 @@ public class Handler : PluginHandler
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
 
-                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/attachments";
+                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/attachments";
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -439,7 +461,7 @@ public class Handler : PluginHandler
                 }else if (getParamVal == "getAllEmails")
                 {
                     try
-                    {
+                    {//not even using this
                         string requestBody;
                         var identifer = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
@@ -499,7 +521,7 @@ public class Handler : PluginHandler
                         dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
 
                         // Step 1: Get the attachment from the MSM API
-                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/attachments/" + identifer + "/content?mode=Attachment";
+                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/attachments/" + identifer + "/content?mode=Attachment";
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -567,7 +589,7 @@ public class Handler : PluginHandler
                         dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
 
                         // Step 1: Get the attachment from the MSM API
-                        string attachmentUrl = "https://localhost/MSM/api/serviceDesk/operational/requests/" + reqId + "/notes/" + identifer;
+                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/notes/" + identifer;
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -625,6 +647,8 @@ public class Handler : PluginHandler
                             //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
                             Log.Information("we are at line 486");
                             context.Response.Write(this.ProcessRequest2(sharePointRequest));
+                            AddMsmNote(Int32.Parse(reqId), "testing note from backend handler");
+                            Log.Information("we are creating a note");
                         }
                         else
                         {
@@ -1051,6 +1075,18 @@ public class Handler : PluginHandler
             subKey = baseKey.OpenSubKey(foldersPath);
         }
         return subKey != null ? subKey.GetValueNames().FirstOrDefault(kv => kv.Contains(productName)) : "ERROR";
+    }
+    internal class JsonHelper
+    {
+        public static string ToJson(object obj)
+        {
+            return JsonConvert.SerializeObject(obj);
+        }
+
+        public static dynamic FromJson(string json)
+        {
+            return JObject.Parse(json);
+        }
     }
 
     private string GetCustomersJSON(string CIId)
