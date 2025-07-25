@@ -68,6 +68,7 @@ public class Handler : PluginHandler
 
     private string ClientID { get { return this.GlobalSettings["@@ClientID"]; } }
     private string MarvalAPIKey { get { return this.GlobalSettings["@@MarvalAPIKey"]; } }
+    private string CustomAttribute { get { return this.GlobalSettings["@@CustomAttribute"]; } }
     private string MSMBaseUrl
     {
         get
@@ -340,6 +341,11 @@ public class Handler : PluginHandler
                     //     string ex = GetRequest("https://graph.microsoft.com/v1.0/sites?search=*", appToken);
                     //     context.Response.Write(ex);
                     // }}
+                }
+                else if (getParamVal == "CustomAttribute")
+                {
+                    context.Response.Write(CustomAttribute);
+                    
                 }
                 else if (getParamVal == "generatePassword")
                 {
