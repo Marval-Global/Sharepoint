@@ -25,7 +25,8 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out;*/
-        
+
+       
 
         #content {
             background: #f5f5f5;
@@ -471,10 +472,17 @@
             fill: #6b7280 !important;
             transition: transform 0.2s !important;
         }
+        .plus-icon {
+            width: 12px !important;
+            height: 12px !important;
+            fill: #6b7280 !important;
+            transition: transform 0.2s !important;
+            color:gray;
+        }
 
-            .chevron.expanded {
-                transform: rotate(90deg);
-            }
+        .chevron.expanded {
+            transform: rotate(90deg);
+        }
 
         .folder-icon {
             width: 20px;
@@ -1034,7 +1042,11 @@
     <path d="M2 6a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Z" fill-opacity="0.7"/>
     <path d="M2 8h16v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8Z"/>
 </svg>`,
-            spinner: `<div class="spinner"></div>`
+            spinner: `<div class="spinner"></div>`,
+            plus: `<svg class="plus-icon" viewBox="0 0 16 16">
+    <path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>`
+
         };
         //window.toggleFolder = toggleFolder;
         MarvalSoftware.Plugins.define("marvalsoftware-plugins-sharepoint",
@@ -1062,6 +1074,8 @@
                 _currentPath: null,
                 _prevId:null,
                 _currentSelectedFolderId: null,
+                _requestAcronym: null,
+                _requestNumber:null,
 
                // Sharepoint: null,
 
@@ -1072,6 +1086,12 @@
                     
                     var requestNumber = $("#ctl00_cph_requestNumber").val();
                     var requestAcronym = $("#ctl00_cph_requestTypeAcronym").text();
+                    this._requestAcronym = requestAcronym;
+                    this._requestNumber = requestNumber;
+                    
+                    //const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
+
+                    //const customAttribute = await(await fetch(customAttributeUrl)).text();
                     console.log("requst number from page is ", requestNumber, "with request acronym ", requestAcronym);
 
                     Sharepoint = this;
@@ -2591,6 +2611,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     e.preventDefault(); //prevent default everytime
                     let sitesDropdown = $("#sitesDropdown");
                     //let foldersDropdown = $("#foldersDropdown");
+                    const customAttributeUrl = _fullPluginPathHandler + "?endpoint=CustomAttribute"; // adjust as needed
+
+                    const customAttribute = await (await fetch(customAttributeUrl)).text();
+                    console.log("custom att is ", customAttribute);
 
                     try {
                         //console.log("req id is", reqId, "identifier is ", this._rowIndex);
@@ -2598,8 +2622,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         let reqId = MarvalSoftware.UI.Controls.ScriptManager.getInstance().getPage()._requestId;
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log("creating folder with current path ", Sharepoint._currentPath);
-                        let name = Sharepoint._currentPath.replace(/\//g, '');
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name + "ReqId "+ reqId;
+                        let name = Sharepoint._requestAcronym + "-" + Sharepoint._requestNumber + " " + customAttribute;
+
+
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name + "&ReqId "+ reqId;
                         console.log("we are going to this create url ", url);
                         //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
@@ -2635,12 +2661,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
 
                         const attachment = await result.json();
                         console.log("attachment feedback", attachment);
-                        this._renderTree();
-                        //let res = await Sharepoint._fetchChildren(Sharepoint._currentSelectedFolderId);
-                        //Sharepoint._renderChildren(Sharepoint._currentSelectedFolderId);
-                      //  //simply re render after folder creation
+                        // Construct fake folder item (you may need to adjust these fields)
+                        await Sharepoint._toggleFolder(Sharepoint._currentSelectedFolderId, {}, { preventDefault: () => { } }, true);
 
-                        //return attachment;
 
                     } catch (ex) {
                         $("#successMessage")
@@ -2702,10 +2725,10 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     const self = this;
 
                     const isExpanded = expandedFolders.has(item.id);
-                    console.log("is expanded is ", isExpanded)
+                    //console.log("is expanded is ", isExpanded)
 
                     const isLoading = loadingFolders.has(item.id);
-                    console.log("is loading is ", isLoading);
+                    //console.log("is loading is ", isLoading);
 
                     const itemElement = document.createElement('div');
                     itemElement.className = 'tree-item';
@@ -2721,6 +2744,26 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         controlsDiv.innerHTML = icons.spinner;
                     } else {
                         // Expand/collapse button
+                        
+                        const createBtn = document.createElement('button');
+                        createBtn.className = 'expand-button2';
+                        createBtn.innerHTML =  icons.plus; // You can replace with an icon if desired
+                        createBtn.title = "Create new folder";
+
+                        createBtn.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            // Expand folder if not expanded
+                            if (!expandedFolders.has(item.id)) {
+                                await self._toggleFolder(item.id, createBtn, e);
+                            }
+
+                            // Add inline input for folder creation
+                            //self._showInlineFolderInput(item.id);
+                        });
+
+                        controlsDiv.appendChild(createBtn);
                         const expandBtn = document.createElement('button');
                         expandBtn.className = 'expand-button2';
                         expandBtn.innerHTML = icons.chevronRight;
@@ -2738,6 +2781,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                             self._toggleFolder(item.id, expandBtn, e);//toggle folder onclick
                         });
                         controlsDiv.appendChild(expandBtn);
+                        
                     }
 
                     // Folder icon
@@ -2801,62 +2845,57 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                 },
 
                 // Toggle folder expand/collapse
-                _toggleFolder: async function (folderId, sender, e) {
-                    e.preventDefault();
-                    
-                    Sharepoint._prevId = this._currentSelectedFolderId; //so when we go to new node, old path will be cur path before update
-                    Sharepoint._currentSelectedFolderId = folderId;//set cur id
-                    Sharepoint._currentPath = folderPaths[folderId];//set cur path
+                _toggleFolder: async function (folderId, sender, e, forceRefresh = false) {
+                    if (e?.preventDefault) e.preventDefault();
 
-                    let selectedFolderDiv = $("#selectedFolder");
-                    selectedFolderDiv.text(Sharepoint._currentPath);//show it
-                    //probably put this in is not expanded
-                    //window.top.document.querySelectorAll(".folder-icon.selected").forEach(el => {
-                    //    el.classList.remove('selected');
-                    //});
+                    Sharepoint._prevId = this._currentSelectedFolderId;
+                    Sharepoint._currentSelectedFolderId = folderId;
+                    Sharepoint._currentPath = folderPaths[folderId];
 
-                    const selectedItem = $(`[data-item-id="${folderId}"] .folder-name`).css("color", 'red');
-                    console.log("selected item is ", selectedItem.text())
-                    //$(selectedItem).css("color","red");
+                    $("#selectedFolder").text(Sharepoint._currentPath);
+
+                    const selectedItem = $(`[data-item-id="${folderId}"] .folder-name`);
                     if (selectedItem.length) {
-                        selectedItem.addClass("selected");
-                        selectedItem.css("fill", "red"); // Use "fill" for SVG color
+                        $('.folder-name').removeClass('selected');
+                        selectedItem.addClass("selected").css("color", "red");
                     }
 
                     if (loadingFolders.has(folderId)) return;
 
                     const isExpanded = expandedFolders.has(folderId);
 
-                    if (isExpanded) {
+                    if (isExpanded && !forceRefresh) {
                         Sharepoint._collapseDescendants(folderId);
-                    } else {
-                        expandedFolders.add(folderId);//we should be expanding it
-                        console.log("we are adding folder id ", folderId, " to expanded: ");
-
-                        // Only fetch children if not already loaded
-                        if (!folderData[folderId]) {
-                            loadingFolders.add(folderId);
-                            Sharepoint._updateTreeItem(folderId);
-
-                            try {
-                                const response = await Sharepoint._fetchChildren(folderId);
-                                folderData[folderId] = response.value;//should 
-                            } catch (error) {
-                                console.error('Error fetching children:', error);
-                                expandedFolders.delete(folderId);
-                            } finally {
-                                loadingFolders.delete(folderId);
-                            }
-                        }
-
-                        // Only render children if not already rendered
-                        const existingContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
-                        if (!existingContainer) {
-                            Sharepoint._renderChildren(folderId);
-                        }
+                        expandedFolders.delete(folderId);
+                        Sharepoint._updateTreeItem(folderId);
+                        return;
                     }
+
+                    // Always re-fetch if forceRefresh is true
+                    loadingFolders.add(folderId);
                     Sharepoint._updateTreeItem(folderId);
+
+                    try {
+                        if (forceRefresh || !folderData[folderId]) {
+                            const response = await Sharepoint._fetchChildren(folderId);
+                            folderData[folderId] = response.value;
+                        }
+
+                        // Remove previous child container if exists
+                        const existingContainer = window.top.document.querySelector(`[data-children-of="${folderId}"]`);
+                        if (existingContainer) existingContainer.remove();
+
+                        expandedFolders.add(folderId);
+                        Sharepoint._renderChildren(folderId);
+                    } catch (error) {
+                        console.error('Error fetching children:', error);
+                        expandedFolders.delete(folderId);
+                    } finally {
+                        loadingFolders.delete(folderId);
+                        Sharepoint._updateTreeItem(folderId);
+                    }
                 },
+
 
                 _updateTreeItem: function (itemId) {
                     const itemElement = window.top.document.querySelector(`[data-item-id="${itemId}"]`);
@@ -3463,7 +3502,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         });
                         let foldersJson = await response.json(); //response promise
 
-                        //console.log("All folders are: ", foldersJson);
+                        console.log("All folders are: ", foldersJson);
 
                         //console.log("we should be appending folders now");
                         //let $dropdown = $('#foldersDropdown');
