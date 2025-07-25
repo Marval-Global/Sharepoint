@@ -32,6 +32,8 @@ public class Handler : PluginHandler
         public string folderId { get; set; }
         public string folderPath { get; set; }
         public string microsoftToken { get; set; }
+        public string combinedText { get; set; }
+        public string attachmentName { get; set; }
 
     }
 
@@ -568,7 +570,59 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
+                }else if (getParamVal == "uploadCombinedNotes")
+                {
+                    using (var reader = new StreamReader(context.Request.InputStream))
+                    {
+                        string json = reader.ReadToEnd();
+                        var data = JsonConvert.DeserializeObject<RequestData>(json); // this should match the frontend JSON shape
+                        Log.Information("data combined text is " + data.combinedText);
+
+                        // Write combined text to a temporary .txt file
+                        string tempFilePath = Path.GetTempFileName();
+                        string targetFileName = Path.ChangeExtension(tempFilePath, ".txt");
+
+                        File.WriteAllText(targetFileName, data.combinedText); // write note content to file
+
+                        // Read file into byte[] for uploading
+                        byte[] attachmentData = File.ReadAllBytes(targetFileName);
+
+                        // Upload to SharePoint via Graph API
+                        string url3 = "https://graph.microsoft.com/v1.0/sites/" + data.siteId
+                            + "/drive/root:/" + data.folderId
+                            + "/" + data.attachmentName + ":/content";
+
+                        Log.Information("Uploading to URL: " + url3);
+
+                        HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
+                        sharePointRequest.Method = "PUT";
+                        sharePointRequest.Headers["Authorization"] = "Bearer " + data.microsoftToken;
+                        sharePointRequest.ContentType = "application/octet-stream";
+                        sharePointRequest.ContentLength = attachmentData.Length;
+
+                        Log.Information("Uploading " + attachmentData.Length + " bytes");
+
+                        using (Stream requestStream = sharePointRequest.GetRequestStream())
+                        {
+                            requestStream.Write(attachmentData, 0, attachmentData.Length);
+                        }
+
+                        // Read SharePoint response
+                        var uploadResponse = this.ProcessRequest2(sharePointRequest); // assuming this returns a JSON string or message
+
+                        Log.Information("Upload finished");
+
+                        context.Response.ContentType = "application/json";
+                        context.Response.Write(JsonConvert.SerializeObject(new
+                        {
+                            status = "success",
+                            file = data.attachmentName,
+                            response = uploadResponse
+                        }));
+                        return;
+                    }
                 }
+
                 if (getParamVal == "uploadNote") //upload attachment
                 {
                     Log.Information("we are in if");
@@ -589,7 +643,7 @@ public class Handler : PluginHandler
                         dynamic parsedBody = JsonConvert.DeserializeObject(requestBody);
 
                         // Step 1: Get the attachment from the MSM API
-                        string attachmentUrl = MSMBaseUrl+"/api/serviceDesk/operational/requests/" + reqId + "/notes/" + identifer;
+                        string attachmentUrl = MSMBaseUrl + "/api/serviceDesk/operational/requests/" + reqId + "/notes/" + identifer;
                         Log.Information("url here is" + attachmentUrl);
                         httpWebRequest = BuildRequest(attachmentUrl);
                         httpWebRequest.Headers["Authorization"] = "Bearer " + MarvalAPIKey;
@@ -604,9 +658,10 @@ public class Handler : PluginHandler
 
                         // Build a plain-text file content
                         string textContent =
-                        "Summary: " + noteData.entity.data.contentSummary + "\r\n" +
+                        "Created On: " + noteData.entity.data.createdOn + "\r\n" +
                         "Author: " + noteData.entity.data.author.name + "\r\n" +
-                        "Created On: " + noteData.entity.data.createdOn;
+                        "Summary: " + noteData.entity.data.contentSummary;
+
 
 
                         // Convert the text to byte array for upload
@@ -628,7 +683,7 @@ public class Handler : PluginHandler
                             // string newUrl = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,"+parsedBody.siteId+"+attachmentName+":/content";
                             string url3 = "https://graph.microsoft.com/v1.0/sites/" + parsedBody.siteId + "/drive/root:/" + parsedBody.folderId + "/" + attachmentName + ":/content";
                             Log.Information("url3 of uploading to " + url3); //are getting here
-                            // Create request for SharePoint upload
+                                                                             // Create request for SharePoint upload
                             HttpWebRequest sharePointRequest = (HttpWebRequest)WebRequest.Create(url3);
                             sharePointRequest.Method = "PUT";
                             Log.Information("line 611");
@@ -647,7 +702,7 @@ public class Handler : PluginHandler
                             //Log.Information("Attachment uploaded successfully to SharePoint", sharePointResponse);
                             Log.Information("we are at line 486");
                             context.Response.Write(this.ProcessRequest2(sharePointRequest));
-                            AddMsmNote(Int32.Parse(reqId), "testing note from backend handler");
+                            //ddMsmNote(Int32.Parse(reqId), "testing note from backend handler");
                             Log.Information("we are creating a note");
                         }
                         else
@@ -661,7 +716,15 @@ public class Handler : PluginHandler
                         Log.Error("Exception during attachment upload: " + e.Message, e);
                         context.Response.Write("Error uploading file: " + e.Message);
                     }
-                } else if (getParamVal == "uploadEmail") //upload attachment
+                }
+                else if (getParamVal == "createUploadNote")
+                {
+                    var reqNum = context.Request.QueryString["reqId"];
+                    AddMsmNote(Int32.Parse(reqNum), "Successfully uploaded all attachments!");
+                }
+
+
+                else if (getParamVal == "uploadEmail") //upload attachment
                 {
                     Log.Information("we are in if");
                     string json;
@@ -684,7 +747,7 @@ public class Handler : PluginHandler
 
                     }
 
-                    catch(JsonException)
+                    catch (JsonException)
                     {
                         context.Response.StatusCode = 400; // Bad Request
                         context.Response.Write("Invalid JSON");
@@ -780,7 +843,7 @@ public class Handler : PluginHandler
                     string folderPath = data.folderPath;
                     if (!String.IsNullOrEmpty(folderPath))//if exists
                     {
-                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/"+folderPath+":/children";
+                        url = "https://graph.microsoft.com/v1.0/sites/marvaluk.sharepoint.com,04f24f61-1573-410f-b54d-3ab2c7784161,6ee23755-585f-477d-bf49-4a114bca65df/drive/root:/" + folderPath + ":/children";
                     }
                     else
                     {
@@ -835,6 +898,7 @@ public class Handler : PluginHandler
                         var identifier = context.Request.QueryString["identifier"];
                         var reqId = context.Request.QueryString["reqId"];
                         var attachmentName = context.Request.QueryString["attachmentName"];
+                        Log.Information("Processing folder creation... with the attachment name " + attachmentName);
 
                         // Read JSON body from request
                         string requestBody;
@@ -849,7 +913,7 @@ public class Handler : PluginHandler
                         string microsoftToken2 = parsedBody.microsoftToken;
 
                         // Create SharePoint folder creation URL
-                        string url = "https://graph.microsoft.com/v1.0/sites/"+siteId+"/drive/items/root:/"+folderId+":/children";
+                        string url = "https://graph.microsoft.com/v1.0/sites/" + siteId + "/drive/items/root:/" + folderId + ":/children";
 
                         // Setup request to create folder
                         HttpWebRequest request2 = (HttpWebRequest)WebRequest.Create(url);
