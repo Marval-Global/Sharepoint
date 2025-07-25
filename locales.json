@@ -5,7 +5,8 @@
     "en-GB": {
       "PluginDisplayname": "Sharepoint",
       "UserAPIKey": "User API Key",
-      "ClientID": "Microsoft Application Client ID"
+      "ClientID": "Microsoft Application Client ID",
+      "CustomAttribute":"Custom Attribute"
     }
   }]
 }
