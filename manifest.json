@@ -3,7 +3,7 @@
   "Organisation": "MarvalSoftware",
   "DisplayName": "@@PluginDisplayname",
   "Icon": "img/Pushover_16.png",
-  "Version": "1.0.4",
+  "Version": "1.0.5",
   "SupportedVersions": [
     "15.11.0",
     "0.0.0"
@@ -14,7 +14,8 @@
   ],
   "GlobalSettings": [
     "@@MarvalAPIKey",
-    "@@ClientID"
+    "@@ClientID",
+    "@@CustomAttribute"
   ],
   "HtmlImportFile": "MarvalSoftware.Plugins.Sharepoint.html",
   "TagName": "marvalsoftware-plugins-sharepoint"
