@@ -25,7 +25,7 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             animation: fadeInUp 0.8s ease-out;*/
-        }
+        
 
         #content {
             background: #f5f5f5;
@@ -259,8 +259,8 @@
         }
 
         /* Upload Button */
-        #uploadButtonTwo {
-            height:40px;
+        #combineNotesBox,#uploadButtonTwo {
+            height: 40px;
             background: linear-gradient(135deg, #32C0F0, #7867AD, #E25F94, #F15D5D);
             background-size: 300% 300%;
             color: white;
@@ -1070,91 +1070,9 @@
 
                 init: function () {
                     
-                    const mockApiData = {
-                        value: [
-                            {
-                                id: '1',
-                                name: 'Documents',
-                                folder: { childCount: 3 },
-                                createdDateTime: '2024-01-15T10:30:00Z',
-                                lastModifiedDateTime: '2024-01-20T14:22:00Z'
-                            },
-                            {
-                                id: '2',
-                                name: 'Images',
-                                folder: { childCount: 5 },
-                                createdDateTime: '2024-01-10T09:15:00Z',
-                                lastModifiedDateTime: '2024-01-18T16:45:00Z'
-                            },
-                            {
-                                id: '3',
-                                name: 'Projects',
-                                folder: { childCount: 2 },
-                                createdDateTime: '2024-01-12T11:20:00Z',
-                                lastModifiedDateTime: '2024-01-12T11:20:00Z'
-                            },
-                            {
-                                id: '4',
-                                name: 'Archives',
-                                folder: { childCount: 1 },
-                                createdDateTime: '2024-01-14T13:45:00Z',
-                                lastModifiedDateTime: '2024-01-16T10:30:00Z'
-                            }
-                        ]
-                    };
-
-                    const mockSubfolderData = {
-                        '1': {
-                            value: [
-                                {
-                                    id: '1-1',
-                                    name: 'Contracts',
-                                    folder: { childCount: 2 },
-                                    createdDateTime: '2024-01-15T10:30:00Z',
-                                    lastModifiedDateTime: '2024-01-20T14:22:00Z'
-                                },
-                                {
-                                    id: '1-2',
-                                    name: 'Legal',
-                                    folder: { childCount: 1 },
-                                    createdDateTime: '2024-01-16T09:15:00Z',
-                                    lastModifiedDateTime: '2024-01-16T09:15:00Z'
-                                },
-                                {
-                                    id: '1-3',
-                                    name: 'Templates',
-                                    folder: { childCount: 0 },
-                                    createdDateTime: '2024-01-17T14:20:00Z',
-                                    lastModifiedDateTime: '2024-01-17T14:20:00Z'
-                                }
-                            ]
-                        },
-                        '2': {
-                            value: [
-                                {
-                                    id: '2-1',
-                                    name: 'Marketing',
-                                    folder: { childCount: 3 },
-                                    createdDateTime: '2024-01-10T09:15:00Z',
-                                    lastModifiedDateTime: '2024-01-10T09:15:00Z'
-                                },
-                                {
-                                    id: '2-2',
-                                    name: 'Product',
-                                    folder: { childCount: 2 },
-                                    createdDateTime: '2024-01-11T15:30:00Z',
-                                    lastModifiedDateTime: '2024-01-11T15:30:00Z'
-                                },
-                                {
-                                    id: '2-3',
-                                    name: 'Screenshots',
-                                    folder: { childCount: 0 },
-                                    createdDateTime: '2024-01-12T11:45:00Z',
-                                    lastModifiedDateTime: '2024-01-12T11:45:00Z'
-                                }
-                            ]
-                        }
-                    };
+                    var requestNumber = $("#ctl00_cph_requestNumber").val();
+                    var requestAcronym = $("#ctl00_cph_requestTypeAcronym").text();
+                    console.log("requst number from page is ", requestNumber, "with request acronym ", requestAcronym);
 
                     Sharepoint = this;
                     Sharepoint._currentPath = "";
@@ -2251,156 +2169,245 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     let folderPath = this._currentPath;
                     console.log("folder path in upallat ius ", folderPath);
 
-                    for (let emailbox of emailBoxes) {
-                        let subject = $(emailbox).data("subject");
-                        let address = $(emailbox).data("address");
-                        let messageDate = $(emailbox).data("date");
-                        let identifier = emailbox.dataset.attachmentId;
+                    try {
+                        for (let emailbox of emailBoxes) {
+                            let subject = $(emailbox).data("subject");
+                            let address = $(emailbox).data("address");
+                            let messageDate = $(emailbox).data("date");
+                            let identifier = emailbox.dataset.attachmentId;
 
-                        console.log("Uploading email here:", subject, "with microsoft token ", Sharepoint._microsoftToken);
+                            console.log("Uploading email here:", subject, "with microsoft token ", Sharepoint._microsoftToken);
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadEmail&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + encodeURIComponent(subject);
+                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadEmail&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + encodeURIComponent(subject);
 
-                        let payload = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: siteId,
-                            folderId: folderPath,
-                            address: address,
-                            messageDate: messageDate
-                        };
+                            let payload = {
+                                microsoftToken: Sharepoint._microsoftToken,
+                                siteId: siteId,
+                                folderId: folderPath,
+                                address: address,
+                                messageDate: messageDate
+                            };
 
-                        console.log("payload", payload);
+                            console.log("payload", payload);
 
-                        try {
-                            let result = await fetch(url, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify(payload)
-                            });
+                            try {
+                                let result = await fetch(url, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json; charset=utf-8"
+                                    },
+                                    body: JSON.stringify(payload)
+                                });
 
-                            if (!result.ok) {
-                                let errorText = await result.text();
-                                throw new Error(`Error uploading "${subject}": ${result.status} - ${errorText}`);
+                                if (!result.ok) {
+                                    let errorText = await result.text();
+                                    throw new Error(`Error uploading "${subject}": ${result.status} - ${errorText}`);
+                                }
+
+                                let response = await result.json();
+                                console.log(`Uploaded email: ${subject}`, response);
+                                $("#successMessage")
+                                    .text("Successfully uploaded emails")
+                                    .fadeIn("slow")
+                                    .delay(2000)
+                                    .fadeOut("slow");
+
+                            } catch (ex) {
+                                console.error("Upload error for", subject, ex);
+                                $("#successMessage")
+                                    .text("Error could not upload notes")
+                                    .fadeIn("slow")
+                                    .delay(2000)
+                                    .fadeOut("slow");
+                            }
+                        }
+
+                        //let combineNotesBoolean =
+
+                        let combineNotes = $("#combineNotesCheckbox").prop("checked");
+
+                        if (combineNotes) {
+                            console.log("check box is ticked!")
+                            // Collect all summaries into one string
+                            let combinedContent = "";
+
+                            for (let notebox of notesBoxes) {
+                                // Get the summary text (the note content)
+                                let summaryText = $(notebox)
+                                    .closest(".note2-item")
+                                    .children("div")
+                                    .last()
+                                    .text()
+                                    .trim();
+
+                                // Extract time and author from the checkbox value
+                                let valueParts = $(notebox).val().split(" ");
+                                let time = valueParts[1]; // e.g., "2025-06-12T02:38:50.183Z"
+                                let author = valueParts.slice(2).join(" "); // everything after time
+
+                                combinedContent += `Time: ${time}\nAuthor: ${author}\nNote: ${summaryText}\n\n`;
                             }
 
-                            let response = await result.json();
-                            console.log(`Uploaded email: ${subject}`, response);
-                            $("#successMessage")
-                                .text("Successfully uploaded emails")
-                                .fadeIn("slow")
-                                .delay(2000)
-                                .fadeOut("slow");
 
-                        } catch (ex) {
-                            console.error("Upload error for", subject, ex);
-                            $("#successMessage")
-                                .text("Error could not upload notes")
-                                .fadeIn("slow")
-                                .delay(2000)
-                                .fadeOut("slow");
-                        }
-                    }
+                            console.log("combined content is ", combinedContent);
+                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadCombinedNotes&reqId=" + reqId;
 
+                            let payload = {
+                                microsoftToken: Sharepoint._microsoftToken,
+                                siteId: siteId,
+                                folderId: folderPath,
+                                combinedText: combinedContent,
+                                attachmentName: "Request "+reqId + " CombinedNotes.txt" //should probably make this changable for the user
+                            };
 
-                    for (let notebox of notesBoxes) {
-                        let attachmentName = $(notebox).val(); // file name stored in value
-                        let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
-                        let summaryText = $(notebox).closest(".note2-item").find(".note2-summary").text().trim();
+                            try {
+                                let result = await fetch(url, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json; charset=utf-8"
+                                    },
+                                    body: JSON.stringify(payload)
+                                });
 
+                                if (!result.ok) {
+                                    throw new Error(await result.text());
+                                }
 
-                        console.log("Uploading attachment:", summaryText);
+                                let response = await result.json();
+                                console.log("Combined upload successful", response);
+                                $("#successMessage").text("Uploaded combined notes").fadeIn("slow").delay(2000).fadeOut("slow");
 
-                        //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
-
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + summaryText;
-                        //should be uploading all notes
-                        console.log("we are uploading notes to this url " + url);
-                        console.log("current token is ", Sharepoint._microsoftToken)
-                        let payload = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: siteId,
-                            folderId: folderPath
-                        };
-
-                        try {
-                            let result = await fetch(url, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify(payload)
-                            });
-
-                            if (!result.ok) {
-                                let errorText = await result.text();
-                                throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
+                            } catch (ex) {
+                                console.error("Upload failed", ex);
+                                $("#successMessage").text("Failed to upload combined notes").fadeIn("slow").delay(2000).fadeOut("slow");
                             }
 
-                            let response = await result.json();
-                            console.log(`Uploaded: ${attachmentName}`, response);
-                            $("#successMessage")
-                                .text("Successfully uploaded notes")
-                                .fadeIn("slow")      // Fade in
-                                .delay(2000)         // Wait 2 seconds
-                                .fadeOut("slow");    // Then fade out
+                            return; // skip individual uploads
+                        } else {
+                            console.log("tickbox was not checked so we are uploading notes individually");
+                            for (let notebox of notesBoxes) {
+                                let attachmentName = $(notebox).val(); // file name stored in value
+                                let identifier = notebox.dataset.attachmentId; //checkboxes store the attachment data
+                                let summaryText = $(notebox).closest(".note2-item").find(".note2-summary").text().trim();
 
-                        } catch (ex) {
-                            console.error("Upload error for", attachmentName, ex);
-                            $("#successMessage")
-                                .text("Error could not upload notes")
-                                .fadeIn("slow")      // Fade in
-                                .delay(2000)         // Wait 2 seconds
-                                .fadeOut("slow"); 
-                        }
-                    }
 
-                    for (let checkbox of checkedBoxes) {
-                        let attachmentName = $(checkbox).val(); // file name stored in value
-                        let identifier = checkbox.dataset.attachmentId; //checkboxes store the attachment data
+                                console.log("Uploading attachment:", summaryText);
 
-                        console.log("Uploading attachment:", attachmentName);
+                                //let folderPath = folderPaths[Sharepoint._currentSelectedFolderId] || "";
 
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier="+identifier+ "&attachmentName=" + attachmentName;
-                        //should change backend getAttachment name to something better
-                        console.log("we are uploading files to this url " + url);
-                        let payload = {
-                            microsoftToken: Sharepoint._microsoftToken,
-                            siteId: siteId,
-                            folderId: folderPath
-                        };
+                                let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=uploadNote&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + summaryText;
+                                //should be uploading all notes
+                                console.log("we are uploading notes to this url " + url);
+                                console.log("current token is ", Sharepoint._microsoftToken)
+                                let payload = {
+                                    microsoftToken: Sharepoint._microsoftToken,
+                                    siteId: siteId,
+                                    folderId: folderPath
+                                };
 
-                        try {
-                            let result = await fetch(url, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json; charset=utf-8"
-                                },
-                                body: JSON.stringify(payload)
-                            });
+                                try {
+                                    let result = await fetch(url, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json; charset=utf-8"
+                                        },
+                                        body: JSON.stringify(payload)
+                                    });
 
-                            if (!result.ok) {
-                                let errorText = await result.text();
-                                throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
+                                    if (!result.ok) {
+                                        let errorText = await result.text();
+                                        throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
+                                    }
+
+                                    let response = await result.json();
+                                    console.log(`Uploaded: ${attachmentName}`, response);
+                                    $("#successMessage")
+                                        .text("Successfully uploaded notes")
+                                        .fadeIn("slow")      // Fade in
+                                        .delay(2000)         // Wait 2 seconds
+                                        .fadeOut("slow");    // Then fade out
+
+                                } catch (ex) {
+                                    console.error("Upload error for", attachmentName, ex);
+                                    $("#successMessage")
+                                        .text("Error could not upload notes")
+                                        .fadeIn("slow")      // Fade in
+                                        .delay(2000)         // Wait 2 seconds
+                                        .fadeOut("slow");
+                                }
                             }
-
-                            let response = await result.json();
-                            console.log(`Uploaded: ${attachmentName}`, response);
-                            $("#successMessage")
-                                .text("Successfully uploaded attachments")
-                                .fadeIn("slow")      // Fade in
-                                .delay(2000)         // Wait 2 seconds
-                                .fadeOut("slow");    // Then fade out
-
-                        } catch (ex) {
-                            console.error("Upload error for", attachmentName, ex);
-                            $("#successMessage")
-                                .text("Error could not upload attachments")
-                                .fadeIn("slow")      // Fade in
-                                .delay(2000)         // Wait 2 seconds
-                                .fadeOut("slow"); 
                         }
+
+
+                        for (let checkbox of checkedBoxes) {
+                            let attachmentName = $(checkbox).val(); // file name stored in value
+                            let identifier = checkbox.dataset.attachmentId; //checkboxes store the attachment data
+
+                            console.log("Uploading attachment:", attachmentName);
+
+                            let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=getAttachment&reqId=" + reqId + "&identifier=" + identifier + "&attachmentName=" + attachmentName;
+                            //should change backend getAttachment name to something better
+                            console.log("we are uploading files to this url " + url);
+                            let payload = {
+                                microsoftToken: Sharepoint._microsoftToken,
+                                siteId: siteId,
+                                folderId: folderPath
+                            };
+
+                            try {
+                                let result = await fetch(url, {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json; charset=utf-8"
+                                    },
+                                    body: JSON.stringify(payload)
+                                });
+
+                                if (!result.ok) {
+                                    let errorText = await result.text();
+                                    throw new Error(`Error uploading "${attachmentName}": ${result.status} - ${errorText}`);
+                                }
+
+                                let response = await result.json();
+                                console.log(`Uploaded: ${attachmentName}`, response);
+                                $("#successMessage")
+                                    .text("Successfully uploaded attachments")
+                                    .fadeIn("slow")      // Fade in
+                                    .delay(2000)         // Wait 2 seconds
+                                    .fadeOut("slow");    // Then fade out
+
+                            } catch (ex) {
+                                console.error("Upload error for", attachmentName, ex);
+                                $("#successMessage")
+                                    .text("Error could not upload attachments")
+                                    .fadeIn("slow")      // Fade in
+                                    .delay(2000)         // Wait 2 seconds
+                                    .fadeOut("slow");
+                            }
+                        }
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createUploadNote&reqId=" + reqId;
+                        let res = fetch(url, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8"
+                            },
+                            body: {}
+                        });
+                        if (!result.ok) {
+                            let errorText = await res.text();
+                            throw new Error(`Error uploading}": ${res.status} - ${errorText}`);
+                        }
+                        let response = await result.json();
+                        console.log("Uploaded: successfully");
+
+
+                    } catch (ex) {
+                        console.error("Upload error for", attachmentName, ex);
+                        $("#successMessage")
+                            .text("Error could not upload attachments")
+                            .fadeIn("slow")      // Fade in
+                            .delay(2000)         // Wait 2 seconds
+                            .fadeOut("slow");
                     }
 
                     alert("Upload complete.");
@@ -2592,7 +2599,7 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                         console.log("req id is", reqId, "identifier is ", this._rowIndex);
                         console.log("creating folder with current path ", Sharepoint._currentPath);
                         let name = Sharepoint._currentPath.replace(/\//g, '');
-                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name;
+                        let url = this._getPluginPath() + "handler/APIHandler.ashx?endpoint=createFolder&reqId=" + reqId + "&identifier=" + this._rowIndex + "&attachmentName=" + name + "ReqId "+ reqId;
                         console.log("we are going to this create url ", url);
                         //console.log("site id is", sitesDropdown.val(), "folderid is", foldersDropdown.find("option:selected").text());
 
@@ -3030,6 +3037,9 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     itemsDiv.appendChild(attachmentsSection);
 
                     // Upload All button
+
+
+
                     let uploadButtonTwo = document.createElement("button");
                     uploadButtonTwo.id = "uploadButtonTwo";
                     uploadButtonTwo.innerHTML = "🚀 Upload All";
@@ -3039,6 +3049,30 @@ fullMessage=  "<b>Description:</b><br> " + requestDescription+ "<br> <b>Last Not
                     };
 
                     itemsDiv.appendChild(uploadButtonTwo);
+
+                    // Combine Notes checkbox container
+                    let combineNotesBox = document.createElement("div");
+                    combineNotesBox.id = "combineNotesBox";
+                    //combineNotesBox.style.marginTop = "10px";
+                    combineNotesBox.style.width = "200px";
+
+                    // Create the checkbox input
+                    let combineCheckbox = document.createElement("input");
+                    combineCheckbox.type = "checkbox";
+                    combineCheckbox.id = "combineNotesCheckbox";
+                    combineCheckbox.name = "combineNotes";
+
+                    // Create a label for the checkbox
+                    let combineLabel = document.createElement("label");
+                    combineLabel.htmlFor = "combineNotesCheckbox";
+                    combineLabel.innerText = "🧩 Combine Notes";
+
+                    // Append checkbox and label to the container div
+                    combineNotesBox.appendChild(combineCheckbox);
+                    combineNotesBox.appendChild(combineLabel);
+
+                    // Append to the itemsDiv
+                    itemsDiv.appendChild(combineNotesBox);
                     console.log("items div is ", itemsDiv);
 
                     document.addEventListener('DOMContentLoaded', function () {
